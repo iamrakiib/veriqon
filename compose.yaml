@@ -1,0 +1,65 @@
+name: veriqon
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: veriqon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.docker}
+      POSTGRES_DB: veriqon
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U veriqon -d veriqon']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    # Private Docker network only. Redis stores disposable rate counters and leases.
+    command: [redis-server, --maxmemory, 64mb, --maxmemory-policy, noeviction]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  api:
+    build: .
+    init: true
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgresql://veriqon:${POSTGRES_PASSWORD}@postgres:5432/veriqon
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.docker}
+      SETUP_CODE: ${SETUP_CODE:?Set SETUP_CODE in .env.docker}
+      APP_ORIGINS: http://localhost:3002,http://127.0.0.1:3002
+      ALLOW_INSECURE_LOCAL_HTTP: 'true'
+      AUTH_COOKIE_SECURE: 'false'
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-false}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-openai/text-embedding-3-small}
+      LLM_MODEL: ${LLM_MODEL:-}
+      VERIFIER_MODEL: ${VERIFIER_MODEL:-}
+      RAG_TIMEOUT_MS: '90000'
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+    stop_grace_period: 30s
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_ORIGIN: http://api:3000
+    init: true
+    ports: ['127.0.0.1:3002:3001']
+    depends_on:
+      api: {condition: service_healthy}
+    restart: unless-stopped
+volumes:
+  postgres-data:

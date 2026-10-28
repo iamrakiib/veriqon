@@ -1,0 +1,63 @@
+{
+  "name": "sc-rag",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "overrides": {
+    "multer": "^2.5.0"
+  },
+  "scripts": {
+    "start": "npx ts-node -r tsconfig-paths/register src/main.ts",
+    "start:dev": "nodemon --watch src --watch .env --ext ts,json,env --exec ts-node src/main.ts",
+    "build": "npx tsc",
+    "evaluate": "npx ts-node scripts/evaluate.ts",
+    "test": "npm run build && node --test dist/src/tests/rag.test.js dist/src/tests/auth.test.js",
+    "test:browser": "playwright test",
+    "web:dev": "npm run dev --workspace @veriqon/web",
+    "web:build": "npm run build --workspace @veriqon/web",
+    "web:start": "npm run start --workspace @veriqon/web",
+    "web:check": "npm run typecheck --workspace @veriqon/web",
+    "lint": "eslint src scripts apps/web/src",
+    "start:prod": "node dist/src/main.js",
+    "db:migrate": "node dist/scripts/migrate.js",
+    "db:import-sqlite": "node dist/scripts/import-sqlite.js",
+    "test:infra": "npm run build && node scripts/test-infra.mjs",
+    "docker:up": "docker compose --env-file .env.docker up --build -d",
+    "docker:down": "docker compose --env-file .env.docker down"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.2.0",
+    "@nestjs/core": "^12.2.0",
+    "@nestjs/jwt": "^12.0.3",
+    "@nestjs/platform-express": "^12.2.0",
+    "axios": "^1.13.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3",
+    "dotenv": "^16.0.0",
+    "mammoth": "^1.13.0",
+    "openai": "^4.0.0",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.23.1",
+    "redis": "^6.3.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.13.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.0.0",
+    "tsconfig-paths": "^4.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.72.1"
+  }
+}

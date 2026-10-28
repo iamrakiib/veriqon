@@ -1,0 +1,40 @@
+# Assumes this directory (sc-rag) is the Git repository root.
+services:
+  - type: web
+    name: veriqon-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /rag/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SETUP_CODE
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: APP_ORIGINS
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: EMBEDDING_MODEL
+        value: openai/text-embedding-3-small
+      - key: AUTH_COOKIE_SECURE
+        value: 'true'
+      - key: ALLOW_REGISTRATION
+        value: 'false'
+      - key: DB_MIGRATE_ON_START
+        value: 'true'
+      - key: RAG_TIMEOUT_MS
+        value: '90000'
+      - key: TRUST_PROXY_HOPS
+        value: '1'

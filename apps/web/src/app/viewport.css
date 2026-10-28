@@ -1,0 +1,69 @@
+/* The viewport owns the frame; each content panel owns its own scrolling. */
+html, body { height: 100%; overflow: hidden; }
+.app-background { height: 100dvh; min-height: 0; padding: 0; overflow: hidden; }
+.app-shell { width: 100%; max-width: none; height: 100%; min-height: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.outside-caption { display: none; }
+.workspace-main, .workspace-columns { min-height: 0; overflow: hidden; }
+.sidebar { min-height: 0; overscroll-behavior: contain; }
+.sidebar>* { flex-shrink: 0; }
+.topbar { flex-shrink: 0; }
+.connection-error { flex-shrink: 0; max-height: 100px; overflow: auto; }
+.connection-error>span { min-width: 0; overflow-wrap: anywhere; }
+.connection-error>button { flex-shrink: 0; }
+.main-content { min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; }
+.main-content>* { flex-shrink: 0; }
+.chat-panel { min-height: 0; overflow: hidden; }
+.assistant-heading, .chat-tabs, .composer-area { flex-shrink: 0; }
+.chat-scroll { overscroll-behavior: contain; scrollbar-width: thin; }
+.composer-area { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.mobile-pane-switch { display: none; }
+.sidebar .conversations { max-height: 28dvh; overflow-y: auto; scrollbar-width: thin; flex-shrink: 1; min-height: 96px; }
+
+@media(max-height:800px) {
+  .sidebar { padding-top: 18px; }
+  .brand { margin-bottom: 20px; }
+  .workspace-switch { margin-bottom: 20px; }
+  .nav-group { margin-bottom: 18px; }
+  .sidebar-bottom { padding-top: 12px; }
+  .foundation-card { display: none; }
+  .profile { padding-block: 14px; margin-top: 10px; }
+  .topbar { height: 56px; min-height: 56px; }
+  .main-content { padding-top: 24px; }
+  .section-heading { margin-bottom: 22px; }
+  .dropzone { min-height: 164px; padding-block: 18px; }
+  .library-section { margin-top: 24px; }
+  .knowledge-note { margin-top: 22px; }
+  .content-footer { padding-block: 20px; }
+  .assistant-heading { padding-block: 16px 13px; }
+  .chat-tabs button { padding-block: 11px; }
+  .chat-scroll { padding-top: 20px; }
+  .chat-welcome { padding-top: 0; }
+  .welcome-orbit { height: 42px; width: 42px; border-radius: 12px; margin-bottom: 18px; }
+  .chat-welcome h2 { font-size: 27px; margin-block: 10px; }
+  .chat-welcome>p { line-height: 1.75; }
+  .suggestions { margin-top: 20px; gap: 7px; }
+  .suggestions button { min-height: 38px; padding-block: 10px; }
+  .welcome-foot { margin-top: 15px; }
+}
+
+@media(max-width:640px) {
+  .workspace-columns, .workspace-columns.chat-focused { display: flex; flex-direction: row; flex: 1; min-height: 0; }
+  .main-content, .chat-focused .main-content { flex: 1; min-height: 0; overflow-y: auto; }
+  .chat-panel, .chat-focused .chat-panel { width: 100%; height: 100%; min-height: 0; flex: 1; border: 0; }
+  .workspace-columns[data-mobile-pane='workspace']>.chat-panel { display: none; }
+  .workspace-columns[data-mobile-pane='assistant']>.main-content { display: none; }
+  .mobile-pane-switch { flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px 14px; border-bottom: 1px solid var(--line); background: var(--paper); }
+  .mobile-pane-switch button { display: flex; justify-content: center; align-items: center; gap: 7px; min-height: 36px; border-radius: 6px; color: var(--muted); font-size: 12px; }
+  .mobile-pane-switch button[aria-pressed='true'] { color: var(--ink); background: var(--selected); font-weight: 600; }
+  .topbar { position: relative; top: auto; }
+  .composer textarea { max-height: min(140px, 20dvh); }
+  .composer-note { margin-top: 7px; }
+}
+
+@media(max-height:550px) {
+  .assistant-heading { padding-block: 10px; }
+  .chat-tabs button { padding-block: 9px; }
+  .composer-area { padding-top: 8px; }
+  .composer textarea { min-height: 44px; max-height: 70px; }
+  .composer-note { display: none; }
+}

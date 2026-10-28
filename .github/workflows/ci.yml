@@ -1,0 +1,46 @@
+name: Verify application and containers
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: veriqon_test
+          POSTGRES_PASSWORD: local_test_only
+          POSTGRES_DB: veriqon_test
+        ports: ['55432:5432']
+        options: >-
+          --health-cmd "pg_isready -U veriqon_test -d veriqon_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7-alpine
+        ports: ['56379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:infra
+      - run: npm run web:build
+      - run: npm run web:check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: docker build -t veriqon-api:ci .
+      - run: docker build -f apps/web/Dockerfile -t veriqon-web:ci .
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failures
+          path: test-results/
