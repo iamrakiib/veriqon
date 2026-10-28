@@ -22,7 +22,7 @@ Render's free service sleeps when idle. The initial workspace connection allows 
 
 ### Release updates
 
-GitHub Actions validates pushes. Releases are currently **manual**: Render automatic deploys are off, and Vercel's GitHub connection still needs a GitHub Login Connection in the Vercel account. The authenticated CLI can deploy the frontend without that integration.
+GitHub Actions validates pushes. Releases are currently **manual**: Render automatic deploys are off. The GitHub login connection in Vercel is established, but automatic frontend deployments still need the Vercel GitHub app to have access to this private repository. The authenticated CLI can deploy the frontend without that repository integration.
 
 From the repository root, after committing, pushing, and checking CI:
 
