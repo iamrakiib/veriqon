@@ -4,6 +4,22 @@ test.beforeEach(async ({ page }) => { await page.route('**/api/rag/conversations
 
 const user = { id: 'fixture', name: 'Alex Morgan', email: 'alex@example.com', role: 'owner' };
 
+test('a sleeping server can wake before the sign-in screen appears', async ({ page }) => {
+  await page.route('**/api/auth/status', async route => {
+    // A real response delay catches the former 15-second browser abort.
+    await new Promise(resolve => setTimeout(resolve, 17000));
+    await route.fulfill({ json: { needsSetup: false, registrationEnabled: false } });
+  });
+  await page.route('**/api/auth/me', route => route.fulfill({ status: 401, json: { message: 'Sign in' } }));
+  await page.route('**/api/auth/refresh', route => route.fulfill({ status: 401, json: { message: 'Sign in' } }));
+  await page.goto('/');
+  await expect(page.getByRole('status')).toHaveText('Waking up your workspace. This can take about a minute.', { timeout: 12000 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled();
+  await expect(page.locator('.auth-error[role=alert]')).toHaveCount(0);
+});
+
 test('sign-in errors, account identity and sign-out clear the private workspace', async ({ page }, info) => {
   let signedIn = false;
   await page.route('**/api/auth/status', route => route.fulfill({ json: { needsSetup: false, registrationEnabled: true } }));

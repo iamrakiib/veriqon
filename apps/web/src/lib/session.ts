@@ -21,7 +21,9 @@ export async function sessionFetch(url: string, options: RequestInit = {}) {
   return response;
 }
 export async function authRequest<T>(path: string, body?: unknown): Promise<T> {
-  const response = await sessionFetch(`/api/auth/${path}`, { method: body === undefined ? 'GET' : 'POST', ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), signal: AbortSignal.timeout(15000) });
+  // The initial read wakes a sleeping free host before sign-in is available.
+  const timeout = path === 'status' && body === undefined ? 90000 : 15000;
+  const response = await sessionFetch(`/api/auth/${path}`, { method: body === undefined ? 'GET' : 'POST', ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), signal: AbortSignal.timeout(timeout) });
   const data = await response.json().catch(() => null);
   if (!response.ok) throw new Error(Array.isArray(data?.message) ? data.message.join('. ') : data?.message || 'Could not connect. Please try again.');
   return data as T;

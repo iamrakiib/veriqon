@@ -10,6 +10,7 @@ export function AuthGate() {
   const [user, setUser] = useState<Account | null>(null);
   const [status, setStatus] = useState<{ needsSetup: boolean; registrationEnabled: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [waking, setWaking] = useState(false);
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -20,9 +21,15 @@ export function AuthGate() {
       const configuration = await authRequest<{ needsSetup: boolean; registrationEnabled: boolean }>('status');
       setStatus(configuration); if (configuration.needsSetup) { setMode('register'); setUser(null); return; }
       try { const session = await authRequest<{ user: Account }>('me'); setUser(session.user); } catch { setUser(null); setError(''); }
-    } catch { setError('The server is unavailable. Start the API, then try again.'); }
+    } catch { setError('Could not reach your workspace. Please try again in a moment.'); }
     finally { setLoading(false); }
   }, []);
+  useEffect(() => {
+    setWaking(false);
+    if (!loading) return;
+    const timer = setTimeout(() => setWaking(true), 8000);
+    return () => clearTimeout(timer);
+  }, [loading]);
   useEffect(() => {
     void load();
     const expired = () => { setUser(null); setError('Your session has expired. Sign in to continue.'); };
@@ -45,7 +52,7 @@ export function AuthGate() {
   async function logout() {
     await authRequest('logout', {}); setUser(null); setMode('login'); setError(''); notifyTabs();
   }
-  if (loading) return <div className="auth-loading"><BrandMark /><LoaderCircle size={18} className="spin" /><span>Opening your workspace</span></div>;
+  if (loading) return <div className="auth-loading"><BrandMark /><LoaderCircle size={18} className="spin" /><span role="status">{waking ? 'Waking up your workspace. This can take about a minute.' : 'Opening your workspace'}</span></div>;
   if (user) return <Workspace key={user.id} account={user} onLogout={logout} />;
   const registering = mode === 'register';
   return <div className="auth-page">

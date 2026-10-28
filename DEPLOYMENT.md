@@ -1,5 +1,43 @@
 # Deploy Veriqon
 
+## Current deployment — 29 October 2026
+
+| Resource | Location |
+| --- | --- |
+| Live application | **https://veriqon-two.vercel.app** |
+| API readiness | https://veriqon-api.onrender.com/rag/ready |
+| Private source repository | https://github.com/iamrakiib/veriqon |
+| Vercel project | https://vercel.com/boycool7823-4129/veriqon |
+| Render service | https://dashboard.render.com/web/srv-dbgo0ahsrm7s73ecc8eg |
+| PostgreSQL | Neon project `veriqon` (`little-queen-41211260`), PostgreSQL 17 + pgvector, Singapore, Free |
+| Redis | Upstash database `veriqon`, Singapore, Free, TLS enabled |
+
+Sign in with your existing Veriqon email and password. The owner already exists, so a setup code is unnecessary and public registration is disabled. The primary frontend origin above is allowed by the backend; use it for sign-in.
+
+The local PostgreSQL snapshot was restored into a separate Neon database and verified against the original records: one user, two documents, 158 chunks, one conversation, and one message. Existing sessions were excluded. The original local databases and Docker volume were preserved. These are separate copies: new cloud activity does not synchronize back to localhost. The two legacy documents contain extracted text and embeddings but had no original upload bytes in the source database; re-upload them if you need their original files available for download.
+
+Live checks through the Vercel frontend passed for sign-in, Secure/HttpOnly cookies, origin protection, account isolation, upload/embedding, exact original-file download, a supported answer with a citation, saved chat history, refresh-token rotation, and logout revocation. The synthetic answer took about eight seconds on that run; this is a smoke check, not a latency guarantee or retrieval-quality benchmark. The temporary test account and its data were removed.
+
+Render's free service sleeps when idle. The initial workspace connection allows up to 90 seconds and explains when the server is waking. Failed connections have a retry button. Hosting is on the free plans; model calls remain subject to the configured provider's separate free quotas.
+
+### Release updates
+
+GitHub Actions validates pushes. Releases are currently **manual**: Render automatic deploys are off, and Vercel's GitHub connection still needs a GitHub Login Connection in the Vercel account. The authenticated CLI can deploy the frontend without that integration.
+
+From the repository root, after committing, pushing, and checking CI:
+
+```powershell
+# Deploy the backend when backend code/configuration changes.
+.\data\tools\render\render.exe deploys create srv-dbgo0ahsrm7s73ecc8eg --wait --confirm
+
+# Deploy the frontend using the saved project link and production API_ORIGIN.
+npx --yes vercel@65.5.0 deploy --prod --yes
+```
+
+On another machine, install/authenticate the Render CLI and use `render` in place of the local executable path; run `vercel link --project veriqon` before the first frontend deployment. Do not deploy from inside `apps/web`: the linked Vercel project already sets that root directory and needs the workspace lockfile above it.
+
+Backend credentials are in Render secret environment settings. The frontend has only `API_ORIGIN=https://veriqon-api.onrender.com`. Local deployment helpers, database snapshots, and credentials remain ignored under `data/` and `.env.deploy`; `.vercelignore` also excludes them from CLI uploads. Do not commit or share those files.
+
 The supported cloud layout is **Vercel frontend → Render API → Neon PostgreSQL + pgvector**, with **Upstash Redis** for shared limits and active-work leases. Docker Compose runs the same application locally.
 
 PostgreSQL is the source of truth for users, hashed passwords, revocable sessions, documents, original upload bytes, embeddings, conversations, and answers. Redis holds disposable rate counters and leases; losing Redis does not delete documents or history. Redis failures reject new protected operations. Short-lived answer/embedding caches remain bounded and local to each API process, with database revision keys for invalidation.
