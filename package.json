@@ -40,7 +40,7 @@
     "class-validator": "^0.14.3",
     "dotenv": "^16.0.0",
     "mammoth": "^1.13.0",
-    "openai": "^4.0.0",
+    "openai": "^7.43.0",
     "pdf-parse": "^2.4.5",
     "pg": "^8.23.1",
     "redis": "^6.3.0",
