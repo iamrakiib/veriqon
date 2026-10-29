@@ -33,6 +33,10 @@ Next priorities: measured retrieval/faithfulness evaluation, verified identity a
 
 ## Release verification
 
-Checks cover lint, backend tests, PostgreSQL/Redis integration, frontend build/types and desktop/mobile browser tests. CI builds both Docker images and checks high-severity dependency advisories. Screenshots use synthetic fixtures.
+[CI for the deployed code](https://github.com/iamrakiib/veriqon/actions/runs/40829342650) passed: 31 backend tests, 5 PostgreSQL/Redis checks, 41 desktop/mobile browser tests (one duplicate mobile layout invocation intentionally skipped), lint, frontend build/type checks and both Docker builds. The dependency audit reported zero vulnerabilities. Screenshots use synthetic fixtures.
 
-Public publication requires scanning Git history and tracked files, inspecting screenshots, and live registration/isolation verification after deployment. Check results are recorded in CI and the release commit; a passing secret scan cannot guarantee the absence of every sensitive value.
+Before publication, Gitleaks found no leaks in Git history, the tracked snapshot or previous CI logs. An additional comparison checked 96 tracked files and history against private local credential values. These scans are evidence of a check, not a guarantee that every sensitive value is detectable. GitHub secret scanning, push protection, vulnerability alerts, Dependabot security updates and private vulnerability reporting are enabled.
+
+Code release `61a67da` is live on Vercel and Render. The live smoke test passed public member registration, origin rejection, Secure/HttpOnly cookies, account isolation, upload/embedding, exact original download, a supported cited answer, persisted history, refresh rotation/replay rejection and logout revocation. The answer took 15.2 seconds in that run; this is not a latency guarantee. The temporary test account and its documents/history were removed. Existing owner data was preserved.
+
+Releases remain manual through the authenticated hosting CLIs. The Vercel GitHub integration could not be linked from the CLI even after public publication; this did not prevent deployment.
