@@ -61,6 +61,7 @@ export class VectorStoreService {
   async addDocument(id: string, text: string, meta?: { source?: string; page?: number; version?: string }, ownerId?: string, file?: OriginalFile) {
     const owner = this.owner(ownerId);
     if (!id?.trim() || !text?.trim() || text.length > 100000) throw new BadRequestException('Document ID and readable text are required (up to 100,000 characters).');
+    meta = { ...meta, version: meta?.version || 'sha256:' + createHash('sha256').update(text).digest('hex') };
     try {
       const existing = await this.database.get('SELECT text,source,page,version,embedding_model FROM documents WHERE owner_id=? AND id=?', owner, id);
       if (existing && existing.text === text && existing.embedding_model === this.embeddingModel && (existing.source ?? undefined) === meta?.source && (existing.page ?? undefined) === meta?.page && (existing.version ?? undefined) === meta?.version) {

@@ -16,7 +16,7 @@
     "start:dev": "nodemon --watch src --watch .env --ext ts,json,env --exec ts-node src/main.ts",
     "build": "npx tsc",
     "evaluate": "npx ts-node scripts/evaluate.ts",
-    "test": "npm run build && node --test dist/src/tests/rag.test.js dist/src/tests/auth.test.js dist/src/tests/reliability.test.js dist/src/tests/recovery.test.js",
+    "test": "npm run build && node --test dist/src/tests/rag.test.js dist/src/tests/auth.test.js dist/src/tests/reliability.test.js dist/src/tests/recovery.test.js dist/src/tests/atomic-facts.test.js",
     "test:browser": "playwright test",
     "web:dev": "npm run dev --workspace @veriqon/web",
     "web:build": "npm run build --workspace @veriqon/web",
@@ -28,7 +28,8 @@
     "db:import-sqlite": "node dist/scripts/import-sqlite.js",
     "test:infra": "npm run build && node scripts/test-infra.mjs",
     "docker:up": "docker compose --env-file .env.docker up --build -d",
-    "docker:down": "docker compose --env-file .env.docker down"
+    "docker:down": "docker compose --env-file .env.docker down",
+    "evaluate:rac": "npm run build && node dist/scripts/evaluate-rac.js --live"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",

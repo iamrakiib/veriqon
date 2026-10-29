@@ -68,7 +68,7 @@ export class RagController {
   @Get('health')
   @Public()
   health() {
-    return { status: 'ok', providerConfigured: Boolean(process.env.OPENROUTER_API_KEY?.trim()), storage: this.database.dialect, capabilities: { authentication: true, temporal: false, conflicts: false, persistedAnswers: true } };
+    return { status: 'ok', providerConfigured: Boolean(process.env.OPENROUTER_API_KEY?.trim()), storage: this.database.dialect, capabilities: { authentication: true, temporal: false, conflicts: true, conflictLibraryScan: false, persistedAnswers: true } };
   }
 
   @Get('ready')
@@ -117,6 +117,12 @@ export class RagController {
 
   @Get('conversations')
   conversations(@CurrentUser() user: Account) { return this.database.conversations(user.id); }
+
+  @Get('conflicts')
+  conflicts(@CurrentUser() user: Account, @Res({ passthrough: true }) response: Response) {
+    response.setHeader('Cache-Control', 'private, no-store');
+    return this.database.conflicts(user.id);
+  }
 
   @Post('add')
   @HttpCode(HttpStatus.CREATED)

@@ -153,7 +153,7 @@ Email addresses are **not verified**. Recovery codes are available: sign in, ope
 
 ## Research roadmap
 
-This is a foundation for the TemporalGuard research direction. **Not implemented:** immutable document versions, effective-date retrieval, authority-based conflict resolution, continuous answer revalidation, durable ingestion workers, learned reranking and independent retrieval/faithfulness benchmarks. The conflict center labels its unavailable backend explicitly.
+This is a foundation for the TemporalGuard research direction. **Not implemented:** immutable document versions, effective-date retrieval, authority-based conflict resolution, continuous answer revalidation, durable ingestion workers, learned reranking and independent retrieval/faithfulness benchmarks. The Conflict Center displays unresolved evidence from saved answer assessments; it does not perform a library-wide scan or resolve authority disputes.
 
 Reliability views show observed outcomes, not factual accuracy or an SLA. Historical audits in `docs/` describe earlier stages; the current review and deployment guide take precedence.
 
@@ -162,3 +162,5 @@ Reliability views show observed outcomes, not factual accuracy or an SLA. Histor
 See [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible bug reports and focused changes are welcome. Keep documents, database exports, credentials and account details out of public issues and commits.
 
 See the [reliability audit](docs/reliability-audit.md) for actual failure causes, verification boundaries and test results. Citation numbers such as `[1]`, `[2]` and `[3]` identify retrieved passages, which can all belong to the same document.
+
+The [RAC-inspired method and comparison](docs/rac-method.md) documents the paper/code audit, differences from RAC, reproducible evaluation and measured limitations.

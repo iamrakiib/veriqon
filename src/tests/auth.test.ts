@@ -76,6 +76,16 @@ test('real HTTP authentication, migration, private uploads, refresh, revocation 
     assert.equal(member.status, 201);
     const memberCookie = cookies(member);
     const memberId = (await member.json() as { user: { id: string } }).user.id;
+    assert.equal((await request('/rag/conflicts')).status, 401);
+    const conflictMessage = randomUUID();
+    await database.beginMessage(ownerId, randomUUID(), 'Conflicting experimental counts?', conflictMessage);
+    await database.finishMessage(ownerId, conflictMessage, {
+      citations: [{ index: 1, documentId: 'a', source: 'a.docx', version: '1', chunkIndex: 0, excerpt: 'The adapter used two datasets.' }, { index: 2, documentId: 'b', source: 'b.docx', version: '2', chunkIndex: 0, excerpt: 'The adapter used three datasets.' }],
+      factCheck: { atomicClaims: [{ id: 's1c1', text: 'The adapter used two datasets.', verdict: 'CONFLICTED', scope: { time: null, place: null }, temporalValidity: 'UNKNOWN', supporting: [{ index: 1, quote: 'The adapter used two datasets.' }], contradicting: [{ index: 2, quote: 'The adapter used three datasets.' }] }] }
+    });
+    const conflicts = await request('/rag/conflicts', undefined, ownerCookie).then(r => r.json()) as { records: { messageId: string; status: string }[] };
+    assert.equal(conflicts.records.length, 1); assert.equal(conflicts.records[0].messageId, conflictMessage); assert.equal(conflicts.records[0].status, 'UNRESOLVED');
+    assert.equal((await request('/rag/conflicts', undefined, memberCookie).then(r => r.json()) as { records: unknown[] }).records.length, 0, 'Conflict evidence is account-scoped');
     assert.deepEqual(await request('/rag/docs', undefined, memberCookie).then(r => r.json()), []);
     const noDocs = await request('/rag/query', { query: 'Hello' }, memberCookie).then(r => r.json()) as { reason: string };
     assert.equal(noDocs.reason, 'no_documents'); assert.equal(generations, 0);

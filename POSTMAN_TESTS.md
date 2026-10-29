@@ -87,6 +87,14 @@ Expected: 200 with `{ "success": true }`. This removes the document, search chun
 
 Access JWTs last 15 minutes; database sessions have a maximum seven-day lifetime. Production cookies require HTTPS.
 
+## Recovery codes and evidence conflicts
+
+New registrations return eight recovery codes once. Existing accounts can use `POST /auth/recovery-codes` with `{ "password": "your current password" }` to replace their codes; `GET /auth/recovery-codes` returns only the remaining count. Store codes privately. `POST /auth/recover` accepts `{ "email": "your account email", "code": "one unused code", "password": "your new password" }`. A successful reset consumes the code and revokes every session. Reusing it returns 401. Test with a disposable account, since regeneration invalidates previous codes.
+
+`GET /rag/conflicts` requires authentication and returns unresolved evidence conflicts from the account's latest 200 saved answer assessments. It includes exact quoted passages, source versions and affected message IDs. An empty list means no conflicts were recorded in that window, not that the entire library is conflict-free. Cross-account conflicts must never appear.
+
+RAG responses also include `verificationStatus`, `repairHistory`, `modelUsage`, `promptVersion`, claim counts and retrieval rounds. Only `REPAIRED_VERIFIED` denotes a revision that passed final verification and the substantive-change guard. Attempted or stylistic revisions must not receive that label. See [RAC method and measured limitations](docs/rac-method.md).
+
 ## Negative cases
 
 | Request | Expected |

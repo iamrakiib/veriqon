@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-10-29T12:05:08.189Z",
+  "baseline": "7b06e3eab78074408e3916640f11c46557bba569",
+  "datasetHash": "6de3fb28cb6e3dbd92ba2b70a0d81ea2ed1ccd4894250fe1831d8bcc2676bde0",
+  "groundTruth": "Programmatic synthetic source records; independent of model outputs, not externally human annotated.",
+  "protocol": "Same fixed drafts, passages, provider configuration and pipeline deadline. Sequential runs. Draft-generation and embedding latency excluded. Production orchestrators; controlled retrieval. Numeric facts only; no general semantic accuracy claim. Token totals include only reported successful calls; inspect completeness flag.",
+  "models": {
+    "generator": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "verifier": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "decomposer": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  "summaries": [
+    {
+      "variant": "veriqon-7b06e3e",
+      "cases": 5,
+      "failures": 0,
+      "claimCorrectness": 1,
+      "repairSuccessRate": 0,
+      "unnecessaryRepairRate": 0,
+      "unsupportedClaimRate": 0,
+      "citationSupportAccuracy": 1,
+      "expectedFactCoverage": 0.6666666666666666,
+      "supportedFactPreservation": 1,
+      "meanLatencyMs": 12703.2,
+      "promptTokens": 3231,
+      "completionTokens": 831,
+      "tokenUsageComplete": false
+    },
+    {
+      "variant": "rac-inspired-v3",
+      "cases": 5,
+      "failures": 1,
+      "claimCorrectness": 1,
+      "repairSuccessRate": 0.5,
+      "unnecessaryRepairRate": 0,
+      "unsupportedClaimRate": 0,
+      "citationSupportAccuracy": 1,
+      "expectedFactCoverage": 0.8333333333333334,
+      "supportedFactPreservation": 1,
+      "meanLatencyMs": 21305.8,
+      "promptTokens": 6327,
+      "completionTokens": 1447,
+      "tokenUsageComplete": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "incorrect-number",
+      "question": "How many datasets and architectures did the adapter use?",
+      "draft": "The adapter used five datasets. The adapter used four architectures.",
+      "initial": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 0,
+          "text": "The adapter used 2 datasets. The adapter used 4 architectures. Numerical accuracy was not reported."
+        }
+      ],
+      "extra": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 0,
+          "text": "The adapter used 2 datasets. The adapter used 4 architectures. Numerical accuracy was not reported."
+        }
+      ],
+      "expected": {
+        "datasets": 2,
+        "architectures": 4
+      },
+      "repairNeeded": true
+    },
+    {
+      "id": "already-correct",
+      "question": "How many datasets and architectures did the adapter use?",
+      "draft": "The adapter used two datasets. The adapter used four architectures.",
+      "initial": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 0,
+          "text": "The adapter used 2 datasets. The adapter used 4 architectures. Numerical accuracy was not reported."
+        }
+      ],
+      "extra": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 0,
+          "text": "The adapter used 2 datasets. The adapter used 4 architectures. Numerical accuracy was not reported."
+        }
+      ],
+      "expected": {
+        "datasets": 2,
+        "architectures": 4
+      },
+      "repairNeeded": false
+    },
+    {
+      "id": "targeted-retrieval",
+      "question": "How many datasets did the adapter use?",
+      "draft": "The adapter used two datasets.",
+      "initial": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 9,
+          "text": "The manuscript describes a forecasting adapter. Experimental details are in a different section."
+        }
+      ],
+      "extra": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 0,
+          "text": "The adapter used 2 datasets. The adapter used 4 architectures. Numerical accuracy was not reported."
+        }
+      ],
+      "expected": {
+        "datasets": 2
+      },
+      "repairNeeded": false
+    },
+    {
+      "id": "missing-evidence",
+      "question": "What accuracy did the adapter achieve?",
+      "draft": "The adapter achieved 95% accuracy.",
+      "initial": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 9,
+          "text": "The manuscript describes a forecasting adapter. Experimental details are in a different section."
+        }
+      ],
+      "extra": [
+        {
+          "id": "synthetic-manuscript",
+          "source": "manuscript.docx",
+          "version": "approved-v1",
+          "chunkIndex": 9,
+          "text": "The manuscript describes a forecasting adapter. Experimental details are in a different section."
+        }
+      ],
+      "expected": {},
+      "repairNeeded": false
+    },
+    {
+      "id": "historical-policy",
+      "question": "How many remote work days per week were permitted in 2024?",
+      "draft": "In 2024, remote work was permitted one day per week.",
+      "initial": [
+        {
+          "id": "policy",
+          "source": "policy-2024.docx",
+          "version": "approved-2024",
+          "chunkIndex": 0,
+          "text": "From January 1 through December 31, 2024, remote work was permitted 3 days per week."
+        },
+        {
+          "id": "policy-current",
+          "source": "policy-2025.docx",
+          "version": "approved-2025",
+          "chunkIndex": 0,
+          "text": "Beginning January 1, 2025, remote work is permitted 1 day per week. This policy does not apply to 2024."
+        }
+      ],
+      "extra": [
+        {
+          "id": "policy",
+          "source": "policy-2024.docx",
+          "version": "approved-2024",
+          "chunkIndex": 0,
+          "text": "From January 1 through December 31, 2024, remote work was permitted 3 days per week."
+        },
+        {
+          "id": "policy-current",
+          "source": "policy-2025.docx",
+          "version": "approved-2025",
+          "chunkIndex": 0,
+          "text": "Beginning January 1, 2025, remote work is permitted 1 day per week. This policy does not apply to 2024."
+        }
+      ],
+      "expected": {
+        "days": 3
+      },
+      "repairNeeded": true
+    }
+  ],
+  "baselineModuleHash": "92fda55b760a10fd76eeb8f39eca4222b222ba73d6df36721b453e544cb9c982"
+}

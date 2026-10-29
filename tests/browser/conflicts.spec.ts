@@ -1,0 +1,24 @@
+import { test, expect } from '@playwright/test';
+test('Conflict Center loads real API records, filters scope and opens exact evidence', async ({ page }, info) => {
+  await page.route('**/api/auth/status', route => route.fulfill({ json: { needsSetup: false, registrationEnabled: true } }));
+  await page.route('**/api/auth/me', route => route.fulfill({ json: { user: { id: 'fixture', email: 'test@example.test', name: 'Test', role: 'member' } } }));
+  await page.route('**/api/rag/conversations', route => route.fulfill({ json: [] }));
+  await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
+  await page.route('**/api/rag/health', route => route.fulfill({ json: { status: 'ok', providerConfigured: true } }));
+  const source = { documentId: 'paper', source: 'paper.docx', version: 'approved-v2', chunkIndex: 0, excerpt: 'The adapter used two datasets.', quote: 'The adapter used two datasets.' };
+  let fail = true;
+  await page.route('**/api/rag/conflicts', route => route.fulfill({ status: fail ? 503 : 200, json: fail ? { message: 'Conflict storage unavailable' } : { coverage: 'saved_answer_assessments', reviewedAnswers: 3, truncated: false, records: [{ id: 'conflict-a', question: 'Datasets?', claim: 'The adapter used two datasets.', detectedAt: '2026-10-29T00:00:00Z', status: 'UNRESOLVED', scope: { time: null, place: null }, reason: 'No source precedence established.', supporting: [{ ...source, index: 1 }], contradicting: [{ ...source, index: 2, source: 'other.docx', excerpt: 'The adapter used three datasets.', quote: 'The adapter used three datasets.' }] }] } }));
+  await page.goto('/');
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
+  await page.getByRole('button', { name: 'Conflict center', exact: true }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Conflict storage unavailable' })).toBeVisible();
+  fail = false; await page.getByRole('button', { name: 'Refresh conflicts' }).click();
+  await expect(page.getByText('1 unresolved record across 3 recent answer assessments.')).toBeVisible();
+  await expect(page.getByText('Unresolved · human review needed')).toBeVisible();
+  await page.getByLabel('Filter conflicts').selectOption('temporal');
+  await expect(page.getByText('Unresolved · human review needed')).toHaveCount(0);
+  await page.getByLabel('Filter conflicts').selectOption('all');
+  await page.getByRole('button', { name: '[1] paper.docx', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText(source.quote);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

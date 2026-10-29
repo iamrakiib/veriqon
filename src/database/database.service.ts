@@ -3,6 +3,7 @@ import { SqlStore } from './sql-store';
 import { mkdirSync, readFileSync, existsSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { randomBytes, randomUUID } from 'crypto';
+import { answerConflicts } from '../rag/conflicts';
 
 export type StoredChunk = { chunkId: string; content: string; embedding: number[]; source?: string; page?: number; version?: string; index: number };
 export type StoredDocument = { id: string; text: string; embeddingModel?: string; chunks: StoredChunk[] };
@@ -169,6 +170,10 @@ export class DatabaseService extends SqlStore implements OnModuleInit {
   }
   async finishMessage(ownerId: string, messageId: string, result?: unknown, error?: string) {
     await this.run('UPDATE messages SET result=?,error=? WHERE owner_id=? AND id=?', result === undefined ? null : JSON.stringify(result), error ?? null, ownerId, messageId);
+  }
+  async conflicts(ownerId: string) {
+    const rows = await this.all('SELECT id,conversation_id,question,created_at,result FROM messages WHERE owner_id=? AND result IS NOT NULL ORDER BY created_at DESC,id LIMIT 201', ownerId);
+    return { coverage: 'saved_answer_assessments' as const, truncated: rows.length > 200, reviewedAnswers: Math.min(200, rows.length), records: rows.slice(0, 200).flatMap(row => answerConflicts({ id: String(row.id), conversationId: String(row.conversation_id), question: String(row.question), createdAt: Number(row.created_at) }, JSON.parse(String(row.result)))) };
   }
   async conversations(ownerId: string) {
     const revision = await this.revision(ownerId);
