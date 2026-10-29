@@ -26,6 +26,7 @@ A document research workspace that retrieves evidence, checks each claim, and re
 Upload a paper, ask how it works, and inspect the passages behind the answer. Veriqon keeps documents, citations, chat history and answer repairs together in a responsive monochrome interface with dark, light and system themes.
 
 - **A private library for every account:** PDF, DOCX, TXT and Markdown ingestion, search, source previews, original-file downloads and persistent conversations.
+- **Account recovery:** save single-use recovery codes from Settings; a password reset revokes existing sessions.
 - **An inspection trail:** hybrid retrieval expands neighboring passages; structured claim assessments include exact quotes. Missing evidence triggers targeted retrieval. Minimal factual edits require final verification and a substantive-change check.
 - **Honest failure states:** missing evidence, provider quotas, interrupted answers, upload errors and stale historical sources are surfaced explicitly.
 - **A deployable stack:** Next.js, NestJS, PostgreSQL/pgvector, Redis limits and work leases, Docker, migrations and automated checks.
@@ -41,7 +42,8 @@ Screenshots use synthetic fixtures. The live app is an early public release with
 flowchart LR
     A[Question] --> B[Embed and retrieve]
     B --> C[Draft with citations]
-    C --> D{Assess evidence}
+    C --> K[Decompose atomic facts]
+    K --> D{Assess evidence}
     D -->|Pass| E[Supported answer]
     D -->|Missing evidence| J[Targeted retrieval]
     J --> D
@@ -49,7 +51,7 @@ flowchart LR
     D -->|Unresolved| I[Withhold unsupported claims]
     F --> G{Reassess}
     G -->|Supported substantive correction| H[Repaired answer]
-    G -->|Fail| I[Abstain]
+    G -->|Fail| I
 ```
 
 The verifier is a model assessment, **not a guarantee of truth**. Questions are independent: previous turns are saved but are not supplied as model context. Retrieval can miss information that a document contains; abstention is not proof that the entire document lacks an answer.
