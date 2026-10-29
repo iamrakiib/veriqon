@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, Check, Eye, EyeOff, Fingerprint, LoaderCircle, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react';
-import { authRequest, type Account } from '../lib/session';
+import { authRequest, AuthRequestError, type Account } from '../lib/session';
 import { BrandMark } from './ui';
 import { ThemeToggle } from './theme-provider';
 import { Workspace } from './workspace';
@@ -20,8 +20,12 @@ export function AuthGate() {
     try {
       const configuration = await authRequest<{ needsSetup: boolean; registrationEnabled: boolean }>('status');
       setStatus(configuration); if (configuration.needsSetup) { setMode('register'); setUser(null); return; }
-      try { const session = await authRequest<{ user: Account }>('me'); setUser(session.user); } catch { setUser(null); setError(''); }
-    } catch { setError('Could not reach your workspace. Please try again in a moment.'); }
+      try { const session = await authRequest<{ user: Account }>('me'); setUser(session.user); }
+      catch (failure) {
+        if (!(failure instanceof AuthRequestError) || failure.status !== 401) throw failure;
+        setUser(null); setError('');
+      }
+    } catch { setStatus(null); setError('Could not reach your workspace. Please try again in a moment.'); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => {
@@ -72,6 +76,7 @@ export function AuthGate() {
         <button className="button primary auth-submit" disabled={busy} type="submit">{busy ? <><LoaderCircle size={17} className="spin" /> {registering ? 'Creating your workspace' : 'Signing you in'}</> : <>{registering ? 'Create account' : 'Sign in'}<ArrowRight size={17} /></>}</button>
       </form>}
       {status && !status.needsSetup && (status.registrationEnabled || registering) && <p className="auth-switch">{registering ? 'Already have an account?' : 'New to Veriqon?'} <button disabled={busy} onClick={() => { setMode(registering ? 'login' : 'register'); setError(''); }}>{registering ? 'Sign in' : 'Create an account'}</button></p>}
+      {status && !status.needsSetup && !status.registrationEnabled && !registering && <p className="auth-switch">This workspace is private. Contact the owner for access.</p>}
       <div className="auth-trust"><LockKeyhole size={14} /><span>Private documents. Secure sign-in.</span></div>
     </div><footer className="auth-footer">A clearer view of what you know.</footer></section>
   </div>;

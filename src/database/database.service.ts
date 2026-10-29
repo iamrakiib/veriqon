@@ -64,10 +64,15 @@ export class DatabaseService extends SqlStore implements OnModuleInit {
       await this.insertDocument(ownerId, record, file);
     });
   }
+  async preflightDocument(ownerId: string, id: string, text: string, file?: OriginalFile) {
+    // Release the lock before provider work; writeDocument rechecks atomically at commit.
+    await this.transaction(() => this.checkLibraryLimit(ownerId, id, text, file));
+  }
   private async checkLibraryLimit(ownerId: string, id: string, text: string, file?: OriginalFile) {
     if (this.dialect === 'postgresql') await this.get('SELECT id FROM users WHERE id=? FOR UPDATE', ownerId);
-    const size = this.dialect === 'postgresql' ? 'octet_length' : 'length';
-    const usage = await this.get(`SELECT COUNT(*) AS count, COALESCE(SUM(COALESCE(${size}(original_file),0)+${size}(text)),0) AS bytes FROM documents WHERE owner_id=? AND id<>?`, ownerId, id);
+    const textSize = this.dialect === 'postgresql' ? 'octet_length(text)' : 'length(CAST(text AS BLOB))';
+    const fileSize = this.dialect === 'postgresql' ? 'octet_length(original_file)' : 'length(original_file)';
+    const usage = await this.get(`SELECT COUNT(*) AS count, COALESCE(SUM(COALESCE(${fileSize},0)+${textSize}),0) AS bytes FROM documents WHERE owner_id=? AND id<>?`, ownerId, id);
     if (Number(usage!.count) >= 100 || Number(usage!.bytes) + (file?.bytes.length || 0) + Buffer.byteLength(text) > 100 * 1024 * 1024) {
       throw new HttpException('Your library limit is 100 documents or 100 MB of source files and text. Remove documents before uploading more.', 413);
     }

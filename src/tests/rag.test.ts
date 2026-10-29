@@ -153,6 +153,26 @@ function testStore(file = join(testDirectory, `store-${++storeNumber}.sqlite`)) 
   return new TestStore(database);
 }
 
+test('full libraries reject new documents before spending embedding quota and allow replacements', async () => {
+  const store = testStore(); let embeddings = 0;
+  store.getEmbeddings = async texts => { embeddings++; return texts.map(() => [1, 0]); };
+  for (let i = 0; i < 100; i++) await store.testDatabase.writeDocument('test-user', { id: `doc-${i}`, text: 'Original', chunks: [] });
+  await assert.rejects(store.addDocument('over-limit', 'New text'), /library limit/);
+  assert.equal(embeddings, 0);
+  await store.addDocument('doc-0', 'Replacement text');
+  assert.equal(embeddings, 1);
+  assert.equal((await store.getAllDocs()).length, 100);
+  // The final write must enforce the limit even if concurrent work fills the library after preflight.
+  await assert.rejects(store.testDatabase.writeDocument('test-user', { id: 'race', text: 'New', chunks: [] }), /library limit/);
+});
+
+test('library byte quotas count UTF-8 text bytes consistently in SQLite', async () => {
+  const store = testStore();
+  // Existing source bytes leave two bytes free; a three-byte character must exceed the cap.
+  await store.testDatabase.run('INSERT INTO documents(owner_id,id,text,original_file,created_at) VALUES(?,?,?,?,?)', 'test-user', 'large', '€', Buffer.alloc(100 * 1024 * 1024 - 5), 0);
+  await assert.rejects(store.testDatabase.preflightDocument('test-user', 'new', '€'), /library limit/);
+});
+
 test('PDF and DOCX parsers extract text; invalid and oversized files fail clearly', async () => {
   for (const originalname of ['policy.pdf', 'policy.docx']) {
     const buffer = readFileSync(join('tests', 'fixtures', originalname));

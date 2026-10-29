@@ -68,6 +68,7 @@ export class VectorStoreService {
         return;
       }
 
+      await this.database.preflightDocument(owner, id, text, file);
       const pieces = chunkText(text, parseInt(process.env.CHUNK_SIZE || '800'), parseInt(process.env.CHUNK_OVERLAP || '120'));
       const chunks: Chunk[] = [];
       const embeddings = await this.getEmbeddings(pieces);

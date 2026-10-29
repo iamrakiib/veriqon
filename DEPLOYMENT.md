@@ -6,13 +6,13 @@
 | --- | --- |
 | Live application | **https://veriqon-two.vercel.app** |
 | API readiness | https://veriqon-api.onrender.com/rag/ready |
-| Private source repository | https://github.com/iamrakiib/veriqon |
+| Source repository | https://github.com/iamrakiib/veriqon |
 | Vercel project | https://vercel.com/boycool7823-4129/veriqon |
 | Render service | https://dashboard.render.com/web/srv-dbgo0ahsrm7s73ecc8eg |
 | PostgreSQL | Neon project `veriqon` (`little-queen-41211260`), PostgreSQL 17 + pgvector, Singapore, Free |
 | Redis | Upstash database `veriqon`, Singapore, Free, TLS enabled |
 
-Sign in with your existing Veriqon email and password. The owner already exists, so a setup code is unnecessary and public registration is disabled. The primary frontend origin above is allowed by the backend; use it for sign-in.
+Sign in with your existing Veriqon email and password, or choose **Create an account**. Public registration is enabled for the live release; each new account starts with an empty private library. The existing owner does not need a setup code. The primary frontend origin above is allowed by the backend; use it for sign-in. Email verification, MFA and self-service recovery are not yet available. Set `ALLOW_REGISTRATION=false` in the backend environment and redeploy to close registration again.
 
 The local PostgreSQL snapshot was restored into a separate Neon database and verified against the original records: one user, two documents, 158 chunks, one conversation, and one message. Existing sessions were excluded. The original local databases and Docker volume were preserved. These are separate copies: new cloud activity does not synchronize back to localhost. The two legacy documents contain extracted text and embeddings but had no original upload bytes in the source database; re-upload them if you need their original files available for download.
 
@@ -22,7 +22,7 @@ Render's free service sleeps when idle. The initial workspace connection allows 
 
 ### Release updates
 
-GitHub Actions validates pushes. Releases are currently **manual**: Render automatic deploys are off. The GitHub login connection in Vercel is established, but automatic frontend deployments still need the Vercel GitHub app to have access to this private repository. The authenticated CLI can deploy the frontend without that repository integration.
+GitHub Actions validates pushes. Releases are currently **manual**: Render automatic deploys are off, and the frontend can be published using its authenticated CLI. Making the repository public does not itself configure deployment triggers. Check each hosting dashboard before relying on automatic releases.
 
 From the repository root, after committing, pushing, and checking CI:
 
