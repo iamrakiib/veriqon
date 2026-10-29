@@ -14,6 +14,7 @@ import { VectorStoreService, joinPassages } from '../vector-store/vector-store.s
 import { DatabaseService, OriginalFile } from '../database/database.service';
 import { WorkLimiter } from '../common/work-limiter';
 import { chunkText } from '../common/utils';
+import { parseClaimVerification } from '../rag/verification';
 
 // Unit fixtures must never inherit a caller's deployed database or Redis connection.
 delete process.env.DATABASE_URL;
@@ -21,8 +22,9 @@ delete process.env.REDIS_URL;
 process.env.NODE_ENV = 'test';
 
 const passage = { id: 'policy', text: 'Remote work is permitted one day a week.', source: 'policy.md', score: 1, chunkIndex: 0 };
-const pass: Verification = { verdict: 'Supported', evidence: 'One day.', claims: [{ sentence: 'One day.', supported: true, evidenceIndexes: [1] }], passed: true };
-const fail: Verification = { verdict: 'Not supported', evidence: 'Missing evidence.', claims: [], passed: false };
+const assessment = (sentence: string, supported: boolean) => parseClaimVerification(JSON.stringify({ sentences: [{ id: 1, kind: 'FACTUAL', claims: [{ text: sentence, span: sentence, verdict: supported ? 'SUPPORTED' : 'CONTRADICTED', supporting: supported ? [{ index: 1, quote: passage.text }] : [], contradicting: supported ? [] : [{ index: 1, quote: passage.text }], missingInformation: [], temporalValidity: 'UNKNOWN', scope: { time: null, place: null } }] }] }), sentence, [passage]);
+const pass: Verification = assessment('One day.', true);
+const fail: Verification = assessment('Three days.', false);
 
 function pipeline(docs = [passage]) {
   const store = { search: async () => docs, revision: () => 0 } as unknown as VectorStoreService;
@@ -295,7 +297,7 @@ test('invalid inline references cannot pass even when the verifier approves the 
   rag.generateAnswer = async () => { count++; return 'One day. [99]'; };
   rag.factCheck = async () => pass;
   assert.equal((await rag.queryPipeline('How many days?')).status, 'abstained');
-  assert.equal(count, 2);
+  assert.equal(count, 1, 'Invalid citation assessments fail closed without an ungrounded rewrite');
   const assessment = parseVerification(JSON.stringify({ claims: [{ id: 1, supported: true, evidenceIndexes: [1] }] }), ['One day [2].'], 2);
   assert.equal(assessment.passed, false);
 });

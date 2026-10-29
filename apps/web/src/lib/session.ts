@@ -8,7 +8,7 @@ export async function sessionFetch(url: string, options: RequestInit = {}) {
   headers.set('X-Veriqon-Request', '1');
   const send = () => fetch(url, { ...options, headers, credentials: 'same-origin', cache: 'no-store' });
   const response = await send();
-  if (response.status !== 401 || ['/login', '/register', '/refresh', '/logout'].some(path => url.endsWith(path))) return response;
+  if (response.status !== 401 || ['/login', '/register', '/refresh', '/logout', '/recover'].some(path => url.endsWith(path))) return response;
   if (!refreshing) {
     const renew = async () => {
       const result = await fetch('/api/auth/refresh', { method: 'POST', headers: { 'X-Veriqon-Request': '1' }, credentials: 'same-origin', signal: AbortSignal.timeout(10000) });

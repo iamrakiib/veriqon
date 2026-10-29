@@ -9,7 +9,7 @@ async function importSqlite() {
   if (!sourcePath || !process.env.DATABASE_URL) throw new Error('Use --from=<sqlite-file> and set DATABASE_URL for an EMPTY PostgreSQL database.');
   const source = new DatabaseSync(resolve(sourcePath), { readOnly: true });
   const target = new DatabaseService();
-  const tables = ['users', 'documents', 'chunks', 'settings', 'conversations', 'messages'] as const;
+  const tables = ['users', 'documents', 'chunks', 'settings', 'conversations', 'messages', 'recovery_codes', 'security_events'] as const;
   try {
     await target.initialize(true);
     source.exec('BEGIN');
@@ -19,6 +19,10 @@ async function importSqlite() {
         if (await target.get(`SELECT 1 FROM ${table} LIMIT 1`)) throw new Error('Target is not empty. Import stopped without changing it.');
       }
       for (const table of tables) {
+        if (!source.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) {
+          if (table === 'recovery_codes' || table === 'security_events') continue;
+          throw new Error('Required source table is missing.');
+        }
         const rows = source.prepare(`SELECT * FROM ${table}`).all();
         for (const row of rows) {
           const columns = Object.keys(row);

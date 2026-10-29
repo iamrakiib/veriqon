@@ -48,21 +48,66 @@ export class AuthService {
     const salt = randomBytes(16).toString('hex');
     const passwordHash = `scrypt$${salt}$${(await derive(password, salt)).toString('hex')}`;
     const user: Account = { id: randomUUID(), email, name, role: needsSetup ? 'owner' : 'member' };
+    let recoveryCodes: string[] = [];
     await this.database.transaction(async () => {
       if (this.database.dialect === 'postgresql') await this.database.get('SELECT pg_advisory_xact_lock(742902)');
       if (needsSetup && await this.database.hasUsers()) throw new ConflictException('Setup is already complete. Sign in or create a regular account.');
       if (await this.database.get('SELECT id FROM users WHERE email=?', email)) throw new ConflictException('An account with this email already exists. Sign in instead.');
       await this.database.run('INSERT INTO users(id,email,name,password_hash,role,created_at) VALUES(?,?,?,?,?,?)', user.id, email, name, passwordHash, user.role, Date.now());
       if (needsSetup) await this.database.importLegacy(user.id);
+      recoveryCodes = await this.replaceRecoveryCodes(user.id);
     });
-    return this.createSession(user);
+    return { ...await this.createSession(user), recoveryCodes };
+  }
+  private async securityEvent(userId: string, event: string) {
+    await this.database.run('INSERT INTO security_events VALUES(?,?,?,?)', randomUUID(), userId, event, Date.now());
+  }
+  private async replaceRecoveryCodes(userId: string) {
+    const codes = Array.from({ length: 8 }, () => randomBytes(16).toString('hex').toUpperCase().match(/.{8}/g)!.join('-'));
+    await this.database.run('DELETE FROM recovery_codes WHERE user_id=?', userId);
+    for (const code of codes) await this.database.run('INSERT INTO recovery_codes VALUES(?,?,?)', userId, digest(code.replace(/-/g, '')), Date.now());
+    await this.securityEvent(userId, 'recovery_codes_generated');
+    return codes;
+  }
+  async recoveryStatus(userId: string) {
+    return { remaining: Number((await this.database.get('SELECT COUNT(*) AS count FROM recovery_codes WHERE user_id=?', userId))!.count) };
+  }
+  async generateRecoveryCodes(userId: string, password: string) {
+    const row = await this.database.get('SELECT password_hash FROM users WHERE id=?', userId);
+    const [, salt, hash] = String(row?.password_hash || this.dummy).split('$');
+    if (!timingSafeEqual(await derive(password, salt), Buffer.from(hash, 'hex')) || !row) throw new ForbiddenException('Password is incorrect.');
+    return this.database.transaction(async () => {
+      const current = await this.database.get(`SELECT password_hash FROM users WHERE id=?${this.database.dialect === 'postgresql' ? ' FOR UPDATE' : ''}`, userId);
+      if (current?.password_hash !== row.password_hash) throw new UnauthorizedException('Your password changed. Sign in again.');
+      return { codes: await this.replaceRecoveryCodes(userId) };
+    });
+  }
+  async recoverPassword(email: string, code: string, password: string) {
+    const salt = randomBytes(16).toString('hex');
+    // Equal password work for known/unknown accounts; no email-enumeration response.
+    const passwordHash = `scrypt$${salt}$${(await derive(password, salt)).toString('hex')}`;
+    const codeHash = digest(code.replace(/[\s-]/g, '').toUpperCase());
+    await this.database.transaction(async () => {
+      const user = await this.database.get(`SELECT id FROM users WHERE email=?${this.database.dialect === 'postgresql' ? ' FOR UPDATE' : ''}`, email.trim().toLowerCase());
+      if (!user) throw new UnauthorizedException('Email or recovery code is invalid, used, or replaced.');
+      const consumed = await this.database.run('DELETE FROM recovery_codes WHERE user_id=? AND code_hash=?', user.id, codeHash);
+      if (!consumed.changes) throw new UnauthorizedException('Email or recovery code is invalid, used, or replaced.');
+      await this.database.run('UPDATE users SET password_hash=? WHERE id=?', passwordHash, user.id);
+      await this.database.run('DELETE FROM sessions WHERE user_id=?', user.id);
+      await this.securityEvent(user.id, 'password_recovered_sessions_revoked');
+    });
+    return { success: true };
   }
   async login(email: string, password: string) {
     const user = await this.database.get('SELECT id,email,name,role,password_hash FROM users WHERE email=?', email.trim().toLowerCase()) as UserRow | undefined;
     const [, salt, hash] = (user?.password_hash || this.dummy).split('$');
     const actual = await derive(password, salt);
     if (!user || !timingSafeEqual(actual, Buffer.from(hash, 'hex'))) throw new UnauthorizedException('Email or password is incorrect.');
-    return this.createSession({ id: user.id, email: user.email, name: user.name, role: user.role });
+    return this.database.transaction(async () => {
+      const current = await this.database.get(`SELECT password_hash FROM users WHERE id=?${this.database.dialect === 'postgresql' ? ' FOR UPDATE' : ''}`, user.id);
+      if (current?.password_hash !== user.password_hash) throw new UnauthorizedException('Your password changed. Sign in again.');
+      return this.createSession({ id: user.id, email: user.email, name: user.name, role: user.role });
+    });
   }
   private async createSession(user: Account) {
     await this.database.run('DELETE FROM sessions WHERE expires_at<=?', Date.now());

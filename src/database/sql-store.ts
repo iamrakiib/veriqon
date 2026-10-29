@@ -42,21 +42,23 @@ export class SqlStore {
   async initialize(migrate = process.env.DB_MIGRATE_ON_START !== 'false') {
     if (!this.pool) return;
     if (migrate) {
-      const sql = readFileSync(join(process.cwd(), 'migrations', '001_postgresql.sql'), 'utf8').replace(/\r\n/g, '\n');
-      const checksum = createHash('sha256').update(sql).digest('hex');
       await this.transaction(async () => {
         await this.get('SELECT pg_advisory_xact_lock(742901)');
         await this.run('CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, checksum TEXT NOT NULL, applied_at BIGINT NOT NULL)');
-        const existing = await this.get('SELECT checksum FROM schema_migrations WHERE version=1');
-        if (existing && existing.checksum !== checksum) throw new Error('Migration checksum mismatch. Add a new migration instead of modifying an applied migration.');
-        if (!existing) {
-          await (this.context.getStore() as PoolClient).query(sql);
-          await this.run('INSERT INTO schema_migrations VALUES(1,?,?)', checksum, Date.now());
+        for (const [index, file] of ['001_postgresql.sql', '002_recovery_codes.sql'].entries()) {
+          const sql = readFileSync(join(process.cwd(), 'migrations', file), 'utf8').replace(/\r\n/g, '\n');
+          const checksum = createHash('sha256').update(sql).digest('hex');
+          const existing = await this.get('SELECT checksum FROM schema_migrations WHERE version=?', index + 1);
+          if (existing && existing.checksum !== checksum) throw new Error('Migration checksum mismatch. Add a new migration instead of modifying an applied migration.');
+          if (!existing) {
+            await (this.context.getStore() as PoolClient).query(sql);
+            await this.run('INSERT INTO schema_migrations VALUES(?,?,?)', index + 1, checksum, Date.now());
+          }
         }
       });
     }
     const version = await this.get('SELECT MAX(version) AS version FROM schema_migrations');
-    if (Number(version?.version) !== 1) throw new Error('Database migrations are not current. Run npm run db:migrate.');
+    if (Number(version?.version) !== 2) throw new Error('Database migrations are not current. Run npm run db:migrate.');
   }
 
   private serialized<T>(task: () => Promise<T>): Promise<T> {

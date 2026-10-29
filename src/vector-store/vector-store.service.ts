@@ -128,7 +128,7 @@ export class VectorStoreService {
       const qVec = cached && cached.expires > Date.now() ? cached.vector : await this.getEmbedding(query, signal);
       if (this.queryVectors.size >= 128) this.queryVectors.delete(this.queryVectors.keys().next().value!);
       this.queryVectors.set(key, { vector: qVec, expires: Date.now() + 10 * 60000 });
-      const records = await this.database.candidateDocuments(owner, qVec, this.embeddingModel, topK);
+      const records = await this.database.candidateDocuments(owner, qVec, this.embeddingModel, topK, query);
       if (records.some(d => (d.embeddingModel && d.embeddingModel !== this.embeddingModel) || d.chunks.some(c => c.embedding.length !== qVec.length))) {
         throw new BadRequestException('The embedding model changed. Re-upload the documents with the current EMBEDDING_MODEL before querying them.');
       }
@@ -140,6 +140,12 @@ export class VectorStoreService {
         }
       }
       scoredChunks.sort((a, b) => b.score - a.score);
+      // Reciprocal-rank fusion keeps retrieval scores separate from factual support.
+      const terms = [...new Set(query.toLowerCase().match(/[a-z0-9]{3,}/g) || [])].filter(t => !['the','and','was','were','what','how','does','this','that','with','from','for','are','can','has','have','which'].includes(t));
+      const lexical = scoredChunks.map(chunk => ({ chunk, hits: terms.filter(term => chunk.text.toLowerCase().includes(term)).length })).filter(c => c.hits > 0).sort((a, b) => b.hits - a.hits);
+      const fusion = new Map(scoredChunks.map((chunk, rank) => [chunk, 1 / (60 + rank + 1)]));
+      lexical.forEach(({ chunk }, rank) => fusion.set(chunk, fusion.get(chunk)! + 1 / (60 + rank + 1)));
+      scoredChunks.sort((a, b) => fusion.get(b)! - fusion.get(a)!);
       const passages: (typeof scoredChunks[number] & { chunkEndIndex: number })[] = [];
       const covered = new Set<string>();
       let characters = 0;

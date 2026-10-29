@@ -7,6 +7,17 @@ export const MAX_TEXT_LENGTH = 100000;
 export type UploadedDocument = { originalname: string; buffer: Buffer; size: number };
 
 let parsing = false;
+/** Mammoth emits escaped HTML; convert it to plain text while preserving table rows/cells. */
+export function docxText(html: string) {
+  const plain = (value: string) => value.replace(/<[^>]*>/g, ' ').replace(/&(amp|lt|gt|quot|apos|#\d+|#x[\da-f]+);/gi, (_, entity: string) => {
+    const named: Record<string, string> = { amp:'&',lt:'<',gt:'>',quot:'"',apos:"'" };
+    if (named[entity]) return named[entity];
+    const code = entity[1]?.toLowerCase() === 'x' ? parseInt(entity.slice(2), 16) : Number(entity.slice(1));
+    return Number.isInteger(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : '';
+  }).replace(/[ \t]+/g, ' ').trim();
+  return html.replace(/<table\b[^>]*>[\s\S]*?<\/table>/gi, table => '\n' + [...table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map(row => [...row[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(cell => cell[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()).join(' | ')).join('\n') + '\n')
+    .replace(/<\/(?:p|h[1-6]|li)>/gi, '\n').split('\n').map(plain).filter(Boolean).join('\n');
+}
 export async function extractDocument(file?: UploadedDocument): Promise<string> {
   if (process.env.NODE_ENV !== 'production' && process.env.PARSER_ISOLATION !== 'process') return extractDocumentInProcess(file);
   if (!file?.buffer?.length) throw new BadRequestException('Choose a non-empty PDF, DOCX, TXT or Markdown file.');
@@ -46,8 +57,8 @@ export async function extractDocumentInProcess(file?: UploadedDocument): Promise
       const parser = new PDFParse({ data: file.buffer });
       try { text = (await parser.getText()).pages.map(page => page.text).join('\n\n'); } finally { await parser.destroy(); }
     } else if (extension === '.docx') {
-      const { extractRawText } = await import('mammoth');
-      text = (await extractRawText({ buffer: file.buffer })).value;
+      const { convertToHtml } = await import('mammoth');
+      text = docxText((await convertToHtml({ buffer: file.buffer })).value);
     } else if (extension === '.txt' || extension === '.md') {
       text = new TextDecoder('utf-8', { fatal: true }).decode(file.buffer);
     } else {

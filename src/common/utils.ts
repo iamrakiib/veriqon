@@ -23,7 +23,12 @@ export function chunkText(text: string, chunkSize = 800, overlap = 120) {
   if (!text || text.length === 0) return chunks;
   let start = 0;
   while (start < text.length) {
-    const end = Math.min(start + chunkSize, text.length);
+    let end = Math.min(start + chunkSize, text.length);
+    // Prefer a paragraph/table-row boundary, without creating zero-progress windows.
+    if (end < text.length) {
+      const boundary = text.lastIndexOf('\n', end);
+      if (boundary > start + Math.max(overlap, Math.floor(chunkSize * 0.6))) end = boundary;
+    }
     const chunk = text.slice(start, end).trim();
     if (chunk.length > 0) chunks.push(chunk);
     if (end >= text.length) break;

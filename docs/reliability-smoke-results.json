@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-29",
+  "kind": "synthetic live-provider smoke checks; not an independently annotated benchmark",
+  "cases": [
+    {
+      "case": "supported counts and missing results",
+      "status": "VERIFIED_UNCHANGED",
+      "answer": "The research adapter was evaluated on two benchmark datasets. [1] Four forecasting architectures were used in the evaluation. [1] The draft does not report numerical accuracy results. [1]",
+      "durationMs": 12540,
+      "claimsChecked": 3,
+      "claimsSupported": 3,
+      "promptTokens": 790,
+      "completionTokens": 339,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1442,
+          "success": true,
+          "promptTokens": 218,
+          "completionTokens": 38
+        },
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 11087,
+          "success": true,
+          "promptTokens": 572,
+          "completionTokens": 301
+        }
+      ]
+    },
+    {
+      "case": "deliberately incorrect count; injected draft",
+      "status": "REPAIRED_VERIFIED",
+      "answer": "The research adapter was evaluated on two benchmark datasets. [1]",
+      "original": "The research adapter was evaluated on five benchmark datasets.",
+      "durationMs": 22351,
+      "claimsChecked": 1,
+      "claimsSupported": 1,
+      "promptTokens": 1412,
+      "completionTokens": 242,
+      "modelUsage": [
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 2801,
+          "success": true,
+          "promptTokens": 529,
+          "completionTokens": 108
+        },
+        {
+          "stage": "Claim repair",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 15428,
+          "success": true,
+          "promptTokens": 351,
+          "completionTokens": 29
+        },
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 4115,
+          "success": true,
+          "promptTokens": 532,
+          "completionTokens": 105
+        }
+      ]
+    }
+  ],
+  "notMeasured": [
+    "real-world verification precision/recall",
+    "retrieval recall",
+    "repair generalization",
+    "API cost",
+    "p95 latency",
+    "temporal accuracy"
+  ]
+}

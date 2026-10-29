@@ -204,3 +204,12 @@ h1 { font-family:var(--font-sans); font-weight:400; font-size:32px; letter-spaci
 @media(max-width:850px) { .sidebar { visibility:hidden; }.sidebar.is-open { visibility:visible; } }
 @media(max-width:640px) { .composer textarea { font-size:16px; }.topbar-actions { gap:3px; }.topbar-actions .connection-badge { font-size:9px; }.section-heading { flex-wrap:wrap; }.section-heading .button { font-size:11px; }.nav-item { min-height:44px; }.icon-button { min-width:36px; min-height:36px; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+.recovery-section { margin:22px 0; padding-top:18px; border-top:1px solid var(--line); }
+.recovery-section p { font-size:12px; line-height:1.7; margin:12px 0; }
+.recovery-codes { padding:12px; margin:14px 0; list-style:none; border:1px solid var(--line); border-radius:10px; }
+.recovery-codes li { padding:5px 0; overflow-wrap:anywhere; font-size:12px; }
+.recovery-confirm { display:flex; gap:10px; align-items:flex-start; font-size:12px; line-height:1.6; margin:18px 0; }
+.recovery-confirm input { margin-top:4px; }
+.inline-citation { display:inline; color:var(--accent); background:none; padding:0 2px; border:0; text-decoration:underline; font:inherit; cursor:pointer; }
+.citation-explanation { margin:12px 0 6px; font-size:11px; line-height:1.6; color:var(--muted); }
+.citation-list small { display:block; font-size:10px; margin-top:4px; color:var(--muted); }

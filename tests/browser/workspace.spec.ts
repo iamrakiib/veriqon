@@ -5,7 +5,7 @@ async function showAssistant(page: Page) {
 }
 
 const source = { id: 'policy', text: 'Employees may work remotely one day per week.', source: 'policy.md', chunkCount: 1, version: '1', hasOriginal: true };
-const result = { draft: 'One day per week. [1]', status: 'repaired', factCheck: { verdict: 'All claims supported by model assessment', evidence: 'Supported: One day per week.', passed: true, claims: [] }, citations: [{ index: 1, documentId: 'policy', source: 'policy.md', chunkIndex: 0, excerpt: source.text }], attempts: 2, durationMs: 1200, correction: { original: 'Three days per week.', revised: 'One day per week. [1]', reason: 'Repaired using the retrieved policy.' } };
+const result = { draft: 'One day per week. [1]', status: 'repaired', verificationStatus: 'REPAIRED_VERIFIED', factCheck: { verdict: 'All claims supported by model assessment', evidence: 'Supported: One day per week.', passed: true, claims: [] }, citations: [{ index: 1, documentId: 'policy', source: 'policy.md', chunkIndex: 0, excerpt: source.text }], attempts: 2, durationMs: 1200, correction: { original: 'Three days per week.', revised: 'One day per week. [1]', reason: 'Repaired using the retrieved policy.' } };
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rag/conversations', route => route.fulfill({ json: [] }));
@@ -37,7 +37,8 @@ test('upload, search, preview, chat, citations and repair history', async ({ pag
   await page.getByLabel('Ask your knowledge base').fill('How many days?');
   await page.getByRole('button', { name: 'Send question' }).click();
   await expect(page.getByText('Repaired & model checked')).toBeVisible();
-  await page.getByRole('button', { name: '[1] policy.md' }).click();
+  await expect(page.getByText('1 passage from 1 document. Numbers identify passages.')).toBeVisible();
+  await page.getByRole('button', { name: 'Open passage 1 from policy.md' }).click();
   await expect(page.getByRole('dialog')).toContainText(source.text);
   await page.getByRole('button', { name: 'Close dialog' }).click();
   if (testInfo.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();

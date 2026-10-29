@@ -7,6 +7,13 @@ export const citationChunkLabel = (citation: Citation) => citation.chunkEndIndex
 export type QueryResult = {
   draft: string;
   status: 'supported' | 'repaired' | 'abstained';
+  verificationStatus?: 'VERIFIED_UNCHANGED' | 'REPAIRED_VERIFIED' | 'PARTIALLY_VERIFIED' | 'INSUFFICIENT_EVIDENCE' | 'UNRESOLVED_CONFLICT' | 'VERIFICATION_FAILED';
+  retrievalRounds?: number;
+  claimsChecked?: number;
+  claimsSupported?: number;
+  claimsUnresolved?: number;
+  promptVersion?: string;
+  repairHistory?: { original: string; revised?: string; accepted: boolean; reason: string }[];
   factCheck: { verdict: string; evidence: string; passed: boolean; claims: { sentence: string; supported: boolean; evidenceIndexes: number[] }[] };
   citations: Citation[];
   attempts: number;

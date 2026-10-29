@@ -22,6 +22,13 @@ export class DatabaseService extends SqlStore implements OnModuleInit {
         id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         refresh_hash TEXT NOT NULL UNIQUE, expires_at INTEGER NOT NULL);
       CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
+      CREATE TABLE IF NOT EXISTS recovery_codes (
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code_hash TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY(user_id,code_hash));
+      CREATE TABLE IF NOT EXISTS security_events (
+        id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        event TEXT NOT NULL, created_at INTEGER NOT NULL);
+      CREATE INDEX IF NOT EXISTS security_events_user ON security_events(user_id,created_at);
       CREATE TABLE IF NOT EXISTS documents (
         owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, id TEXT NOT NULL,
         text TEXT NOT NULL, source TEXT, version TEXT, page INTEGER, embedding_model TEXT,
@@ -85,17 +92,24 @@ export class DatabaseService extends SqlStore implements OnModuleInit {
     });
   }
   /** PostgreSQL ranks vectors on the database; only candidate windows cross the network. */
-  async candidateDocuments(ownerId: string, vector: number[], model: string, topK: number): Promise<StoredDocument[]> {
+  async candidateDocuments(ownerId: string, vector: number[], model: string, topK: number, query = ''): Promise<StoredDocument[]> {
     if (this.dialect !== 'postgresql') return this.readDocuments(ownerId);
     const incompatible = await this.get(`SELECT 1 FROM chunks c JOIN documents d ON d.owner_id=c.owner_id AND d.id=c.document_id
       WHERE c.owner_id=? AND (vector_dims(c.embedding)<>? OR (d.embedding_model IS NOT NULL AND d.embedding_model<>?)) LIMIT 1`, ownerId, vector.length, model);
     if (incompatible) throw new BadRequestException('The embedding model changed. Re-upload the documents with the current EMBEDDING_MODEL before querying them.');
-    const rows = await this.all(`WITH seeds AS MATERIALIZED (
+    const lexical = [...new Set(query.toLowerCase().match(/[a-z0-9]{3,}/g) || [])].slice(0, 24).join(' | ');
+    const depth = Math.max(12, Math.min(80, Number(process.env.RETRIEVAL_CANDIDATES || topK * 10)));
+    const rows = await this.all(`WITH dense AS MATERIALIZED (
       SELECT document_id,chunk_index FROM chunks WHERE owner_id=? ORDER BY embedding <=> ?::vector LIMIT ?
+    ), lexical AS MATERIALIZED (
+      SELECT document_id,chunk_index FROM chunks WHERE owner_id=? AND to_tsvector('simple',content) @@ to_tsquery('simple',?)
+      ORDER BY ts_rank_cd(to_tsvector('simple',content),to_tsquery('simple',?)) DESC LIMIT ?
+    ), seeds AS MATERIALIZED (
+      SELECT * FROM dense UNION SELECT * FROM lexical
     ) SELECT DISTINCT c.*,d.embedding_model FROM seeds s JOIN chunks c
       ON c.document_id=s.document_id AND c.chunk_index BETWEEN s.chunk_index-2 AND s.chunk_index+2
       JOIN documents d ON d.owner_id=c.owner_id AND d.id=c.document_id
-      WHERE c.owner_id=? ORDER BY c.document_id,c.chunk_index`, ownerId, JSON.stringify(vector), topK * 10, ownerId);
+      WHERE c.owner_id=? ORDER BY c.document_id,c.chunk_index`, ownerId, JSON.stringify(vector), depth, ownerId, lexical, lexical, depth, ownerId);
     const records = new Map<string, StoredDocument>();
     for (const row of rows) {
       if (!records.has(row.document_id)) records.set(row.document_id, { id: row.document_id, text: '', embeddingModel: row.embedding_model || undefined, chunks: [] });

@@ -10,7 +10,7 @@ Include the affected revision, reproduction with synthetic data, expected/actual
 
 ## Current boundaries
 
-- Email addresses are login identifiers, not verified identities. There is no MFA, self-service recovery, session-management screen or invitation system.
+- Email addresses are login identifiers, not verified identities. Recovery uses eight 128-bit random one-time codes stored as SHA-256 hashes. Generating replacements requires the current password. Recovery consumes a code atomically, revokes every session and records a security event; unknown accounts and invalid codes receive the same response. There is no email reset, MFA, session-management screen or invitation system.
 - Public registration consumes shared quotas. Per-account limits do not prevent a determined attacker from creating many accounts. Edge abuse protection and monitoring remain operational work.
 - Rotation rejects old refresh-token replay but does not implement token-family compromise detection or revoke every session on replay.
 - Retrieved text is untrusted. Model verification does not eliminate prompt injection or establish factual correctness.

@@ -26,7 +26,7 @@ A document research workspace that retrieves evidence, checks each claim, and re
 Upload a paper, ask how it works, and inspect the passages behind the answer. Veriqon keeps documents, citations, chat history and answer repairs together in a responsive monochrome interface with dark, light and system themes.
 
 - **A private library for every account:** PDF, DOCX, TXT and Markdown ingestion, search, source previews, original-file downloads and persistent conversations.
-- **An inspection trail:** semantic retrieval expands neighboring passages; structured assessment checks each sentence against cited evidence. One repair is allowed before abstention.
+- **An inspection trail:** hybrid retrieval expands neighboring passages; structured claim assessments include exact quotes. Missing evidence triggers targeted retrieval. Minimal factual edits require final verification and a substantive-change check.
 - **Honest failure states:** missing evidence, provider quotas, interrupted answers, upload errors and stale historical sources are surfaced explicitly.
 - **A deployable stack:** Next.js, NestJS, PostgreSQL/pgvector, Redis limits and work leases, Docker, migrations and automated checks.
 - **Desktop and mobile:** independently scrolling panels, a visible composer, keyboard-accessible dialogs and mobile navigation.
@@ -43,9 +43,12 @@ flowchart LR
     B --> C[Draft with citations]
     C --> D{Assess evidence}
     D -->|Pass| E[Supported answer]
-    D -->|Fail| F[One repair]
+    D -->|Missing evidence| J[Targeted retrieval]
+    J --> D
+    D -->|Contradicting evidence| F[Minimal factual edit]
+    D -->|Unresolved| I[Withhold unsupported claims]
     F --> G{Reassess}
-    G -->|Pass| H[Repaired answer]
+    G -->|Supported substantive correction| H[Repaired answer]
     G -->|Fail| I[Abstain]
 ```
 
@@ -146,14 +149,16 @@ Passwords use salted scrypt. Access JWTs expire after 15 minutes; hashed rotatin
 
 Uploads allow 10 MB and 100,000 extracted characters per file, ten files per browser batch, and 100 documents / 100 MB of source files plus text per account. Scanned PDFs need OCR. Parsing has a process boundary, memory limit and deadline. AI work is rate-limited and bounded in concurrency.
 
-Email addresses are **not verified**. MFA, self-service recovery, invitations, account deletion/export and security event monitoring are not implemented. AI providers receive document text or retrieved passages. Review provider handling before uploading confidential data. See [SECURITY.md](SECURITY.md).
+Email addresses are **not verified**. Recovery codes are available: sign in, open Settings, confirm your password and save eight one-time codes. Use **Forgot password?** with your email and one saved code to reset your password and revoke existing sessions. New accounts receive codes at registration. Replacing codes invalidates the old set; there is no email reset delivery. MFA, invitations, account deletion/export and security event monitoring are not implemented. AI providers receive document text or retrieved passages. Review provider handling before uploading confidential data. See [SECURITY.md](SECURITY.md).
 
 ## Research roadmap
 
-This is a foundation for the TemporalGuard research direction. **Not implemented:** immutable document versions, effective-date retrieval, authority-based conflict resolution, continuous answer revalidation, durable ingestion workers, hybrid search/reranking and independent retrieval/faithfulness benchmarks. The conflict center labels its unavailable backend explicitly.
+This is a foundation for the TemporalGuard research direction. **Not implemented:** immutable document versions, effective-date retrieval, authority-based conflict resolution, continuous answer revalidation, durable ingestion workers, learned reranking and independent retrieval/faithfulness benchmarks. The conflict center labels its unavailable backend explicitly.
 
 Reliability views show observed outcomes, not factual accuracy or an SLA. Historical audits in `docs/` describe earlier stages; the current review and deployment guide take precedence.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible bug reports and focused changes are welcome. Keep documents, database exports, credentials and account details out of public issues and commits.
+
+See the [reliability audit](docs/reliability-audit.md) for actual failure causes, verification boundaries and test results. Citation numbers such as `[1]`, `[2]` and `[3]` identify retrieved passages, which can all belong to the same document.

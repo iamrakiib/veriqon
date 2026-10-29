@@ -15,6 +15,11 @@ export class RegisterDto extends LoginDto {
   @IsString() @Length(1, 80) @Matches(/\S/) name!: string;
   @IsOptional() @IsString() @MaxLength(128) setupCode?: string;
 }
+export class RecoveryCodesDto { @IsString() @Length(1, 128) password!: string; }
+export class RecoverPasswordDto extends LoginDto {
+  @IsString() @Length(12, 128) declare password: string;
+  @IsString() @Length(32, 80) @Matches(/^[A-Fa-f0-9\s-]+$/) code!: string;
+}
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
@@ -22,7 +27,7 @@ export class AuthController {
   @Public() @Post('register') async register(@Body() dto: RegisterDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
     await this.auth.limit(request.ip || 'unknown', dto.email);
     const session = await this.auth.register(dto.email, dto.name, dto.password, dto.setupCode);
-    this.setCookies(response, session); return { user: session.user };
+    this.setCookies(response, session); return { user: session.user, recoveryCodes: session.recoveryCodes };
   }
   @Public() @Post('login') @HttpCode(200) async login(@Body() dto: LoginDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
     await this.auth.limit(request.ip || 'unknown', dto.email);
@@ -30,6 +35,19 @@ export class AuthController {
     this.setCookies(response, session); return { user: session.user };
   }
   @Get('me') me(@CurrentUser() user: Account) { return { user }; }
+  @Get('recovery-codes') recoveryStatus(@CurrentUser() user: Account, @Res({ passthrough: true }) response: Response) {
+    response.setHeader('Cache-Control', 'no-store'); return this.auth.recoveryStatus(user.id);
+  }
+  @Post('recovery-codes') @HttpCode(200) async recoveryCodes(@CurrentUser() user: Account, @Body() dto: RecoveryCodesDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    response.setHeader('Cache-Control', 'no-store'); await this.auth.limit(request.ip || 'unknown', user.email);
+    return this.auth.generateRecoveryCodes(user.id, dto.password);
+  }
+  @Public() @Post('recover') @HttpCode(200) async recover(@Body() dto: RecoverPasswordDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    response.setHeader('Cache-Control', 'no-store'); await this.auth.limit(request.ip || 'unknown', dto.email);
+    const result = await this.auth.recoverPassword(dto.email, dto.code, dto.password);
+    for (const name of ['vq_access', 'vq_refresh']) response.clearCookie(name, this.options());
+    return result;
+  }
   @Public() @Post('refresh') @HttpCode(200) async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
     const session = await this.auth.refresh(cookie(request, 'vq_refresh')); this.setCookies(response, session); return { user: session.user };
   }

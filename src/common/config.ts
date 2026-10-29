@@ -15,6 +15,11 @@ export function validateEnvironment(env: NodeJS.ProcessEnv = process.env) {
   if (!local && env.AUTH_COOKIE_SECURE === 'false') throw new Error('Production cookies must be Secure.');
   if (!['postgres:', 'postgresql:'].includes(new URL(env.DATABASE_URL!).protocol)) throw new Error('DATABASE_URL must be a PostgreSQL URL.');
   if (!['redis:', 'rediss:'].includes(new URL(env.REDIS_URL!).protocol)) throw new Error('REDIS_URL must be a Redis URL.');
-  const timeout = Number(env.RAG_TIMEOUT_MS || 90000);
+  const timeout = Number(env.RAG_TIMEOUT_MS || 110000);
   if (!Number.isInteger(timeout) || timeout < 1000 || timeout > 150000) throw new Error('RAG_TIMEOUT_MS must be between 1000 and 150000.');
+  if (env.RAG_REASONING && !['off', 'low'].includes(env.RAG_REASONING)) throw new Error('RAG_REASONING must be off or low.');
+  for (const [key, fallback, min, max] of [['PROVIDER_TIMEOUT_MS', 45000, 5000, 90000], ['MAX_REPAIR_ATTEMPTS', 1, 0, 2], ['RETRIEVAL_CANDIDATES', 30, 12, 80]] as const) {
+    const value = Number(env[key] ?? fallback);
+    if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${key} must be between ${min} and ${max}.`);
+  }
 }
