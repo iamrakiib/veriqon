@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-16",
+  "boundary": "Synthetic HTTP browser fixtures, Chromium/Edge, Next development server, one browser worker; no live model or capacity claim",
+  "history": {
+    "before": {
+      "fixture": "120 synthetic assessments",
+      "legacyArrayBytes": 195153,
+      "pageBytes": [
+        32609,
+        32550,
+        32549,
+        32549,
+        32550,
+        32520
+      ],
+      "retainedRecords": 120
+    },
+    "after": {
+      "fixture": "120 synthetic assessments",
+      "legacyArrayBytes": 195153,
+      "pageBytes": [
+        32609,
+        32550,
+        32549,
+        32549,
+        32550,
+        32520
+      ],
+      "retainedRecords": 100
+    },
+    "firstPageReductionPercent": 83.29,
+    "allPagesBytes": 195327
+  },
+  "navigation": {
+    "before": {
+      "fixture": "16 navigation cycles, 20 synthetic answer versions opened each cycle; Chromium dev server, forced GC",
+      "samples": [
+        {
+          "cycle": 4,
+          "heapBytes": 10105168,
+          "nodes": 1109
+        },
+        {
+          "cycle": 8,
+          "heapBytes": 10275744,
+          "nodes": 1109
+        },
+        {
+          "cycle": 12,
+          "heapBytes": 10342308,
+          "nodes": 1109
+        },
+        {
+          "cycle": 16,
+          "heapBytes": 10440388,
+          "nodes": 1109
+        }
+      ]
+    },
+    "after": {
+      "fixture": "16 navigation cycles, 20 synthetic answer versions opened each cycle; Chromium dev server, forced GC",
+      "samples": [
+        {
+          "cycle": 4,
+          "heapBytes": 10152564,
+          "nodes": 1109
+        },
+        {
+          "cycle": 8,
+          "heapBytes": 10313256,
+          "nodes": 1109
+        },
+        {
+          "cycle": 12,
+          "heapBytes": 10405612,
+          "nodes": 1109
+        },
+        {
+          "cycle": 16,
+          "heapBytes": 10471776,
+          "nodes": 1109
+        }
+      ]
+    }
+  },
+  "limits": {
+    "lifecycleRecordsPerPanel": 100,
+    "conversations": 40,
+    "messagesPerConversation": 60
+  },
+  "interpretation": "Paging reduces initial transfer; fetching every page does not reduce total transfer. Forced-GC navigation samples include browser/development-runtime overhead and do not prove leak freedom. Model calls/tokens/cost and SQL plans were not measured in this UI probe."
+}

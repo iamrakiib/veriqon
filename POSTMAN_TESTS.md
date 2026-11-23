@@ -45,7 +45,9 @@ If no owner exists, create it through the UI with the local setup code, or POST 
 
 Expected: 201 with `{ "success": true, "id": "manual-test-policy" }` after embeddings and database commit succeed. A provider error is not a successful upload. Retrying identical content and metadata reuses existing embeddings.
 
-For an actual file, use `POST /rag/upload`, Body -> form-data, with one **File** field named `file`. Do not manually set multipart Content-Type: the client must supply its boundary. Supported: PDF, DOCX, TXT and Markdown; 10 MB and 100,000 extracted characters maximum. Scanned PDFs need OCR. This route returns a content-derived document ID and retains the original file.
+For an actual file, use `POST /rag/uploads`, Body -> form-data, with one **File** field named `file`. Do not manually set multipart Content-Type: the client must supply its boundary. Supported: PDF, DOCX, TXT and Markdown; 10 MB, 500,000 extracted characters and 1,000 passages maximum. Scanned PDFs need OCR. HTTP **202** means accepted, not indexed. Poll `GET /rag/uploads` for the authenticated account's saved progress; the source appears in `GET /rag/docs` only when its status is `completed`. `POST /rag/uploads/:id/retry` resumes a failed job, subject to its retry budget. `DELETE /rag/uploads/:id` discards a pending job or dismisses a completed receipt; it does not delete an indexed document. Cross-account job operations return 404. No job list response contains document text, file bytes or embedding vectors.
+
+The compatibility route `POST /rag/upload` still performs synchronous indexing and returns HTTP 201 with a content-derived document ID only after success. It retains the 100,000-character limit and a bounded request deadline. Use the background route for larger files or unreliable providers.
 
 ## 3. Inspect the library: GET /rag/docs
 
@@ -63,17 +65,23 @@ Returns only the signed-in account's documents. Records include `id`, `text`, `s
 }
 ```
 
-These UUIDs are synthetic examples. Use a new `messageId` for a new question, and retain `conversationId` to group questions in the same saved conversation. Both fields are optional. Earlier turns are not automatically included in model context.
+These UUIDs are synthetic examples. Use a new `messageId` for a new question, and retain `conversationId` to group questions in the same saved conversation. Both fields are optional. For a recognized follow-up, up to three prior supported turns from this account and conversation can resolve references. Prior answers are untrusted context, never evidence; claims still need current retrieved passages. `contextUsed` indicates when that context was supplied.
 
 A successful HTTP response has `draft`, `status`, `factCheck`, `citations`, `attempts`, `durationMs`, `correction`, `conversationId`, `messageId`, `sourceRevision` and `sourcesChanged`. A cached result may have `cached: true`.
 
-`status` can be `supported`, `repaired` or `abstained`. Abstention is an expected outcome, with `reason` equal to `no_documents`, `insufficient_context` or `verification_failed`. A model check is not a factual accuracy guarantee. Exact answer wording is not deterministic and should not be asserted in live tests.
+`status` can be `supported`, `repaired` or `abstained`. Abstention is an expected outcome, with `reason` equal to `no_documents`, `insufficient_context`, `verification_failed` or `generation_failed`. A model check is not a factual accuracy guarantee. Exact answer wording is not deterministic and should not be asserted in live tests.
+
+When generation fails after passages have been retrieved, HTTP 200 returns a structured fallback: `reason: "generation_failed"`, `status: "abstained"`, `verificationStatus: "VERIFICATION_FAILED"`, `factCheck.passed: false`, zero checked claims and the authorized citation excerpts/versions. The UI labels it **Source passages only**. This is saved in history but excluded from the answer cache. A retry uses a new message ID and makes a fresh attempt. Transport success does not mean generation or verification succeeded. Failures before usable retrieval can still return HTTP errors.
 
 Replay the exact same body after completion: it should return the stored result without adding another message or making another model call. Reusing the message ID with a changed question returns 409. A pending or previously failed message also returns 409; an intentional retry after failure needs a new message ID.
 
 ## 5. Check saved history: GET /rag/conversations
 
-The latest 100 conversations include saved questions, answers, citations and failures. Reload the UI or sign out and back in to confirm they remain. The `sourcesChanged` warning becomes true when the library revision differs from the answer's recorded revision; it does not mean the answer was automatically revalidated.
+Each page returns up to 20 conversations with ten recent messages each, including saved answers, citations and failures. If `hasMoreConversations` is true, pass the last item's `cursor` as `GET /rag/conversations?before={cursor}`. A conversation with `olderMessagesCursor` has older messages: request `GET /rag/conversations/{id}/messages?before={olderMessagesCursor}` for up to 30 more. That response has `messages` and another `olderMessagesCursor` (null at the end). Cursors are opaque; malformed inputs return 400 and another account's conversation returns 404. These endpoints preserve old records.
+
+Reload the UI or sign out and back in to confirm persistence. The `sourcesChanged` warning becomes true when the library revision differs from the answer's recorded revision; it does not mean the answer was automatically revalidated. Browser requests include `X-Veriqon-Account` with the displayed account ID. A mismatch with the authenticated session returns 409 / `ACCOUNT_CHANGED`, preventing an old tab from silently using a different account's session. API clients can include this optional consistency header; it never grants access.
+
+`GET /rag/messages/{messageId}` retrieves one owned saved answer with its conversation title and ID, even when it is outside the loaded history page. It returns `{ conversationId, title, message }` with `Cache-Control: private, no-store`. Another account's ID or a missing ID returns 404; no session returns 401. Conflict Center uses this endpoint to open older affected answers without loading the whole history.
 
 ## 6. Delete only the synthetic document: DELETE /rag/docs/manual-test-policy
 
@@ -102,13 +110,21 @@ RAG responses also include `verificationStatus`, `repairHistory`, `modelUsage`, 
 | Read documents/history without authentication | 401 |
 | POST/DELETE without `X-Veriqon-Request: 1`, or with a disallowed Origin | 403 |
 | Query body with another user's `ownerId` | 400, unknown field rejected |
+| Private request with `X-Veriqon-Account` different from the authenticated user | 409 / ACCOUNT_CHANGED, no mutation |
+| Malformed history cursor or unsupported history query parameters | 400 |
 | Query with an invalid UUID or more than 4,000 characters | 400 |
 | Download/delete another account's document ID | 404 |
 | Invalid or oversized upload | 400 or 413, depending on validation stage |
 | More than one active ingestion/query in the same account | 429 |
 | Four other accounts already running expensive work | 429 |
 | More than 20 expensive operations/account/minute | 429 |
-| Unavailable, denied, truncated or empty provider response | Explicit error, never a fake supported answer |
+| Unavailable, denied, truncated or empty generation response after retrieval | HTTP 200 with `generation_failed`, unverified source excerpts and no successful correction |
+| Invalid verification output after its bounded contract retry | `VERIFICATION_FAILED`, never a fake supported answer |
 | POST /rag/save or /rag/load | 404; SQLite now persists writes automatically |
 
 Do not run overload or quota tests against a live paid provider. Deterministic isolation, idempotency, admission-control and failure tests are already included in `npm test`.
+
+
+## Lifecycle metadata, review and version history
+
+See [Lifecycle workflows](docs/LIFECYCLE_WORKFLOWS.md) for bounded history routes, revision-checked writes, shared admission limits and the combined browser/API acceptance command. Legacy version-array routes remain compatible; use `GET /rag/messages/:id/version-history?limit=20` for newest-first paginated answer versions.

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "provenance": "Authored synthetic documents and annotations, fixed before model execution. Not independently human-reviewed and not sampled from real research papers.",
+  "documents": [
+    { "id": "intro", "source": "manuscript.txt", "text": "The manuscript describes a forecasting adapter. Experimental details appear in the results section." },
+    { "id": "results", "source": "manuscript-results.txt", "text": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported." },
+    { "id": "historical", "source": "policy-2024.txt", "text": "In 2024, remote work was permitted three days per week. Manager approval was required." },
+    { "id": "current", "source": "policy-2025.txt", "text": "In 2025, remote work is permitted one day per week. This policy does not apply to 2024." }
+  ],
+  "annotations": [
+    { "claim": "The adapter used two datasets.", "document": "results", "quote": "The adapter used two datasets." },
+    { "claim": "The adapter used four architectures.", "document": "results", "quote": "The adapter used four architectures." },
+    { "claim": "In 2024, remote work was permitted three days per week.", "document": "historical", "quote": "In 2024, remote work was permitted three days per week." },
+    { "claim": "Manager approval was required.", "document": "historical", "quote": "Manager approval was required." }
+  ],
+  "corrections": [
+    { "original": "The adapter used five datasets.", "replacement": "The adapter used two datasets." },
+    { "original": "In 2024, remote work was permitted one day per week.", "replacement": "In 2024, remote work was permitted three days per week." }
+  ],
+  "cases": [
+    { "id": "incorrect-number", "question": "How many datasets and architectures did the adapter use?", "draft": "The adapter used five datasets. The adapter used four architectures.", "initial": ["results"], "extra": ["results"], "expectedFacts": { "datasets": 2, "architectures": 4 }, "repairNeeded": true, "expect": "REPAIRED_VERIFIED" },
+    { "id": "already-correct", "question": "How many datasets and architectures did the adapter use?", "draft": "The adapter used two datasets. The adapter used four architectures.", "initial": ["results"], "extra": ["results"], "expectedFacts": { "datasets": 2, "architectures": 4 }, "repairNeeded": false, "expect": "VERIFIED_UNCHANGED" },
+    { "id": "targeted-retrieval", "question": "How many datasets did the adapter use?", "draft": "The adapter used two datasets.", "initial": ["intro"], "extra": ["results"], "expectedFacts": { "datasets": 2 }, "repairNeeded": false, "expect": "VERIFIED_UNCHANGED" },
+    { "id": "missing-evidence", "question": "What accuracy did the adapter achieve?", "draft": "The adapter achieved 95% accuracy.", "initial": ["intro"], "extra": ["intro"], "expectedFacts": {}, "repairNeeded": false, "expect": "INSUFFICIENT_EVIDENCE" },
+    { "id": "historical-policy", "question": "How many remote work days were permitted in 2024, and was approval required?", "draft": "In 2024, remote work was permitted one day per week. Manager approval was required.", "initial": ["historical", "current"], "extra": ["historical", "current"], "expectedFacts": { "days": 3 }, "repairNeeded": true, "expect": "REPAIRED_VERIFIED" },
+    { "id": "superficial-rewrite", "question": "How many datasets and architectures did the adapter use?", "draft": "The adapter used five datasets. The adapter used four architectures.", "initial": ["results"], "extra": ["results"], "expectedFacts": { "datasets": 2, "architectures": 4 }, "repairNeeded": true, "replacement": "The adapter used 5 datasets.", "expect": "PARTIALLY_VERIFIED" },
+    { "id": "new-error-in-repair", "question": "How many datasets and architectures did the adapter use?", "draft": "The adapter used five datasets. The adapter used four architectures.", "initial": ["results"], "extra": ["results"], "expectedFacts": { "datasets": 2, "architectures": 4 }, "repairNeeded": true, "replacement": "The adapter used two synthetic datasets.", "expect": "PARTIALLY_VERIFIED" }
+  ]
+}

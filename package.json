@@ -2,6 +2,7 @@
   "name": "sc-rag",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "apps/web"
   ],
@@ -9,15 +10,17 @@
     "node": ">=22.18"
   },
   "overrides": {
-    "multer": "^2.5.0"
+    "multer": "^2.5.0",
+    "minimatch": "^11.0.1"
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register src/main.ts",
     "start:dev": "nodemon --watch src --watch .env --ext ts,json,env --exec ts-node src/main.ts",
     "build": "npx tsc",
     "evaluate": "npx ts-node scripts/evaluate.ts",
-    "test": "npm run build && node --test dist/src/tests/rag.test.js dist/src/tests/auth.test.js dist/src/tests/reliability.test.js dist/src/tests/recovery.test.js dist/src/tests/atomic-facts.test.js",
+    "test": "npm run build && node --test dist/src/tests/rag.test.js dist/src/tests/auth.test.js dist/src/tests/reliability.test.js dist/src/tests/recovery.test.js dist/src/tests/atomic-facts.test.js dist/src/tests/answer-cache.test.js dist/src/tests/query-context.test.js dist/src/tests/hardening.test.js dist/src/tests/ingestion.test.js dist/src/tests/knowledge-lifecycle.test.js dist/src/tests/retrieval-stability.test.js dist/src/tests/worker.test.js dist/src/tests/revalidation.test.js",
     "test:browser": "playwright test",
+    "test:lifecycle": "npm run build && playwright test --config playwright.integration.config.ts",
     "web:dev": "npm run dev --workspace @veriqon/web",
     "web:build": "npm run build --workspace @veriqon/web",
     "web:start": "npm run start --workspace @veriqon/web",
@@ -27,9 +30,20 @@
     "db:migrate": "node dist/scripts/migrate.js",
     "db:import-sqlite": "node dist/scripts/import-sqlite.js",
     "test:infra": "npm run build && node scripts/test-infra.mjs",
+    "test:load": "npm run build && node --expose-gc scripts/test-storage-load.mjs",
     "docker:up": "docker compose --env-file .env.docker up --build -d",
     "docker:down": "docker compose --env-file .env.docker down",
-    "evaluate:rac": "npm run build && node dist/scripts/evaluate-rac.js --live"
+    "evaluate:rac": "npm run research:live",
+    "evaluate:rac:legacy": "npm run build && node dist/scripts/evaluate-rac.js --live",
+    "research:demo": "npm run build && node dist/scripts/research-evaluate.js",
+    "research:live": "npm run build && node dist/scripts/research-evaluate.js --live",
+    "setup:local": "node scripts/init-local.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "release:audit": "node scripts/audit-release.mjs --history",
+    "test:release": "node --test scripts/release-tools.test.mjs scripts/research-review.test.mjs",
+    "release:export": "node scripts/export-release.mjs",
+    "evaluate:cache": "npm run build && node dist/scripts/evaluate-cache.js",
+    "worker:prod": "node dist/src/worker.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",
@@ -37,9 +51,11 @@
     "@nestjs/jwt": "^12.0.3",
     "@nestjs/platform-express": "^12.2.0",
     "axios": "^1.13.2",
+    "bullmq": "6.7.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "dotenv": "^16.0.0",
+    "ioredis": "6.0.0",
     "mammoth": "^1.13.0",
     "openai": "^4.0.0",
     "pdf-parse": "^2.4.5",

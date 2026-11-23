@@ -1,0 +1,36 @@
+{
+  "kind": "local PostgreSQL retrieval short soak; no inference, API or queue throughput",
+  "startedAt": "2026-11-17T15:04:15.398Z",
+  "node": "v22.19.0",
+  "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+  "workload": {
+    "owners": 4,
+    "documentsPerOwner": 20,
+    "chunksPerDocument": 16,
+    "dimensions": 1536,
+    "concurrency": 4,
+    "durationMs": 60000,
+    "pausePerClientMs": 100
+  },
+  "gates": {
+    "minOperations": 200,
+    "p95Ms": 2000,
+    "errors": 0,
+    "retainedHeapGrowthBytes": 67108864
+  },
+  "inferenceCalls": 0,
+  "tokens": null,
+  "apiCost": null,
+  "passed": true,
+  "results": {
+    "operations": 1598,
+    "errors": 0,
+    "elapsedMs": 60135.151000000005,
+    "p50Ms": 37.89879999999903,
+    "p95Ms": 92.17669999999634,
+    "retainedHeapGrowthBytes": -667096,
+    "peakNodeRssKiB": 111880,
+    "gcExposed": true,
+    "databaseBytes": 28817075
+  }
+}

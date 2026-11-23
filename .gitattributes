@@ -1,9 +1,3 @@
-* text=auto
-*.sql text eol=lf
-*.sh text eol=lf
-Dockerfile text eol=lf
-*.yaml text eol=lf
-*.yml text eol=lf
-*.pdf binary
-*.docx binary
-*.png binary
+# Preserve the exact bytes used by corpus/report SHA-256 checks on every OS.
+research/fixtures.json -text
+research/results/*.json -text

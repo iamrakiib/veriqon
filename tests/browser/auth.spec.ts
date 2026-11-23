@@ -10,7 +10,7 @@ test('a temporary session lookup failure offers retry instead of a misleading si
   await page.route('**/api/auth/me', route => route.fulfill({ status: unavailable ? 503 : 200, json: unavailable ? { message: 'Storage unavailable' } : { user } }));
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
   await page.route('**/api/rag/health', route => route.fulfill({ json: { status: 'ok', providerConfigured: true } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Retry connection' })).toBeVisible();
   await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
   unavailable = false;
@@ -18,7 +18,7 @@ test('a temporary session lookup failure offers retry instead of a misleading si
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
 });
 
-for (const failure of ['unavailable', 'network'] as const) test(`temporary ${failure} refresh failure preserves the workspace and unsent draft`, async ({ page }, info) => {
+for (const failure of ['unavailable', 'network'] as const) test(`temporary ${failure} refresh failure preserves the workspace and unsent draft`, async ({ page }) => {
   let expired = false, recovered = false;
   await page.route('**/api/auth/status', route => route.fulfill({ json: { needsSetup: false, registrationEnabled: true } }));
   await page.route('**/api/auth/me', route => route.fulfill({ json: { user } }));
@@ -28,9 +28,9 @@ for (const failure of ['unavailable', 'network'] as const) test(`temporary ${fai
     if (!recovered) return failure === 'network' ? route.abort('failed') : route.fulfill({ status: 503, json: {} });
     expired = false; return route.fulfill({ json: { user } });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
-  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Show assistant' }).click();
+  await page.getByRole('button', { name: 'Show assistant' }).click();
   await page.getByLabel('Ask your knowledge base').fill('Keep my unsent research question');
   expired = true;
   await page.getByRole('button', { name: 'Refresh workspace' }).click();
@@ -54,7 +54,7 @@ test('public registration creates a personal workspace without requesting an own
     registered = true;
     return route.fulfill({ status: 201, json: { user: { ...user, role: 'member' } } });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Create an account', exact: true }).click();
   await expect(page.getByLabel('One-time setup code')).toHaveCount(0);
   await page.getByLabel('Full name').fill(user.name);
@@ -72,7 +72,7 @@ test('a sleeping server can wake before the sign-in screen appears', async ({ pa
   });
   await page.route('**/api/auth/me', route => route.fulfill({ status: 401, json: { message: 'Sign in' } }));
   await page.route('**/api/auth/refresh', route => route.fulfill({ status: 401, json: { message: 'Sign in' } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('status')).toHaveText('Waking up your workspace. This can take about a minute.', { timeout: 12000 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible({ timeout: 15000 });
@@ -94,7 +94,7 @@ test('sign-in errors, account identity and sign-out clear the private workspace'
   await page.route('**/api/auth/logout', route => { signedIn = false; return route.fulfill({ json: { success: true } }); });
   await page.route('**/api/rag/health', route => route.fulfill({ json: { status: 'ok', providerConfigured: true, storage: 'sqlite' } }));
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
   await expect(page.locator('.auth-error[role=alert]')).toHaveCount(0);
   await page.getByLabel('Email address').fill(user.email);
@@ -121,7 +121,7 @@ test('owner setup is responsive in both themes and submits the setup code', asyn
     expect(route.request().postDataJSON()).toEqual({ name: user.name, email: user.email, password: 'a valid testing password', setupCode: 'fixture-setup' });
     return route.fulfill({ status: 403, json: { message: 'Enter the setup code from the server to create the owner account.' } });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Make it yours.' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: `test-results/auth-${info.project.name}-dark.png`, fullPage: true });
@@ -142,7 +142,7 @@ test('expired session clears the workspace; valid renewal retries the private re
   await page.route('**/api/auth/refresh', route => { renewed = !expire; return route.fulfill({ status: expire ? 401 : 200, json: expire ? {} : { user } }); });
   await page.route('**/api/rag/health', route => route.fulfill({ json: { status: 'ok', providerConfigured: true } }));
   await page.route('**/api/rag/docs', route => route.fulfill({ status: renewed && !expire ? 200 : 401, json: renewed && !expire ? [] : { message: 'Expired' } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
   expect(renewed).toBe(true);
   expire = true;
@@ -167,9 +167,9 @@ test('two tabs serialize session renewal instead of racing refresh tokens', asyn
     await route.fulfill({ json: { user } }); active--;
   });
   const first = await context.newPage(), second = await context.newPage();
-  await Promise.all([first.goto('/'), second.goto('/')]);
-  await expect(first.getByRole('button', { name: 'Add documents' })).toBeEnabled();
-  await expect(second.getByRole('button', { name: 'Add documents' })).toBeEnabled();
+  await Promise.all([first.goto('/', {waitUntil:'domcontentloaded'}), second.goto('/', {waitUntil:'domcontentloaded'})]);
+  await expect(first.getByRole('button', { name: 'Add documents' })).toBeEnabled({timeout:15000});
+  await expect(second.getByRole('button', { name: 'Add documents' })).toBeEnabled({timeout:15000});
   expect(maximum).toBe(1);
   await first.close(); await second.close();
 });

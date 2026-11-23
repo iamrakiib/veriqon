@@ -1,9 +1,10 @@
 import { BadRequestException, HttpException } from '@nestjs/common';
 import { extname, join } from 'path';
 import { fork } from 'node:child_process';
+import { MAX_DOCUMENT_CHARACTERS } from '../common/ingestion-config';
 
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
-export const MAX_TEXT_LENGTH = 100000;
+export const MAX_TEXT_LENGTH = MAX_DOCUMENT_CHARACTERS;
 export type UploadedDocument = { originalname: string; buffer: Buffer; size: number };
 
 let parsing = false;
@@ -47,7 +48,7 @@ export async function extractDocument(file?: UploadedDocument): Promise<string> 
 export async function extractDocumentInProcess(file?: UploadedDocument): Promise<string> {
   if (!file?.buffer?.length) throw new BadRequestException('Choose a non-empty PDF, DOCX, TXT or Markdown file.');
   if (file.size > MAX_FILE_BYTES || file.buffer.length > MAX_FILE_BYTES) throw new BadRequestException('Files must be 10 MB or smaller.');
-  if (file.originalname.length > 255) throw new BadRequestException('Use a filename shorter than 256 characters.');
+  if (file.originalname.length > 255 || /[\x00-\x1f\x7f]/.test(file.originalname)) throw new BadRequestException('Use a filename shorter than 256 characters without control characters.');
   const extension = extname(file.originalname).toLowerCase();
   let text: string;
   try {
@@ -70,6 +71,6 @@ export async function extractDocumentInProcess(file?: UploadedDocument): Promise
   }
   text = text.trim();
   if (!text || text.includes('\0')) throw new BadRequestException('No readable text was found. Scanned PDFs need OCR before upload.');
-  if (text.length > MAX_TEXT_LENGTH) throw new BadRequestException('This document exceeds 100,000 extracted characters. Split it into smaller documents.');
+  if (text.length > MAX_TEXT_LENGTH) throw new BadRequestException('This document exceeds 500,000 extracted characters. Split it into smaller documents.');
   return text;
 }

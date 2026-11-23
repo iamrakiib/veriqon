@@ -3,18 +3,19 @@ import { test, after } from 'node:test';
 import { mkdtempSync, readFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { createHash } from 'node:crypto';
 import { providerError, withProviderRetry } from '../common/provider';
 import { extractDocument, MAX_FILE_BYTES } from '../rag/document-parser';
 import assert from 'node:assert/strict';
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module, ValidationPipe, HttpException, BadRequestException } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { RagService, parseVerification, Verification, completionText } from '../rag/rag.service';
 import { RagController } from '../rag/rag.controller';
-import { VectorStoreService, joinPassages } from '../vector-store/vector-store.service';
+import { VectorStoreService, joinPassages, namedDocumentIds } from '../vector-store/vector-store.service';
 import { DatabaseService, OriginalFile } from '../database/database.service';
 import { WorkLimiter } from '../common/work-limiter';
 import { chunkText } from '../common/utils';
-import { parseClaimVerification } from '../rag/verification';
+import { parseClaimVerification, invalidVerification } from '../rag/verification';
 
 // Unit fixtures must never inherit a caller's deployed database or Redis connection.
 delete process.env.DATABASE_URL;
@@ -22,12 +23,27 @@ delete process.env.REDIS_URL;
 process.env.NODE_ENV = 'test';
 
 const passage = { id: 'policy', text: 'Remote work is permitted one day a week.', source: 'policy.md', score: 1, chunkIndex: 0 };
+
+test('bounded chunk boundary search preserves published passage layouts', () => {
+  // Golden hashes captured from the accepted chunker before the performance change.
+  // Changed boundaries would invalidate existing vectors and passage citations.
+  const cases = [
+    ['a'.repeat(500000), 736, '08ed6b60243445ecf0a91f22dd29c0fb12926e53847ef71d114db87ad0de2c31'],
+    [('Row 1 | 95% | 2024\nRow 2 | 12 kg | 2025\n').repeat(1000), 59, 'bce614b69dfc8bcbe9e17fd2dddd3928582fde0b83c77a14e43fe1077d7c94d7'],
+    ['x'.repeat(480)+'\n'+'y'.repeat(319)+'\n'+'z'.repeat(900), 3, '8625a82e7666c06c3889f0cff956480f498acd6d360c46307c513b0030cd41f1']
+  ] as const;
+  for (const [text, count, hash] of cases) {
+    const chunks = chunkText(text);
+    assert.equal(chunks.length, count);
+    assert.equal(createHash('sha256').update(JSON.stringify(chunks)).digest('hex'), hash);
+  }
+});
 const assessment = (sentence: string, supported: boolean) => parseClaimVerification(JSON.stringify({ sentences: [{ id: 1, kind: 'FACTUAL', claims: [{ text: sentence, span: sentence, verdict: supported ? 'SUPPORTED' : 'CONTRADICTED', supporting: supported ? [{ index: 1, quote: passage.text }] : [], contradicting: supported ? [] : [{ index: 1, quote: passage.text }], missingInformation: [], temporalValidity: 'UNKNOWN', scope: { time: null, place: null } }] }] }), sentence, [passage]);
 const pass: Verification = assessment('One day.', true);
 const fail: Verification = assessment('Three days.', false);
 
 function pipeline(docs = [passage]) {
-  const store = { search: async () => docs, revision: () => 0 } as unknown as VectorStoreService;
+  const store = { search: async () => docs, revision: () => 0, inventory: async () => docs.map(d => ({ id: d.id, source: d.source })) } as unknown as VectorStoreService;
   return new RagService(store);
 }
 
@@ -80,7 +96,10 @@ test('second failed assessment abstains instead of returning unsupported text', 
 
 test('provider failures are returned without secret or document detail', async () => {
   const rag = pipeline(); rag.generateAnswer = async () => { throw new Error('secret-provider-token'); };
-  await assert.rejects(rag.queryPipeline('Question'), error => error instanceof Error && !error.message.includes('secret-provider-token'));
+  const result = await rag.queryPipeline('Question');
+  assert.equal('reason' in result && result.reason, 'generation_failed'); assert.equal(result.factCheck.passed, false);
+  assert.ok(!JSON.stringify(result).includes('secret-provider-token'));
+  assert.equal(result.citations[0].excerpt, passage.text);
 });
 
 test('failed replacement leaves the original document searchable', async () => {
@@ -95,6 +114,21 @@ test('bulk ingestion reports actual successes and failures', async () => {
   const store = testStore(); store.getEmbeddings = async texts => texts.map(text => { if (text === 'bad') throw new Error('Failure'); return [1, 0]; });
   const result = await store.bulkAdd([{ id: 'a', text: 'good' }, { id: 'b', text: 'bad' }]);
   assert.equal(result.success, false); assert.equal(result.count, 1); assert.equal(result.errors[0].id, 'b');
+});
+
+test('bulk ingestion shares its deadline and never commits a late embedding or starts remaining provider work', async () => {
+  const store = testStore(), controller = new AbortController();
+  let calls = 0;
+  store.getEmbeddings = async (texts, signal) => {
+    assert.equal(signal, controller.signal);
+    if (++calls === 2) controller.abort();
+    return texts.map(() => [1, 0]);
+  };
+  const result = await store.bulkAdd([{ id: 'complete', text: 'First source' }, { id: 'late', text: 'Late source' }, { id: 'not-started', text: 'Third source' }], 'test-user', controller.signal);
+  assert.equal(result.count, 1); assert.equal(result.success, false); assert.equal(calls, 2);
+  assert.deepEqual(result.errors.map(e => e.id), ['late', 'not-started']);
+  assert.ok(result.errors.every(e => /time budget expired/.test(e.error)));
+  assert.deepEqual((await store.getAllDocs()).map(d => d.id), ['complete']);
 });
 
 test('invalid chunk configuration cannot create an infinite loop', () => {
@@ -141,10 +175,10 @@ after(async () => { for (const database of databases) await database.onModuleDes
 let storeNumber = 0;
 class TestStore extends VectorStoreService {
   constructor(readonly testDatabase: DatabaseService) { super(testDatabase); }
-  override addDocument(id: string, text: string, meta?: { source?: string; page?: number; version?: string }, owner = 'test-user', file?: OriginalFile) { return super.addDocument(id, text, meta, owner, file); }
+  override addDocument(id: string, text: string, meta?: { source?: string; page?: number; version?: string }, owner = 'test-user', file?: OriginalFile, signal?: AbortSignal) { return super.addDocument(id, text, meta, owner, file, signal); }
   override search(query: string, topK = 5, signal?: AbortSignal, owner = 'test-user') { return super.search(query, topK, signal, owner); }
   override getAllDocs(owner = 'test-user') { return super.getAllDocs(owner); }
-  override bulkAdd(docs: Parameters<VectorStoreService['bulkAdd']>[0], owner = 'test-user') { return super.bulkAdd(docs, owner); }
+  override bulkAdd(docs: Parameters<VectorStoreService['bulkAdd']>[0], owner = 'test-user', signal?: AbortSignal) { return super.bulkAdd(docs, owner, signal); }
 }
 function testStore(file = join(testDirectory, `store-${++storeNumber}.sqlite`)) {
   const previous = process.env.DATABASE_PATH;
@@ -154,6 +188,66 @@ function testStore(file = join(testDirectory, `store-${++storeNumber}.sqlite`)) 
   database.db.prepare("INSERT OR IGNORE INTO users(id,email,name,password_hash,role,created_at) VALUES('test-user','test@example.com','Test','unused','owner',0)").run();
   return new TestStore(database);
 }
+
+test('named-paper retrieval excludes an unrelated resume without restricting vague or cross-document questions', async () => {
+  const store = testStore();
+  store.getEmbeddings = async texts => texts.map(() => [1, 0]);
+  store.getEmbedding = async () => [1, 0];
+  await store.addDocument('paper', 'Abstract: The TKG method corrects historical predictions.', { source: 'Tkg_new.pdf' });
+  await store.addDocument('resume', 'The resume lists TKG research experience.', { source: 'my_resume.pdf' });
+  const focused = await store.search('what tkg paper is about', 5);
+  assert.deepEqual(focused.map(d => d.id), ['paper']);
+  assert.equal((await store.search('tell me about my documents', 5)).length, 2);
+  assert.equal((await store.search('compare tkg with other documents', 5)).length, 2);
+  assert.equal((await store.search('compare tkg and resume', 5)).length, 2);
+  assert.equal((await store.testDatabase.candidateDocuments('different-owner', [1, 0], 'fixture', 5, 'tkg', ['paper'])).length, 0);
+  assert.equal(namedDocumentIds('tell me about my paper', [{ id: 'paper', source: 'Tkg_new.pdf' }, { id: 'resume', source: 'my_resume.pdf' }]), undefined);
+});
+
+test('named comparison retrieval keeps both requested files and excludes a competing same-year file', async () => {
+  const store = testStore();
+  store.getEmbeddings = async texts => texts.map(() => [1, 0]); store.getEmbedding = async () => [1, 0];
+  for (const [id, source] of [['policy', 'aurora-2026-policy.txt'], ['sales', 'aurora-sales.txt'], ['memo', 'aurora-2026-memo.txt']]) {
+    await store.addDocument(id, `${source}: remote work rules for 2026.`, { source });
+  }
+  const result = await store.search('Compare aurora-2026-policy.txt with aurora-sales.txt in 2026.', 5);
+  assert.deepEqual(result.map(d => d.id).sort(), ['policy', 'sales']);
+});
+
+test('a long high-scoring source cannot crowd the other named comparison source out of context', async () => {
+  const store = testStore(); store.getEmbedding = async () => [1, 0];
+  for (const [id, vector] of [['long', [1, 0]], ['other', [0, 1]]] as const) {
+    await store.testDatabase.writeDocument('test-user', { id, text: 'Policy evidence', chunks: Array.from({ length: id === 'long' ? 35 : 1 }, (_, index) => ({
+      chunkId: `${id}#${index}`, index, content: `${id} passage ${index}: Engineering remote policy details.`, source: `${id}.txt`, embedding: [...vector]
+    })) });
+  }
+  const found = await store.search('Compare long.txt and other.txt', 2);
+  assert.deepEqual(new Set(found.map(d => d.id)), new Set(['long', 'other']));
+});
+
+test('legacy document evidence receives stable content versions without rewriting historical records', async () => {
+  const store = testStore(); store.getEmbedding = async () => [1,0];
+  await store.testDatabase.writeDocument('test-user', { id: 'legacy', text: 'Legacy content', chunks: [{ chunkId: 'legacy#0', content: 'Legacy content', embedding: [1,0], index: 0, source: 'legacy.pdf' }] });
+  const [before] = await store.search('Legacy content');
+  assert.match(before.version!, /^sha256:[a-f0-9]{64}$/);
+  assert.equal((await store.getAllDocs())[0].version, before.version);
+  assert.equal((await store.search('Legacy content'))[0].version, before.version);
+  await store.testDatabase.writeDocument('test-user', { id: 'legacy', text: 'Changed content', chunks: [{ chunkId: 'legacy#0', content: 'Changed content', embedding: [1,0], index: 0, source: 'legacy.pdf' }] });
+  assert.notEqual((await store.search('Changed content'))[0].version, before.version);
+});
+
+test('embedding outages fall back to authorized lexical evidence without inventing semantic scores', async () => {
+  const store = testStore(); store.getEmbeddings = async texts => texts.map(() => [1,0]);
+  await store.addDocument('resume', 'Example Person works as a researcher.', { source: 'my_resume.pdf' });
+  store.getEmbedding = async () => { throw new HttpException('Rate limit reached', 429); };
+  const found = await store.search('researcher');
+  assert.equal(found.length, 1); assert.equal(found[0].retrievalMode, 'lexical_fallback'); assert.equal(found[0].score, 0);
+  assert.equal((await store.search('profession in my_resume.pdf')).length, 1);
+  assert.deepEqual(await store.search('researcher', 5, undefined, 'another-owner'), []);
+  await assert.rejects(store.search('unrelated galaxies'), /Rate limit/);
+  store.getEmbedding = async () => { throw new BadRequestException('Invalid model configuration'); };
+  await assert.rejects(store.search('researcher'), /Invalid model/);
+});
 
 test('full libraries reject new documents before spending embedding quota and allow replacements', async () => {
   const store = testStore(); let embeddings = 0;
@@ -185,7 +279,7 @@ test('PDF and DOCX parsers extract text; invalid and oversized files fail clearl
   }
   await assert.rejects(extractDocument({ originalname: 'big.txt', buffer: Buffer.from('x'), size: MAX_FILE_BYTES + 1 }), /10 MB/);
   await assert.rejects(extractDocument({ originalname: 'blank.txt', buffer: Buffer.from(' '), size: 1 }), /No readable text/);
-  await assert.rejects(extractDocument({ originalname: 'long.txt', buffer: Buffer.from('x'.repeat(100001)), size: 100001 }), /100,000/);
+  await assert.rejects(extractDocument({ originalname: 'long.txt', buffer: Buffer.from('x'.repeat(500001)), size: 500001 }), /500,000/);
 });
 
 test('concurrent indexing persists all documents and reload restores the library', async () => {
@@ -218,7 +312,7 @@ test('transient provider limits retry once; long cooldowns and auth failures fai
     return 'recovered';
   }, AbortSignal.timeout(5000));
   assert.equal(value, 'recovered'); assert.equal(attempts, 2);
-  for (const failure of [{ status: 401 }, { status: 429, headers: { 'retry-after': '60' } }]) {
+  for (const failure of [{ status: 401 }, { status: 429 }, { status: 429, headers: { 'retry-after': '60' } }]) {
     let calls = 0;
     await assert.rejects(withProviderRetry(async () => { calls++; throw failure; }, AbortSignal.timeout(5000)));
     assert.equal(calls, 1);
@@ -235,7 +329,7 @@ test('embedding batches are reordered by provider index and malformed vectors ar
   } } } });
   try {
     const result = await store.getEmbeddings(Array.from({ length: 33 }, () => 'source'));
-    assert.equal(calls, 2); assert.equal(result.length, 33); assert.deepEqual(result[0], [1, 0]);
+    assert.equal(calls, 5); assert.equal(result.length, 33); assert.deepEqual(result[0], [1, 0]);
     Object.defineProperty(store, 'client', { value: { embeddings: { create: async () => ({ data: [{ index: 0, embedding: [NaN] }] }) } } });
     await assert.rejects(store.getEmbeddings(['source']), /embedding failed/);
   } finally {
@@ -251,7 +345,7 @@ test('abstention distinguishes absent documents, insufficient context and failed
   const result = await missing.queryPipeline('Explain the architecture');
   assert.equal('reason' in result && result.reason, 'insufficient_context');
   assert.equal(result.attempts, 1); assert.ok(!result.factCheck.evidence.includes('Upload'));
-  const rejected = pipeline(); rejected.generateAnswer = async () => 'Unsupported claim.'; rejected.factCheck = async () => fail;
+  const rejected = pipeline(); rejected.generateAnswer = async () => 'Unsupported claim.'; rejected.factCheck = async () => invalidVerification();
   const unverified = await rejected.queryPipeline('Explain the architecture');
   assert.equal('reason' in unverified && unverified.reason, 'verification_failed');
 });

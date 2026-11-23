@@ -16,8 +16,10 @@ services:
     restart: unless-stopped
   redis:
     image: redis:7-alpine
-    # Private Docker network only. Redis stores disposable rate counters and leases.
-    command: [redis-server, --maxmemory, 64mb, --maxmemory-policy, noeviction]
+    # Private Docker network: shared admission counters and durable BullMQ delivery.
+    command: [redis-server, --appendonly, 'yes', --appendfsync, everysec, --maxmemory, 128mb, --maxmemory-policy, noeviction]
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: [CMD, redis-cli, ping]
       interval: 5s
@@ -27,12 +29,18 @@ services:
   api:
     build: .
     init: true
-    environment:
+    environment: &backend-environment
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
       DATABASE_URL: postgresql://veriqon:${POSTGRES_PASSWORD}@postgres:5432/veriqon
       REDIS_URL: redis://redis:6379
+      QUEUE_REDIS_URL: redis://redis:6379
+      QUEUE_PREFIX: veriqon-jobs
+      VERIQON_PROCESS_ROLE: api
+      JOB_QUEUE_MODE: bullmq
+      REVALIDATION_ENABLED: ${REVALIDATION_ENABLED:-true}
+      REVALIDATION_PER_HOUR: ${REVALIDATION_PER_HOUR:-10}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.docker}
       SETUP_CODE: ${SETUP_CODE:?Set SETUP_CODE in .env.docker}
       APP_ORIGINS: http://localhost:3002,http://127.0.0.1:3002
@@ -42,12 +50,43 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-openai/text-embedding-3-small}
+      EMBEDDING_BATCH_SIZE: ${EMBEDDING_BATCH_SIZE:-1}
+      EMBEDDING_MIN_INTERVAL_MS: ${EMBEDDING_MIN_INTERVAL_MS:-3000}
+      EMBEDDING_JOB_BATCHES_PER_TURN: ${EMBEDDING_JOB_BATCHES_PER_TURN:-25}
+      EMBEDDING_DOCUMENT_INPUT_TYPE: ${EMBEDDING_DOCUMENT_INPUT_TYPE:-}
+      EMBEDDING_QUERY_INPUT_TYPE: ${EMBEDDING_QUERY_INPUT_TYPE:-}
       LLM_MODEL: ${LLM_MODEL:-}
       VERIFIER_MODEL: ${VERIFIER_MODEL:-}
-      RAG_TIMEOUT_MS: '90000'
+      DECOMPOSER_MODEL: ${DECOMPOSER_MODEL:-}
+      PROVIDER_TIMEOUT_MS: ${PROVIDER_TIMEOUT_MS:-45000}
+      RAG_TIMEOUT_MS: ${RAG_TIMEOUT_MS:-110000}
+      MAX_REPAIR_ATTEMPTS: ${MAX_REPAIR_ATTEMPTS:-1}
+      TOP_K: ${TOP_K:-3}
+      RETRIEVAL_CANDIDATES: ${RETRIEVAL_CANDIDATES:-30}
+      CHUNK_SIZE: ${CHUNK_SIZE:-800}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-120}
     depends_on:
       postgres: {condition: service_healthy}
       redis: {condition: service_healthy}
+    restart: unless-stopped
+    stop_grace_period: 30s
+  worker:
+    build: .
+    init: true
+    command: [node, dist/src/worker.js]
+    environment:
+      <<: *backend-environment
+      VERIQON_PROCESS_ROLE: worker
+      WORKER_HEARTBEAT_PATH: /tmp/veriqon-worker-heartbeat.json
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, dist/scripts/worker-health.js]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
     restart: unless-stopped
     stop_grace_period: 30s
   web:
@@ -60,6 +99,8 @@ services:
     ports: ['127.0.0.1:3002:3001']
     depends_on:
       api: {condition: service_healthy}
+      worker: {condition: service_healthy}
     restart: unless-stopped
 volumes:
   postgres-data:
+  redis-data:

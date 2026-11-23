@@ -1,0 +1,969 @@
+{
+  "baseline": {
+    "measuredAt": "2026-11-12T07:31:11.768Z",
+    "kind": "offline SQLite storage/retrieval microbenchmark, not live RAG or backend/worker load",
+    "node": "v22.19.0",
+    "hardware": {
+      "platform": "win32",
+      "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+      "logicalCpus": 12,
+      "memoryBytes": 7931146240
+    },
+    "config": {
+      "documents": 80,
+      "charactersPerDocument": 64000,
+      "chunksPerDocument": 20,
+      "vectorDimensions": 2,
+      "snapshots": 13,
+      "samples": 40,
+      "warmups": 5,
+      "inference": "none; deterministic query vector",
+      "gcExposed": true
+    },
+    "results": {
+      "conflictReview": {
+        "samples": 40,
+        "p50Ms": 2.51929999999993,
+        "p95Ms": 3.8203000000000884,
+        "queriesPerOperation": 5,
+        "serializedSqlRowBytesPerOperation": 5127377,
+        "retainedHeapDeltaBytes": 35936
+      },
+      "versionSummaryPage": {
+        "samples": 40,
+        "p50Ms": 0.6515000000003965,
+        "p95Ms": 1.138600000000224,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1374,
+        "retainedHeapDeltaBytes": 21408
+      },
+      "versionLegacyList": {
+        "samples": 40,
+        "p50Ms": 2.339300000000094,
+        "p95Ms": 3.3787999999999556,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1054112,
+        "retainedHeapDeltaBytes": 7328
+      },
+      "lexicalRetrieval": {
+        "samples": 40,
+        "p50Ms": 8.17069999999967,
+        "p95Ms": 8.764000000000124,
+        "queriesPerOperation": 1,
+        "serializedSqlRowBytesPerOperation": 49835,
+        "retainedHeapDeltaBytes": 752
+      },
+      "sqliteDenseCandidates": {
+        "samples": 40,
+        "p50Ms": 33.71509999999989,
+        "p95Ms": 38.74109999999973,
+        "queriesPerOperation": 2,
+        "serializedSqlRowBytesPerOperation": 6636422,
+        "retainedHeapDeltaBytes": 7232
+      },
+      "hybridRetrieval": {
+        "samples": 40,
+        "p50Ms": 38.54830000000038,
+        "p95Ms": 47.02649999999994,
+        "queriesPerOperation": 5,
+        "serializedSqlRowBytesPerOperation": 6639546,
+        "retainedHeapDeltaBytes": 52016
+      },
+      "fourConcurrentConflictReads": {
+        "samples": 40,
+        "p50Ms": 15.156400000000758,
+        "p95Ms": 23.669600000000173,
+        "queriesPerOperation": 20,
+        "serializedSqlRowBytesPerOperation": 20509508,
+        "retainedHeapDeltaBytes": -1500248
+      },
+      "chunking500k": {
+        "samples": 40,
+        "p50Ms": 92.00009999999929,
+        "p95Ms": 99.04140000000007,
+        "queriesPerOperation": 0,
+        "serializedSqlRowBytesPerOperation": 0,
+        "retainedHeapDeltaBytes": 5720
+      }
+    },
+    "peakProcessRssKiB": 277732,
+    "finalMemoryBytes": {
+      "rss": 268279808,
+      "heapTotal": 50425856,
+      "heapUsed": 13718648,
+      "external": 2825732,
+      "arrayBuffers": 35023
+    },
+    "embeddingFixtureCalls": 1,
+    "llmCalls": 0,
+    "tokens": null
+  },
+  "intermediate": {
+    "measuredAt": "2026-11-12T07:34:27.761Z",
+    "kind": "offline SQLite storage/retrieval microbenchmark, not live RAG or backend/worker load",
+    "node": "v22.19.0",
+    "hardware": {
+      "platform": "win32",
+      "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+      "logicalCpus": 12,
+      "memoryBytes": 7931146240
+    },
+    "config": {
+      "documents": 80,
+      "charactersPerDocument": 64000,
+      "chunksPerDocument": 20,
+      "vectorDimensions": 2,
+      "snapshots": 13,
+      "samples": 40,
+      "warmups": 5,
+      "inference": "none; deterministic query vector",
+      "gcExposed": true
+    },
+    "results": {
+      "conflictReview": {
+        "samples": 40,
+        "p50Ms": 0.2682999999997264,
+        "p95Ms": 1.076100000000224,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 2641,
+        "retainedHeapDeltaBytes": 35536
+      },
+      "versionSummaryPage": {
+        "samples": 40,
+        "p50Ms": 0.8773999999998523,
+        "p95Ms": 3.9275000000002365,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1374,
+        "retainedHeapDeltaBytes": 24496
+      },
+      "versionLegacyList": {
+        "samples": 40,
+        "p50Ms": 2.3670999999999367,
+        "p95Ms": 3.9823999999998705,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1054112,
+        "retainedHeapDeltaBytes": 7304
+      },
+      "lexicalRetrieval": {
+        "samples": 40,
+        "p50Ms": 8.044200000000274,
+        "p95Ms": 22.601900000000114,
+        "queriesPerOperation": 1,
+        "serializedSqlRowBytesPerOperation": 49835,
+        "retainedHeapDeltaBytes": 752
+      },
+      "sqliteDenseCandidates": {
+        "samples": 40,
+        "p50Ms": 50.38730000000032,
+        "p95Ms": 92.66330000000016,
+        "queriesPerOperation": 2,
+        "serializedSqlRowBytesPerOperation": 6636422,
+        "retainedHeapDeltaBytes": 7064
+      },
+      "hybridRetrieval": {
+        "samples": 40,
+        "p50Ms": 100.82910000000084,
+        "p95Ms": 207.14279999999962,
+        "queriesPerOperation": 5,
+        "serializedSqlRowBytesPerOperation": 6639546,
+        "retainedHeapDeltaBytes": 53912
+      },
+      "fourConcurrentConflictReads": {
+        "samples": 40,
+        "p50Ms": 1.8105999999988853,
+        "p95Ms": 8.15310000000136,
+        "queriesPerOperation": 12,
+        "serializedSqlRowBytesPerOperation": 10564,
+        "retainedHeapDeltaBytes": -444136
+      },
+      "chunking500k": {
+        "samples": 40,
+        "p50Ms": 511.9925000000003,
+        "p95Ms": 756.2380999999987,
+        "queriesPerOperation": 0,
+        "serializedSqlRowBytesPerOperation": 0,
+        "retainedHeapDeltaBytes": 6216
+      }
+    },
+    "peakProcessRssKiB": 123352,
+    "finalMemoryBytes": {
+      "rss": 54067200,
+      "heapTotal": 18706432,
+      "heapUsed": 15239944,
+      "external": 2831862,
+      "arrayBuffers": 35023
+    },
+    "embeddingFixtureCalls": 1,
+    "llmCalls": 0,
+    "tokens": null
+  },
+  "candidate": {
+    "measuredAt": "2026-11-12T17:19:36.320Z",
+    "kind": "offline SQLite storage/retrieval microbenchmark, not live RAG or backend/worker load",
+    "node": "v22.19.0",
+    "hardware": {
+      "platform": "win32",
+      "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+      "logicalCpus": 12,
+      "memoryBytes": 7931146240
+    },
+    "config": {
+      "documents": 80,
+      "charactersPerDocument": 64000,
+      "chunksPerDocument": 20,
+      "vectorDimensions": 2,
+      "snapshots": 13,
+      "samples": 40,
+      "warmups": 5,
+      "inference": "none; deterministic query vector",
+      "gcExposed": true
+    },
+    "results": {
+      "conflictReview": {
+        "samples": 40,
+        "p50Ms": 0.25850000000036744,
+        "p95Ms": 0.5123999999996158,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 2641,
+        "retainedHeapDeltaBytes": 52880
+      },
+      "versionSummaryPage": {
+        "samples": 40,
+        "p50Ms": 0.8415999999997439,
+        "p95Ms": 1.7820999999999003,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1374,
+        "retainedHeapDeltaBytes": 24424
+      },
+      "versionLegacyList": {
+        "samples": 40,
+        "p50Ms": 2.9286999999999352,
+        "p95Ms": 4.211800000000039,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1054112,
+        "retainedHeapDeltaBytes": 7304
+      },
+      "lexicalRetrieval": {
+        "samples": 40,
+        "p50Ms": 11.12039999999979,
+        "p95Ms": 13.193900000000212,
+        "queriesPerOperation": 1,
+        "serializedSqlRowBytesPerOperation": 49835,
+        "retainedHeapDeltaBytes": 752
+      },
+      "sqliteDenseCandidates": {
+        "samples": 40,
+        "p50Ms": 0.2761000000000422,
+        "p95Ms": 0.4962000000000444,
+        "queriesPerOperation": 2,
+        "serializedSqlRowBytesPerOperation": 82903,
+        "retainedHeapDeltaBytes": 1992
+      },
+      "hybridRetrieval": {
+        "samples": 40,
+        "p50Ms": 36.62830000000031,
+        "p95Ms": 45.299700000000485,
+        "queriesPerOperation": 5,
+        "serializedSqlRowBytesPerOperation": 6639546,
+        "retainedHeapDeltaBytes": 41376
+      },
+      "fourConcurrentConflictReads": {
+        "samples": 40,
+        "p50Ms": 0.5609000000004016,
+        "p95Ms": 0.8425000000006548,
+        "queriesPerOperation": 12,
+        "serializedSqlRowBytesPerOperation": 10564,
+        "retainedHeapDeltaBytes": -444264
+      },
+      "chunking500k": {
+        "samples": 40,
+        "p50Ms": 0.4192000000002736,
+        "p95Ms": 0.8557000000000698,
+        "queriesPerOperation": 0,
+        "serializedSqlRowBytesPerOperation": 0,
+        "retainedHeapDeltaBytes": 4608
+      }
+    },
+    "peakProcessRssKiB": 126716,
+    "finalMemoryBytes": {
+      "rss": 113655808,
+      "heapTotal": 51212288,
+      "heapUsed": 15292368,
+      "external": 2831862,
+      "arrayBuffers": 35023
+    },
+    "embeddingFixtureCalls": 1,
+    "llmCalls": 0,
+    "tokens": null
+  },
+  "protocol": {
+    "datasetHash": "fb8d60ab47eaf7163f9c7f5e7b2718b1a7c054f2a7e0a9b19643c119c3f24c11",
+    "mode": "offline-scripted-provider-protocol-test",
+    "independentlyHumanReviewed": false,
+    "cases": [
+      {
+        "id": "incorrect-number",
+        "passed": true,
+        "status": "REPAIRED_VERIFIED",
+        "latencyMs": 27,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 1,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 1,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "already-correct",
+        "passed": true,
+        "status": "VERIFIED_UNCHANGED",
+        "latencyMs": 1,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "targeted-retrieval",
+        "passed": true,
+        "status": "VERIFIED_UNCHANGED",
+        "latencyMs": 2,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "missing-evidence",
+        "passed": true,
+        "status": "INSUFFICIENT_EVIDENCE",
+        "latencyMs": 2,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "historical-policy",
+        "passed": true,
+        "status": "REPAIRED_VERIFIED",
+        "latencyMs": 5,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 1,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "superficial-rewrite",
+        "passed": true,
+        "status": "PARTIALLY_VERIFIED",
+        "latencyMs": 2,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "new-error-in-repair",
+        "passed": true,
+        "status": "PARTIALLY_VERIFIED",
+        "latencyMs": 3,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      }
+    ],
+    "summaries": [
+      {
+        "variant": "uncorrected-fixed-draft",
+        "cases": 7,
+        "executionFailures": 0,
+        "numericFactCorrectness": 0.5454545454545454,
+        "numericUnsupportedRate": 0.45454545454545453,
+        "expectedNumericCoverage": 0.6,
+        "repairSuccessRate": null,
+        "unnecessaryRepairRate": null
+      },
+      {
+        "variant": "rac-inspired",
+        "cases": 7,
+        "executionFailures": 0,
+        "numericFactCorrectness": 1,
+        "numericUnsupportedRate": 0,
+        "expectedNumericCoverage": 0.8,
+        "repairSuccessRate": 0.5,
+        "unnecessaryRepairRate": 0
+      }
+    ]
+  },
+  "optimizationCheckpoint": {
+    "measuredAt": "2026-11-12T07:45:15.534Z",
+    "kind": "offline SQLite storage/retrieval microbenchmark, not live RAG or backend/worker load",
+    "node": "v22.19.0",
+    "hardware": {
+      "platform": "win32",
+      "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+      "logicalCpus": 12,
+      "memoryBytes": 7931146240
+    },
+    "config": {
+      "documents": 80,
+      "charactersPerDocument": 64000,
+      "chunksPerDocument": 20,
+      "vectorDimensions": 2,
+      "snapshots": 13,
+      "samples": 40,
+      "warmups": 5,
+      "inference": "none; deterministic query vector",
+      "gcExposed": true
+    },
+    "results": {
+      "conflictReview": {
+        "samples": 40,
+        "p50Ms": 0.1825000000003456,
+        "p95Ms": 1.422399999999925,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 2641,
+        "retainedHeapDeltaBytes": 35472
+      },
+      "versionSummaryPage": {
+        "samples": 40,
+        "p50Ms": 0.9435999999996056,
+        "p95Ms": 2.240299999999934,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1374,
+        "retainedHeapDeltaBytes": 24160
+      },
+      "versionLegacyList": {
+        "samples": 40,
+        "p50Ms": 3.2563999999997577,
+        "p95Ms": 8.96810000000005,
+        "queriesPerOperation": 3,
+        "serializedSqlRowBytesPerOperation": 1054112,
+        "retainedHeapDeltaBytes": 6968
+      },
+      "lexicalRetrieval": {
+        "samples": 40,
+        "p50Ms": 20.85480000000007,
+        "p95Ms": 44.57099999999991,
+        "queriesPerOperation": 1,
+        "serializedSqlRowBytesPerOperation": 49835,
+        "retainedHeapDeltaBytes": 816
+      },
+      "sqliteDenseCandidates": {
+        "samples": 40,
+        "p50Ms": 0.4997000000003027,
+        "p95Ms": 2.5404000000007727,
+        "queriesPerOperation": 2,
+        "serializedSqlRowBytesPerOperation": 82903,
+        "retainedHeapDeltaBytes": 2056
+      },
+      "hybridRetrieval": {
+        "samples": 40,
+        "p50Ms": 46.69000000000051,
+        "p95Ms": 80.04320000000007,
+        "queriesPerOperation": 5,
+        "serializedSqlRowBytesPerOperation": 6639546,
+        "retainedHeapDeltaBytes": 35744
+      },
+      "fourConcurrentConflictReads": {
+        "samples": 40,
+        "p50Ms": 0.581199999999626,
+        "p95Ms": 1.0291999999999462,
+        "queriesPerOperation": 12,
+        "serializedSqlRowBytesPerOperation": 10564,
+        "retainedHeapDeltaBytes": -444328
+      },
+      "chunking500k": {
+        "samples": 40,
+        "p50Ms": 0.3000000000001819,
+        "p95Ms": 0.5992999999998574,
+        "queriesPerOperation": 0,
+        "serializedSqlRowBytesPerOperation": 0,
+        "retainedHeapDeltaBytes": 8976
+      }
+    },
+    "peakProcessRssKiB": 126384,
+    "finalMemoryBytes": {
+      "rss": 113324032,
+      "heapTotal": 51474432,
+      "heapUsed": 15279240,
+      "external": 2831862,
+      "arrayBuffers": 35023
+    },
+    "embeddingFixtureCalls": 1,
+    "llmCalls": 0,
+    "tokens": null
+  },
+  "previousProtocol": {
+    "datasetHash": "fb8d60ab47eaf7163f9c7f5e7b2718b1a7c054f2a7e0a9b19643c119c3f24c11",
+    "mode": "offline-scripted-provider-protocol-test",
+    "independentlyHumanReviewed": false,
+    "cases": [
+      {
+        "id": "incorrect-number",
+        "passed": true,
+        "status": "REPAIRED_VERIFIED",
+        "latencyMs": 72,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "already-correct",
+        "passed": true,
+        "status": "VERIFIED_UNCHANGED",
+        "latencyMs": 2,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "targeted-retrieval",
+        "passed": true,
+        "status": "VERIFIED_UNCHANGED",
+        "latencyMs": 4,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "missing-evidence",
+        "passed": true,
+        "status": "INSUFFICIENT_EVIDENCE",
+        "latencyMs": 3,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "historical-policy",
+        "passed": true,
+        "status": "REPAIRED_VERIFIED",
+        "latencyMs": 6,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 1,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "superficial-rewrite",
+        "passed": true,
+        "status": "PARTIALLY_VERIFIED",
+        "latencyMs": 3,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 1,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      },
+      {
+        "id": "new-error-in-repair",
+        "passed": true,
+        "status": "PARTIALLY_VERIFIED",
+        "latencyMs": 4,
+        "calls": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Claim repair",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "controlled-fixture-not-a-model",
+            "durationMs": 0,
+            "success": true,
+            "promptTokens": null,
+            "completionTokens": null
+          }
+        ]
+      }
+    ],
+    "summaries": [
+      {
+        "variant": "uncorrected-fixed-draft",
+        "cases": 7,
+        "executionFailures": 0,
+        "numericFactCorrectness": 0.5454545454545454,
+        "numericUnsupportedRate": 0.45454545454545453,
+        "expectedNumericCoverage": 0.6,
+        "repairSuccessRate": null,
+        "unnecessaryRepairRate": null
+      },
+      {
+        "variant": "rac-inspired",
+        "cases": 7,
+        "executionFailures": 0,
+        "numericFactCorrectness": 1,
+        "numericUnsupportedRate": 0,
+        "expectedNumericCoverage": 0.8,
+        "repairSuccessRate": 0.5,
+        "unnecessaryRepairRate": 0
+      }
+    ]
+  },
+  "sourceFingerprint": "c5d75d9f0eee85ab87cdf26c498a677c7b551d7d122a37f7338db304b0cd891a"
+}

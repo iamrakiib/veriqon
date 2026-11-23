@@ -1,0 +1,155 @@
+{
+  "measuredAt": "2026-11-17T15:01:40.556Z",
+  "mode": "live-provider-controlled-retrieval",
+  "datasetHash": "fb8d60ab47eaf7163f9c7f5e7b2718b1a7c054f2a7e0a9b19643c119c3f24c11",
+  "independentlyHumanReviewed": false,
+  "scope": "Same fixed drafts and evidence for both variants. Initial generation and embedding are excluded. No LLM grades the answers. Offline outcomes test orchestration only; live numeric grading is vocabulary-limited and cannot grade arbitrary semantic claims.",
+  "summary": [
+    {
+      "variant": "uncorrected-fixed-draft",
+      "cases": 7,
+      "executionFailures": 0,
+      "numericFactCorrectness": 0.5454545454545454,
+      "numericUnsupportedRate": 0.45454545454545453,
+      "expectedNumericCoverage": 0.6,
+      "repairSuccessRate": null,
+      "unnecessaryRepairRate": null
+    },
+    {
+      "variant": "rac-inspired",
+      "cases": 7,
+      "executionFailures": 0,
+      "numericFactCorrectness": 1,
+      "numericUnsupportedRate": 0,
+      "expectedNumericCoverage": 1,
+      "repairSuccessRate": 1,
+      "unnecessaryRepairRate": 0
+    }
+  ],
+  "reportedTokens": 19636,
+  "modelCalls": 27,
+  "latencyMs": {
+    "p50": 11252,
+    "p95": 43450
+  },
+  "generalClaimCorrectness": null,
+  "citationEntailmentAccuracy": null,
+  "apiCost": null,
+  "models": [
+    "nvidia/nemotron-3-ultra-550b-a55b:free"
+  ],
+  "cases": [
+    {
+      "id": "incorrect-number",
+      "status": "REPAIRED_VERIFIED",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "latencyMs": 17045,
+      "reportedTokens": 3486,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "already-correct",
+      "status": "VERIFIED_UNCHANGED",
+      "answer": "The adapter used two datasets. The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "latencyMs": 8847,
+      "reportedTokens": 1464,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "targeted-retrieval",
+      "status": "VERIFIED_UNCHANGED",
+      "answer": "The adapter used two datasets.",
+      "numerical": {
+        "returned": 1,
+        "correct": 1,
+        "unsupported": 0,
+        "expected": 1,
+        "covered": 1
+      },
+      "latencyMs": 8550,
+      "reportedTokens": 2408,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "missing-evidence",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "answer": "The retrieved passages do not establish the requested information. I cannot supply an unsupported value. Try identifying the relevant paper, results table, or section.",
+      "numerical": {
+        "returned": 0,
+        "correct": 0,
+        "unsupported": 0,
+        "expected": 0,
+        "covered": 0
+      },
+      "latencyMs": 2738,
+      "reportedTokens": 1332,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "historical-policy",
+      "status": "REPAIRED_VERIFIED",
+      "answer": "In 2024, remote work was permitted three days per week. [1] Manager approval was required.",
+      "numerical": {
+        "returned": 1,
+        "correct": 1,
+        "unsupported": 0,
+        "expected": 1,
+        "covered": 1
+      },
+      "latencyMs": 22526,
+      "reportedTokens": 3974,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "superficial-rewrite",
+      "status": "REPAIRED_VERIFIED",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "latencyMs": 11252,
+      "reportedTokens": 3486,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false
+    },
+    {
+      "id": "new-error-in-repair",
+      "status": "REPAIRED_VERIFIED",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "latencyMs": 43450,
+      "reportedTokens": 3486,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false
+    }
+  ]
+}

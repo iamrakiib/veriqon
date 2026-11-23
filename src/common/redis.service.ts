@@ -25,22 +25,45 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor() {
     if (process.env.NODE_ENV === 'production' && !this.enabled) throw new Error('REDIS_URL is required in production for shared admission control.');
     if (this.enabled) {
-      this.client = createClient({ url: process.env.REDIS_URL, disableOfflineQueue: true,
+      this.client = createClient({ url: process.env.REDIS_URL, disableOfflineQueue: true, commandsQueueMaxLength: 256,
         socket: { connectTimeout: 5000, reconnectStrategy: retries => Math.min(250 * (retries + 1), 5000) } });
       this.client.on('error', () => console.error('Redis is unavailable; protected work fails closed.'));
     }
   }
-  async onModuleInit() { if (this.client) await this.client.connect(); }
+  async onModuleInit() {
+    if (!this.client) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([this.client.connect(), new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error('Redis connection deadline exceeded')), 10000);
+      })]);
+    } catch {
+      if (this.client.isOpen) this.client.destroy();
+      throw new ServiceUnavailableException('Request coordination could not connect within its startup deadline.');
+    } finally { clearTimeout(timer); }
+  }
   async onModuleDestroy() { if (this.client?.isOpen) this.client.destroy(); }
+  private async deadline<T>(operation: Promise<T>): Promise<T> {
+    // The Redis client's AbortSignal only removes commands not yet written to
+    // the socket. Bound the response wait too, including a stalled live socket.
+    // A timed-out write may execute later; admission stays closed and leases
+    // expire rather than assuming that a timeout cancelled the server command.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([operation, new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error('Redis response deadline exceeded')), 5000);
+      })]);
+    } finally { clearTimeout(timer); }
+  }
   private async eval(script: string, keys: string[], args: string[]) {
     if (!this.client?.isReady) throw new ServiceUnavailableException('Request coordination is unavailable. Please retry shortly.');
-    try { return Number(await this.client.eval(script, { keys, arguments: args })); }
+    try { return Number(await this.deadline(this.client.withAbortSignal(AbortSignal.timeout(5000)).eval(script, { keys, arguments: args }))); }
     catch { throw new ServiceUnavailableException('Request coordination is unavailable. Please retry shortly.'); }
   }
   async ping() {
     if (!this.enabled) return;
     if (!this.client?.isReady) throw new Error('Redis unavailable');
-    await this.client.ping();
+    await this.deadline(this.client.withAbortSignal(AbortSignal.timeout(5000)).ping());
   }
   async limit(key: string, maximum: number, milliseconds: number, message: string) {
     const hash = createHash('sha256').update(key).digest('hex');

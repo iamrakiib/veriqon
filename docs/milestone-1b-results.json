@@ -1,0 +1,445 @@
+{
+  "checkpointDate": "2026-11-12",
+  "milestone": "1B",
+  "status": "COMPLETE",
+  "checks": {
+    "backend": {
+      "passed": 148,
+      "failed": 0,
+      "skipped": 1,
+      "build": "passed",
+      "log": "data/m1b-backend-final.log"
+    },
+    "lint": "passed",
+    "infrastructureInitial": {
+      "passed": 46,
+      "failed": 1,
+      "skipped": 0,
+      "log": "data/m1b-infra.log"
+    },
+    "isolatedMigrationRetry": {
+      "passed": 1,
+      "failed": 0,
+      "log": "data/m1b-infra-isolated.log"
+    },
+    "infrastructureFullRetry": {
+      "status": "interrupted",
+      "reason": "Docker Desktop is manually paused",
+      "log": "data/m1b-infra-final.log"
+    },
+    "infrastructureAfterResume": {
+      "passed": 46,
+      "failed": 1,
+      "skipped": 0,
+      "reason": "Temporary SQLite fixture failed: C: had zero free bytes",
+      "log": "data/m1b-infra-resumed.log"
+    },
+    "infrastructureAccepted": {
+      "passed": 47,
+      "failed": 0,
+      "skipped": 0,
+      "durationMs": 89750.3512,
+      "temporaryDirectory": "data/m1b-test-tmp on D: (process-local TEMP/TMP)",
+      "log": "data/m1b-infra-accepted.log"
+    }
+  },
+  "retrieval": [
+    {
+      "dialect": "sqlite",
+      "controlledEmbeddings": true,
+      "candidateBudget": 30,
+      "finalPassages": 3,
+      "rows": [
+        {
+          "query": "What is the adapter objective?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 5,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 6,
+              "to": 6,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "What does the adapter improve?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 5,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 6,
+              "to": 6,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "What MAE kWh values are in the results table?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 6,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "policy-a",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "According to paper.txt, describe the objective and evaluation datasets.",
+          "expected": 2,
+          "found": 2,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 4,
+              "to": 6,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 3,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "According to policy-a.txt, how many remote days?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "policy-a",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "Compare policy-a.txt and policy-b.txt remote days.",
+          "expected": 2,
+          "found": 2,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "policy-a",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            },
+            {
+              "id": "policy-b",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dialect": "postgresql",
+      "controlledEmbeddings": true,
+      "candidateBudget": 30,
+      "finalPassages": 3,
+      "rows": [
+        {
+          "query": "What is the adapter objective?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-0",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-1",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "What does the adapter improve?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-0",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-1",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "What MAE kWh values are in the results table?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 6,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-0",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            },
+            {
+              "id": "noise-1",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "According to paper.txt, describe the objective and evaluation datasets.",
+          "expected": 2,
+          "found": 2,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "paper",
+              "from": 0,
+              "to": 2,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 4,
+              "to": 6,
+              "mode": "hybrid"
+            },
+            {
+              "id": "paper",
+              "from": 3,
+              "to": 3,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "According to policy-a.txt, how many remote days?",
+          "expected": 1,
+          "found": 1,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "policy-a",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        },
+        {
+          "query": "Compare policy-a.txt and policy-b.txt remote days.",
+          "expected": 2,
+          "found": 2,
+          "embeddings": 1,
+          "passages": [
+            {
+              "id": "policy-a",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            },
+            {
+              "id": "policy-b",
+              "from": 0,
+              "to": 0,
+              "mode": "hybrid"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cache": {
+    "controlledEquivalence": true,
+    "warmups": 9,
+    "probes": [
+      {
+        "name": "exact",
+        "actual": "exact",
+        "expected": "exact",
+        "generations": 1,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "paraphrase",
+        "actual": "semantic",
+        "expected": "semantic",
+        "generations": 1,
+        "gates": 1,
+        "embeddings": 1
+      },
+      {
+        "name": "date",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "quantity",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "entity",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 1,
+        "embeddings": 1
+      },
+      {
+        "name": "scope",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "owner",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "revision",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      },
+      {
+        "name": "explicit-date",
+        "actual": "miss",
+        "expected": "miss",
+        "generations": 2,
+        "gates": 0,
+        "embeddings": 0
+      }
+    ],
+    "hits": 2,
+    "misses": 7,
+    "totalGenerationCalls": 16,
+    "totalEquivalenceCalls": 2
+  },
+  "isolation": {
+    "searches": 2,
+    "generations": 1,
+    "checks": 1,
+    "unauthorizedProviderInputs": 0
+  },
+  "limitations": [
+    "Controlled embeddings and inference; no live-provider calls.",
+    "Synthetic labels specified before execution, without independent human review.",
+    "Fixture hit rate and passage recall are not production accuracy estimates.",
+    "Initial migration timeout cause remains unconfirmed; did not recur in isolation or either resumed full run. No production lock fix claimed.",
+    "No frontend changes; browser checks retain historical milestone 1A evidence.",
+    "C: disk remains full; test scratch relocation does not free workstation storage."
+  ],
+  "cleanup": {
+    "status": "unverified",
+    "reason": "Docker CLI removal and status commands stopped returning after tests",
+    "disposableContainers": [
+      "veriqon-m1b-postgres",
+      "veriqon-m1b-redis"
+    ],
+    "unrelatedContainersTargeted": false
+  }
+}

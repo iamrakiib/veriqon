@@ -1,5 +1,13 @@
 # Veriqon engineering and product review
 
+> **11 November 2026 follow-up:** [Release priorities and the first hardening batch](release-priorities.md) records corrected chunk-profile reuse, retry/checkpoint recovery, shutdown behavior, and bounded lexical fallback. Temporal resolution, continuous correction and production release gates remain open.
+
+> **10 November 2026 follow-up:** [Upload reliability](ingestion-reliability.md) now covers durable ingestion, resumable checkpoints, real provider batching tests and updated release gates. The missing durable-ingestion capability in older reviews is superseded; continuous answer revalidation remains separate unfinished work.
+
+> **9 November 2026 follow-up:** See the [backend security and reliability audit](security-reliability-audit.md) for the latest adversarial checks, concrete fixes, validation results and unresolved release risks. The baseline below is historical.
+
+> **Current follow-up (2 November 2026):** This file is a historical baseline. See [the current robustness review](robustness-review.md) for account-history findings, tested fixes, bounded conversation context, recovery, conflict records, cache behavior and remaining release work. Do not interpret the old missing-feature list below as current capabilities.
+
 > **Deployment follow-up (27 October 2026):** This review records the earlier baseline. PostgreSQL/pgvector, asynchronous storage, Redis shared limits/leases, parser subprocess limits, Docker, Vercel/Render configuration, CI, and tested SQLite import are now implemented. See [DEPLOYMENT.md](../DEPLOYMENT.md) for the current architecture. References below to SQLite-only persistence, process-local-only limits, in-process production parsing, or missing containers are superseded. Temporal revalidation, workspace administration, independent ML evaluation, durable jobs, and service objectives remain unresolved.
 
 Review date: 27 October 2026. Scope: current source, original TemporalGuard brief, deterministic backend/HTTP tests, desktop/mobile browser flows, build and dependency audit. No production traffic, live provider accuracy study, penetration test or load test was performed. No claim that every bug has been found.

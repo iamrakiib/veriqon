@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata, ForbiddenException, createParamDecorator } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, SetMetadata, ForbiddenException, ConflictException, createParamDecorator } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { Account, AuthService } from './auth.service';
@@ -23,6 +23,11 @@ export class AuthGuard implements CanActivate {
     if (this.reflector.getAllAndOverride<boolean>('public', [context.getHandler(), context.getClass()])) return true;
     const bearer = request.headers.authorization?.match(/^Bearer (.+)$/i)?.[1];
     request.user = await this.auth.authenticate(bearer || cookie(request, 'vq_access'));
+    // Cookies are shared by browser tabs. An old tab must not replay its work as a new account.
+    const expectedAccount = request.headers['x-veriqon-account'];
+    if (expectedAccount !== undefined && expectedAccount !== request.user.id) {
+      throw new ConflictException({ code: 'ACCOUNT_CHANGED', message: 'The signed-in account changed. Reopen the workspace before continuing.' });
+    }
     return true;
   }
 }

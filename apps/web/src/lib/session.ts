@@ -3,10 +3,20 @@ export class AuthRequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); this.name = 'AuthRequestError'; }
 }
 let refreshing: Promise<boolean> | null = null;
+let workspaceAccount: string | null = null;
+export function setSessionAccount(account: string | null) { workspaceAccount = account; }
 export async function sessionFetch(url: string, options: RequestInit = {}) {
   const headers = new Headers(options.headers);
   headers.set('X-Veriqon-Request', '1');
-  const send = () => fetch(url, { ...options, headers, credentials: 'same-origin', cache: 'no-store' });
+  // Snapshot identity before any asynchronous refresh. Never silently replay a draft for another user.
+  if (workspaceAccount && (url.startsWith('/api/rag/') || url === '/api/auth/recovery-codes')) headers.set('X-Veriqon-Account', workspaceAccount);
+  const send = async () => {
+    const response = await fetch(url, { ...options, headers, credentials: 'same-origin', cache: 'no-store' });
+    if (response.status === 409 && (await response.clone().json().catch(() => null))?.code === 'ACCOUNT_CHANGED') {
+      window.dispatchEvent(new Event('veriqon:account-changed'));
+    }
+    return response;
+  };
   const response = await send();
   if (response.status !== 401 || ['/login', '/register', '/refresh', '/logout', '/recover'].some(path => url.endsWith(path))) return response;
   if (!refreshing) {

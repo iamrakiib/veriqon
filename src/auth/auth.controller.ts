@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, HttpCode } from '@nestjs/common';
-import { IsEmail, IsString, Length, IsOptional, MaxLength, Matches } from 'class-validator';
+import { IsEmail, IsString, Length, IsOptional, MaxLength, Matches, NotContains } from 'class-validator';
 import { Transform } from 'class-transformer';
 import type { Request, Response } from 'express';
 import { ACCESS_SECONDS, Account, AuthService, SESSION_SECONDS } from './auth.service';
@@ -12,7 +12,7 @@ export class LoginDto {
 export class RegisterDto extends LoginDto {
   @IsString() @Length(12, 128) declare password: string;
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
-  @IsString() @Length(1, 80) @Matches(/\S/) name!: string;
+  @IsString() @Length(1, 80) @Matches(/\S/) @NotContains('\0') name!: string;
   @IsOptional() @IsString() @MaxLength(128) setupCode?: string;
 }
 export class RecoveryCodesDto { @IsString() @Length(1, 128) password!: string; }
@@ -49,6 +49,7 @@ export class AuthController {
     return result;
   }
   @Public() @Post('refresh') @HttpCode(200) async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    await this.auth.limitRefresh(request.ip || 'unknown');
     const session = await this.auth.refresh(cookie(request, 'vq_refresh')); this.setCookies(response, session); return { user: session.user };
   }
   @Public() @Post('logout') @HttpCode(200) async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response) {

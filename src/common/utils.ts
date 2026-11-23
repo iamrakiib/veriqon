@@ -14,6 +14,12 @@ export function splitSentences(text: string) {
     .filter(Boolean);
 }
 
+/** Bounded, literal terms shared by SQL fallback retrieval and passage ranking. */
+export function lexicalTerms(query: string) {
+  const stop = new Set(['the','and','was','were','what','how','does','this','that','with','from','for','are','can','has','have','which','tell','about','please','paper']);
+  return [...new Set(query.toLowerCase().match(/[a-z0-9]{3,}/g) || [])].filter(term => !stop.has(term)).slice(0, 24);
+}
+
 // Simple character-based chunker with overlap. Suitable for short docs.
 export function chunkText(text: string, chunkSize = 800, overlap = 120) {
   if (!Number.isInteger(chunkSize) || chunkSize < 1 || !Number.isInteger(overlap) || overlap < 0 || overlap >= chunkSize) {
@@ -26,8 +32,9 @@ export function chunkText(text: string, chunkSize = 800, overlap = 120) {
     let end = Math.min(start + chunkSize, text.length);
     // Prefer a paragraph/table-row boundary, without creating zero-progress windows.
     if (end < text.length) {
-      const boundary = text.lastIndexOf('\n', end);
-      if (boundary > start + Math.max(overlap, Math.floor(chunkSize * 0.6))) end = boundary;
+      const earliest = start + Math.max(overlap, Math.floor(chunkSize * 0.6)) + 1;
+      const boundary = text.slice(earliest, end + 1).lastIndexOf('\n');
+      if (boundary >= 0) end = earliest + boundary;
     }
     const chunk = text.slice(start, end).trim();
     if (chunk.length > 0) chunks.push(chunk);

@@ -1,0 +1,750 @@
+{
+  "generatedAt": "2026-10-30T13:14:07.274Z",
+  "requests": 100,
+  "semanticIntents": 20,
+  "cache": "Production in-process answer cache; SHA-256 key of trimmed exact query plus owner, source revision, model/configuration and prompt version; 5-minute TTL; 100 entries.",
+  "protocol": "20 authored synthetic intent groups, five requests per group: original, exact repeat, whitespace-only repeat, two paraphrases. Fresh service instance; sequential requests within TTL. Real cache orchestration; fixture retrieval/generation/verification. No live LLM calls, user documents, or database writes.",
+  "limits": "Measures cache matching only. Equivalence labels are authored, not independently reviewed. Does not measure semantic similarity accuracy, model quality, real provider latency, cost savings, TTL expiry, distributed cache behavior, or production traffic hit rate.",
+  "hits": 40,
+  "misses": 60,
+  "hitRate": 0.4,
+  "breakdown": [
+    {
+      "kind": "first_question",
+      "requests": 20,
+      "hits": 0
+    },
+    {
+      "kind": "exact_repeat",
+      "requests": 20,
+      "hits": 20
+    },
+    {
+      "kind": "whitespace_repeat",
+      "requests": 20,
+      "hits": 20
+    },
+    {
+      "kind": "paraphrase_a",
+      "requests": 20,
+      "hits": 0
+    },
+    {
+      "kind": "paraphrase_b",
+      "requests": 20,
+      "hits": 0
+    }
+  ],
+  "callsFor100": {
+    "searches": 60,
+    "generations": 60,
+    "verifications": 60
+  },
+  "providerCalls": 0,
+  "isolationChecks": {
+    "differentOwnerMiss": true,
+    "changedSourceRevisionMiss": true
+  },
+  "rows": [
+    {
+      "group": 1,
+      "kind": "first_question",
+      "question": "How many datasets were used?",
+      "cacheHit": false,
+      "durationMs": 35.73710000000028
+    },
+    {
+      "group": 2,
+      "kind": "first_question",
+      "question": "How many backbones were evaluated?",
+      "cacheHit": false,
+      "durationMs": 2.276800000000094
+    },
+    {
+      "group": 3,
+      "kind": "first_question",
+      "question": "What accuracy did the model report?",
+      "cacheHit": false,
+      "durationMs": 1.8742999999999483
+    },
+    {
+      "group": 4,
+      "kind": "first_question",
+      "question": "How many epochs did training run?",
+      "cacheHit": false,
+      "durationMs": 1.5388000000002648
+    },
+    {
+      "group": 5,
+      "kind": "first_question",
+      "question": "What batch size was used?",
+      "cacheHit": false,
+      "durationMs": 1.9708000000000538
+    },
+    {
+      "group": 6,
+      "kind": "first_question",
+      "question": "What learning rate was used?",
+      "cacheHit": false,
+      "durationMs": 1.1023999999997613
+    },
+    {
+      "group": 7,
+      "kind": "first_question",
+      "question": "How many random seeds were used?",
+      "cacheHit": false,
+      "durationMs": 1.4671000000003005
+    },
+    {
+      "group": 8,
+      "kind": "first_question",
+      "question": "How long did training take?",
+      "cacheHit": false,
+      "durationMs": 0.9689000000003034
+    },
+    {
+      "group": 9,
+      "kind": "first_question",
+      "question": "How many layers does the encoder have?",
+      "cacheHit": false,
+      "durationMs": 3.5706999999997606
+    },
+    {
+      "group": 10,
+      "kind": "first_question",
+      "question": "What is the embedding dimension?",
+      "cacheHit": false,
+      "durationMs": 3.309700000000248
+    },
+    {
+      "group": 11,
+      "kind": "first_question",
+      "question": "How many remote days are allowed per week?",
+      "cacheHit": false,
+      "durationMs": 2.20029999999997
+    },
+    {
+      "group": 12,
+      "kind": "first_question",
+      "question": "How many annual leave days are provided?",
+      "cacheHit": false,
+      "durationMs": 1.3442999999997483
+    },
+    {
+      "group": 13,
+      "kind": "first_question",
+      "question": "How long is the probation period?",
+      "cacheHit": false,
+      "durationMs": 1.0177000000003318
+    },
+    {
+      "group": 14,
+      "kind": "first_question",
+      "question": "What is the meal reimbursement limit?",
+      "cacheHit": false,
+      "durationMs": 1.106800000000021
+    },
+    {
+      "group": 15,
+      "kind": "first_question",
+      "question": "How many vacation days may be carried over?",
+      "cacheHit": false,
+      "durationMs": 0.8442000000000007
+    },
+    {
+      "group": 16,
+      "kind": "first_question",
+      "question": "What is the upload size limit?",
+      "cacheHit": false,
+      "durationMs": 0.839799999999741
+    },
+    {
+      "group": 17,
+      "kind": "first_question",
+      "question": "How many files can be uploaded in a batch?",
+      "cacheHit": false,
+      "durationMs": 0.8775000000000546
+    },
+    {
+      "group": 18,
+      "kind": "first_question",
+      "question": "How long are access tokens valid?",
+      "cacheHit": false,
+      "durationMs": 0.8683000000000902
+    },
+    {
+      "group": 19,
+      "kind": "first_question",
+      "question": "How many recovery codes are generated?",
+      "cacheHit": false,
+      "durationMs": 0.8559999999997672
+    },
+    {
+      "group": 20,
+      "kind": "first_question",
+      "question": "How long are cached answers retained?",
+      "cacheHit": false,
+      "durationMs": 0.7635000000000218
+    },
+    {
+      "group": 1,
+      "kind": "exact_repeat",
+      "question": "How many datasets were used?",
+      "cacheHit": true,
+      "durationMs": 0.2154000000000451
+    },
+    {
+      "group": 2,
+      "kind": "exact_repeat",
+      "question": "How many backbones were evaluated?",
+      "cacheHit": true,
+      "durationMs": 0.09989999999970678
+    },
+    {
+      "group": 3,
+      "kind": "exact_repeat",
+      "question": "What accuracy did the model report?",
+      "cacheHit": true,
+      "durationMs": 0.08320000000003347
+    },
+    {
+      "group": 4,
+      "kind": "exact_repeat",
+      "question": "How many epochs did training run?",
+      "cacheHit": true,
+      "durationMs": 0.07450000000017099
+    },
+    {
+      "group": 5,
+      "kind": "exact_repeat",
+      "question": "What batch size was used?",
+      "cacheHit": true,
+      "durationMs": 0.06829999999990832
+    },
+    {
+      "group": 6,
+      "kind": "exact_repeat",
+      "question": "What learning rate was used?",
+      "cacheHit": true,
+      "durationMs": 0.25489999999990687
+    },
+    {
+      "group": 7,
+      "kind": "exact_repeat",
+      "question": "How many random seeds were used?",
+      "cacheHit": true,
+      "durationMs": 0.15360000000009677
+    },
+    {
+      "group": 8,
+      "kind": "exact_repeat",
+      "question": "How long did training take?",
+      "cacheHit": true,
+      "durationMs": 0.045099999999820284
+    },
+    {
+      "group": 9,
+      "kind": "exact_repeat",
+      "question": "How many layers does the encoder have?",
+      "cacheHit": true,
+      "durationMs": 0.07510000000002037
+    },
+    {
+      "group": 10,
+      "kind": "exact_repeat",
+      "question": "What is the embedding dimension?",
+      "cacheHit": true,
+      "durationMs": 0.0478000000002794
+    },
+    {
+      "group": 11,
+      "kind": "exact_repeat",
+      "question": "How many remote days are allowed per week?",
+      "cacheHit": true,
+      "durationMs": 0.06149999999979627
+    },
+    {
+      "group": 12,
+      "kind": "exact_repeat",
+      "question": "How many annual leave days are provided?",
+      "cacheHit": true,
+      "durationMs": 0.07960000000002765
+    },
+    {
+      "group": 13,
+      "kind": "exact_repeat",
+      "question": "How long is the probation period?",
+      "cacheHit": true,
+      "durationMs": 0.060899999999946886
+    },
+    {
+      "group": 14,
+      "kind": "exact_repeat",
+      "question": "What is the meal reimbursement limit?",
+      "cacheHit": true,
+      "durationMs": 0.0579000000002452
+    },
+    {
+      "group": 15,
+      "kind": "exact_repeat",
+      "question": "How many vacation days may be carried over?",
+      "cacheHit": true,
+      "durationMs": 0.05690000000004147
+    },
+    {
+      "group": 16,
+      "kind": "exact_repeat",
+      "question": "What is the upload size limit?",
+      "cacheHit": true,
+      "durationMs": 0.05529999999998836
+    },
+    {
+      "group": 17,
+      "kind": "exact_repeat",
+      "question": "How many files can be uploaded in a batch?",
+      "cacheHit": true,
+      "durationMs": 0.05319999999983338
+    },
+    {
+      "group": 18,
+      "kind": "exact_repeat",
+      "question": "How long are access tokens valid?",
+      "cacheHit": true,
+      "durationMs": 0.05249999999978172
+    },
+    {
+      "group": 19,
+      "kind": "exact_repeat",
+      "question": "How many recovery codes are generated?",
+      "cacheHit": true,
+      "durationMs": 0.05430000000023938
+    },
+    {
+      "group": 20,
+      "kind": "exact_repeat",
+      "question": "How long are cached answers retained?",
+      "cacheHit": true,
+      "durationMs": 0.05330000000003565
+    },
+    {
+      "group": 1,
+      "kind": "whitespace_repeat",
+      "question": "  How many datasets were used?  ",
+      "cacheHit": true,
+      "durationMs": 0.07679999999982101
+    },
+    {
+      "group": 2,
+      "kind": "whitespace_repeat",
+      "question": "  How many backbones were evaluated?  ",
+      "cacheHit": true,
+      "durationMs": 0.05639999999993961
+    },
+    {
+      "group": 3,
+      "kind": "whitespace_repeat",
+      "question": "  What accuracy did the model report?  ",
+      "cacheHit": true,
+      "durationMs": 0.05569999999988795
+    },
+    {
+      "group": 4,
+      "kind": "whitespace_repeat",
+      "question": "  How many epochs did training run?  ",
+      "cacheHit": true,
+      "durationMs": 0.059099999999943975
+    },
+    {
+      "group": 5,
+      "kind": "whitespace_repeat",
+      "question": "  What batch size was used?  ",
+      "cacheHit": true,
+      "durationMs": 0.07399999999961437
+    },
+    {
+      "group": 6,
+      "kind": "whitespace_repeat",
+      "question": "  What learning rate was used?  ",
+      "cacheHit": true,
+      "durationMs": 0.06629999999995562
+    },
+    {
+      "group": 7,
+      "kind": "whitespace_repeat",
+      "question": "  How many random seeds were used?  ",
+      "cacheHit": true,
+      "durationMs": 0.09519999999974971
+    },
+    {
+      "group": 8,
+      "kind": "whitespace_repeat",
+      "question": "  How long did training take?  ",
+      "cacheHit": true,
+      "durationMs": 0.0725999999999658
+    },
+    {
+      "group": 9,
+      "kind": "whitespace_repeat",
+      "question": "  How many layers does the encoder have?  ",
+      "cacheHit": true,
+      "durationMs": 0.06080000000019936
+    },
+    {
+      "group": 10,
+      "kind": "whitespace_repeat",
+      "question": "  What is the embedding dimension?  ",
+      "cacheHit": true,
+      "durationMs": 0.06379999999990105
+    },
+    {
+      "group": 11,
+      "kind": "whitespace_repeat",
+      "question": "  How many remote days are allowed per week?  ",
+      "cacheHit": true,
+      "durationMs": 0.05390000000033979
+    },
+    {
+      "group": 12,
+      "kind": "whitespace_repeat",
+      "question": "  How many annual leave days are provided?  ",
+      "cacheHit": true,
+      "durationMs": 0.0579000000002452
+    },
+    {
+      "group": 13,
+      "kind": "whitespace_repeat",
+      "question": "  How long is the probation period?  ",
+      "cacheHit": true,
+      "durationMs": 0.05540000000019063
+    },
+    {
+      "group": 14,
+      "kind": "whitespace_repeat",
+      "question": "  What is the meal reimbursement limit?  ",
+      "cacheHit": true,
+      "durationMs": 0.05319999999983338
+    },
+    {
+      "group": 15,
+      "kind": "whitespace_repeat",
+      "question": "  How many vacation days may be carried over?  ",
+      "cacheHit": true,
+      "durationMs": 0.06259999999974752
+    },
+    {
+      "group": 16,
+      "kind": "whitespace_repeat",
+      "question": "  What is the upload size limit?  ",
+      "cacheHit": true,
+      "durationMs": 0.054799999999886495
+    },
+    {
+      "group": 17,
+      "kind": "whitespace_repeat",
+      "question": "  How many files can be uploaded in a batch?  ",
+      "cacheHit": true,
+      "durationMs": 0.05160000000023501
+    },
+    {
+      "group": 18,
+      "kind": "whitespace_repeat",
+      "question": "  How long are access tokens valid?  ",
+      "cacheHit": true,
+      "durationMs": 0.04989999999997963
+    },
+    {
+      "group": 19,
+      "kind": "whitespace_repeat",
+      "question": "  How many recovery codes are generated?  ",
+      "cacheHit": true,
+      "durationMs": 0.0488999999997759
+    },
+    {
+      "group": 20,
+      "kind": "whitespace_repeat",
+      "question": "  How long are cached answers retained?  ",
+      "cacheHit": true,
+      "durationMs": 0.05009999999992942
+    },
+    {
+      "group": 1,
+      "kind": "paraphrase_a",
+      "question": "What is the number of datasets used?",
+      "cacheHit": false,
+      "durationMs": 0.7910000000001673
+    },
+    {
+      "group": 2,
+      "kind": "paraphrase_a",
+      "question": "What number of backbones was evaluated?",
+      "cacheHit": false,
+      "durationMs": 1.2568999999998596
+    },
+    {
+      "group": 3,
+      "kind": "paraphrase_a",
+      "question": "What was the reported model accuracy?",
+      "cacheHit": false,
+      "durationMs": 0.8374999999996362
+    },
+    {
+      "group": 4,
+      "kind": "paraphrase_a",
+      "question": "What was the number of training epochs?",
+      "cacheHit": false,
+      "durationMs": 1.0895999999997912
+    },
+    {
+      "group": 5,
+      "kind": "paraphrase_a",
+      "question": "What was the training batch size?",
+      "cacheHit": false,
+      "durationMs": 0.9385999999999513
+    },
+    {
+      "group": 6,
+      "kind": "paraphrase_a",
+      "question": "Which learning rate was used for training?",
+      "cacheHit": false,
+      "durationMs": 1.0842000000002372
+    },
+    {
+      "group": 7,
+      "kind": "paraphrase_a",
+      "question": "What was the count of random seeds?",
+      "cacheHit": false,
+      "durationMs": 1.2420999999999367
+    },
+    {
+      "group": 8,
+      "kind": "paraphrase_a",
+      "question": "What was the training duration?",
+      "cacheHit": false,
+      "durationMs": 0.9537000000000262
+    },
+    {
+      "group": 9,
+      "kind": "paraphrase_a",
+      "question": "What is the number of encoder layers?",
+      "cacheHit": false,
+      "durationMs": 0.8560999999999694
+    },
+    {
+      "group": 10,
+      "kind": "paraphrase_a",
+      "question": "How many dimensions do the embeddings have?",
+      "cacheHit": false,
+      "durationMs": 0.8346000000001368
+    },
+    {
+      "group": 11,
+      "kind": "paraphrase_a",
+      "question": "What is the weekly remote-work day allowance?",
+      "cacheHit": false,
+      "durationMs": 0.8042000000000371
+    },
+    {
+      "group": 12,
+      "kind": "paraphrase_a",
+      "question": "What is the annual leave allowance in days?",
+      "cacheHit": false,
+      "durationMs": 0.8962000000001353
+    },
+    {
+      "group": 13,
+      "kind": "paraphrase_a",
+      "question": "What is the duration of probation?",
+      "cacheHit": false,
+      "durationMs": 0.9465999999997621
+    },
+    {
+      "group": 14,
+      "kind": "paraphrase_a",
+      "question": "What is the maximum meal reimbursement?",
+      "cacheHit": false,
+      "durationMs": 0.9039999999999964
+    },
+    {
+      "group": 15,
+      "kind": "paraphrase_a",
+      "question": "What is the vacation carryover allowance?",
+      "cacheHit": false,
+      "durationMs": 0.746599999999944
+    },
+    {
+      "group": 16,
+      "kind": "paraphrase_a",
+      "question": "What is the maximum upload file size?",
+      "cacheHit": false,
+      "durationMs": 0.9259999999999309
+    },
+    {
+      "group": 17,
+      "kind": "paraphrase_a",
+      "question": "What is the batch upload file limit?",
+      "cacheHit": false,
+      "durationMs": 1.0199999999999818
+    },
+    {
+      "group": 18,
+      "kind": "paraphrase_a",
+      "question": "What is the access-token lifetime?",
+      "cacheHit": false,
+      "durationMs": 1.2199999999998
+    },
+    {
+      "group": 19,
+      "kind": "paraphrase_a",
+      "question": "What is the number of generated recovery codes?",
+      "cacheHit": false,
+      "durationMs": 0.8479999999999563
+    },
+    {
+      "group": 20,
+      "kind": "paraphrase_a",
+      "question": "What is the answer-cache retention duration?",
+      "cacheHit": false,
+      "durationMs": 1.2717999999999847
+    },
+    {
+      "group": 1,
+      "kind": "paraphrase_b",
+      "question": "How many datasets did the experiment use?",
+      "cacheHit": false,
+      "durationMs": 0.9130000000000109
+    },
+    {
+      "group": 2,
+      "kind": "paraphrase_b",
+      "question": "How many backbone models were tested?",
+      "cacheHit": false,
+      "durationMs": 1.2436000000002423
+    },
+    {
+      "group": 3,
+      "kind": "paraphrase_b",
+      "question": "What accuracy value was reported for the model?",
+      "cacheHit": false,
+      "durationMs": 2.156199999999899
+    },
+    {
+      "group": 4,
+      "kind": "paraphrase_b",
+      "question": "For how many epochs was the model trained?",
+      "cacheHit": false,
+      "durationMs": 1.2631999999998698
+    },
+    {
+      "group": 5,
+      "kind": "paraphrase_b",
+      "question": "How large was each training batch?",
+      "cacheHit": false,
+      "durationMs": 1.0774999999998727
+    },
+    {
+      "group": 6,
+      "kind": "paraphrase_b",
+      "question": "What was the training learning rate?",
+      "cacheHit": false,
+      "durationMs": 1.1313000000000102
+    },
+    {
+      "group": 7,
+      "kind": "paraphrase_b",
+      "question": "How many seeds were used in the experiment?",
+      "cacheHit": false,
+      "durationMs": 1.162000000000262
+    },
+    {
+      "group": 8,
+      "kind": "paraphrase_b",
+      "question": "How much time did training require?",
+      "cacheHit": false,
+      "durationMs": 1.0390000000002146
+    },
+    {
+      "group": 9,
+      "kind": "paraphrase_b",
+      "question": "How many layers are in the encoder?",
+      "cacheHit": false,
+      "durationMs": 1.1667999999999665
+    },
+    {
+      "group": 10,
+      "kind": "paraphrase_b",
+      "question": "What dimensionality do the embeddings use?",
+      "cacheHit": false,
+      "durationMs": 0.721599999999853
+    },
+    {
+      "group": 11,
+      "kind": "paraphrase_b",
+      "question": "How many days a week may employees work remotely?",
+      "cacheHit": false,
+      "durationMs": 0.7555999999999585
+    },
+    {
+      "group": 12,
+      "kind": "paraphrase_b",
+      "question": "How many days of annual leave are available?",
+      "cacheHit": false,
+      "durationMs": 1.0914999999999964
+    },
+    {
+      "group": 13,
+      "kind": "paraphrase_b",
+      "question": "How many months does probation last?",
+      "cacheHit": false,
+      "durationMs": 0.95049999999992
+    },
+    {
+      "group": 14,
+      "kind": "paraphrase_b",
+      "question": "How much may be reimbursed for a meal?",
+      "cacheHit": false,
+      "durationMs": 0.6732999999999265
+    },
+    {
+      "group": 15,
+      "kind": "paraphrase_b",
+      "question": "How many unused vacation days can carry over?",
+      "cacheHit": false,
+      "durationMs": 0.6948999999999614
+    },
+    {
+      "group": 16,
+      "kind": "paraphrase_b",
+      "question": "How large can an uploaded file be?",
+      "cacheHit": false,
+      "durationMs": 0.8061000000002423
+    },
+    {
+      "group": 17,
+      "kind": "paraphrase_b",
+      "question": "What is the maximum number of files per upload batch?",
+      "cacheHit": false,
+      "durationMs": 1.6480999999998858
+    },
+    {
+      "group": 18,
+      "kind": "paraphrase_b",
+      "question": "How much time passes before an access token expires?",
+      "cacheHit": false,
+      "durationMs": 1.6242999999999483
+    },
+    {
+      "group": 19,
+      "kind": "paraphrase_b",
+      "question": "How many backup recovery codes are issued?",
+      "cacheHit": false,
+      "durationMs": 0.9540999999999258
+    },
+    {
+      "group": 20,
+      "kind": "paraphrase_b",
+      "question": "How much time can an answer remain cached?",
+      "cacheHit": false,
+      "durationMs": 0.8286000000002787
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "checkpointDate": "2026-11-13",
+  "sourceFingerprint": "d0e2e3f39eee95fd1106f06ff5ad32a09a781363aa4fbe089d86b42738229d4d",
+  "backend": {
+    "passed": 169,
+    "failed": 0,
+    "skipped": 6
+  },
+  "infrastructure": {
+    "passed": 67,
+    "failed": 0,
+    "skipped": 0
+  },
+  "controlledCorrectionProtocol": {
+    "passed": 7,
+    "total": 7,
+    "liveInference": false
+  },
+  "metrics": [],
+  "parser": {
+    "inputBytes": 500000,
+    "extractedCharacters": 500000,
+    "parserPeakRssKiB": 57420,
+    "parentPeakRssKiB": 61752,
+    "elapsedMs": 1155.1033,
+    "parserHeapCapMiB": 96,
+    "declaredParserBudgetMiB": 256,
+    "format": "txt",
+    "concurrency": 1,
+    "limitation": "Single synthetic maximum-text fixture; not PDF/DOCX worst-case or concurrent capacity."
+  },
+  "connections": {
+    "active": {
+      "sampledAt": "2026-11-13T14:07:31.528Z",
+      "phase": "standalone recovery fixture",
+      "redisClients": 9,
+      "redisBlockedClients": 2,
+      "postgresConnections": [
+        {
+          "application": "psql",
+          "count": 1
+        },
+        {
+          "application": "veriqon-worker",
+          "count": 2
+        }
+      ],
+      "limitation": "Point sample including test harness and observer; not peak or managed service capacity. Fixture has two producer queues; observer adds one Redis client. Worker labels also include the fixture database."
+    },
+    "afterSuite": {
+      "sampledAt": "2026-11-13T14:10:04.507Z",
+      "redisClients": 1,
+      "redisBlockedClients": 0,
+      "postgresConnections": [
+        {
+          "application": "psql",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "limitation": "Controlled local tests with scripted model responses. Recovery leases were expired in the fixture. No cloud, live accuracy, concurrent capacity or SLA claim."
+}

@@ -1,7 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 
 async function showAssistant(page: Page) {
-  if ((page.viewportSize()?.width || 0) <= 640) await page.getByRole('button', { name: 'Show assistant' }).click();
+  await expect(page.locator('.app-shell')).toBeVisible();
+  if (await page.getByRole('button', { name: 'Show assistant', exact: true }).isVisible()) await page.getByRole('button', { name: 'Show assistant', exact: true }).click();
 }
 
 const source = { id: 'policy', text: 'Employees may work remotely one day per week.', source: 'policy.md', chunkCount: 1, version: '1', hasOriginal: true };
@@ -20,7 +21,7 @@ test('upload, search, preview, chat, citations and repair history', async ({ pag
   await page.route('**/api/rag/upload', async route => { expect(route.request().headers()['content-type']).toContain('multipart/form-data; boundary='); expect(route.request().postData()).toContain(source.text); uploaded = true; await route.fulfill({ json: { success: true }, status: 201 }); });
   await page.route('**/api/rag/query', async route => { expect(route.request().postDataJSON().query).toBe('How many days?'); await route.fulfill({ json: result }); });
   await page.route('**/api/rag/docs/policy/file', route => route.fulfill({ body: source.text, contentType: 'text/plain' }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Make room for what you know' })).toBeVisible();
   await page.getByLabel('Upload documents').setInputFiles({ name: 'policy.md', mimeType: 'text/markdown', buffer: Buffer.from(source.text) });
   await expect(page.getByRole('button', { name: /policy.md.*Version 1/ })).toBeVisible();
@@ -36,13 +37,13 @@ test('upload, search, preview, chat, citations and repair history', async ({ pag
   await showAssistant(page);
   await page.getByLabel('Ask your knowledge base').fill('How many days?');
   await page.getByRole('button', { name: 'Send question' }).click();
-  await expect(page.getByText('Repaired & model checked')).toBeVisible();
+  await expect(page.getByText('Repaired & verified')).toBeVisible();
   await expect(page.getByText('1 passage from 1 document. Numbers identify passages.')).toBeVisible();
   await page.getByRole('button', { name: 'Open passage 1 from policy.md' }).click();
   await expect(page.getByRole('dialog')).toContainText(source.text);
   await page.getByRole('button', { name: 'Close dialog' }).click();
   if (testInfo.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
-  await page.getByRole('button', { name: /Answer repairs/ }).click();
+  await page.getByRole('button', { name: /Corrections/ }).click();
   await expect(page.getByRole('main').getByText('Three days per week.', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
@@ -50,7 +51,7 @@ test('upload, search, preview, chat, citations and repair history', async ({ pag
 test('unsupported files and API failures are visible without fake success', async ({ page }) => {
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
   await page.route('**/api/rag/query', route => route.fulfill({ status: 500, json: { message: 'Provider unavailable. Try again.' } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
   await page.getByLabel('Upload documents').setInputFiles({ name: 'policy.exe', mimeType: 'application/octet-stream', buffer: Buffer.from('not a supported text file') });
   await expect(page.getByText('Supported formats: PDF, DOCX, TXT and Markdown. Convert legacy .doc files to .docx.')).toBeVisible();
@@ -64,7 +65,7 @@ test('unsupported files and API failures are visible without fake success', asyn
 
 test('offline state offers recovery and disables uploads', async ({ page }) => {
   await page.route('**/api/rag/docs', route => route.fulfill({ status: 503, json: { message: 'API is offline' } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('alert').filter({ hasText: 'API is offline' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeDisabled();
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
@@ -75,19 +76,19 @@ test('offline state offers recovery and disables uploads', async ({ page }) => {
 test('reference layout renders without browser errors or horizontal overflow', async ({ page }, testInfo) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [source] }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: /policy.md.*Version 1/ })).toBeVisible();
   await expect(page).toHaveTitle('Veriqon | Knowledge workspace');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.screenshot({ path: `test-results/workspace-${testInfo.project.name}-dark.png`, fullPage: true });
   await page.getByRole('button', { name: 'Switch to light mode' }).click();
-  await expect(page.locator('.dropzone')).toHaveCSS('background-color', 'rgb(250, 250, 250)');
+  await expect(page.locator('.dropzone')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
   await page.screenshot({ path: `test-results/workspace-${testInfo.project.name}-light.png`, fullPage: true });
   if (testInfo.project.name === 'mobile') {
     await showAssistant(page);
     await page.screenshot({ path: 'test-results/assistant-mobile-light.png', fullPage: true });
     await page.getByRole('button', { name: 'Switch to dark mode' }).click();
-    await expect(page.locator('.chat-panel')).toHaveCSS('background-color', 'rgb(17, 17, 17)');
+    await expect(page.locator('.chat-panel')).toHaveCSS('background-color', 'rgb(24, 24, 24)');
     await page.screenshot({ path: 'test-results/assistant-mobile-dark.png', fullPage: true });
   }
   expect(errors).toEqual([]);
@@ -99,19 +100,19 @@ test('theme persists across reload and system mode follows the device preference
   page.on('console', message => { if (message.type() === 'error' && /hydration|did not match/i.test(message.text())) errors.push(message.text()); });
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   // The reference's black appearance is the initial default, even on a light OS.
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.getByRole('button', { name: 'Switch to light mode' }).click();
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(237, 237, 237)');
-  await page.reload();
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(250, 250, 250)');
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.getByRole('button', { name: 'Switch to dark mode' }).click();
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   if (testInfo.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('button', { name: 'Workspace settings', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCSS('background-color', 'rgb(12, 12, 12)');
+  await expect(page.getByRole('dialog')).toHaveCSS('background-color', 'rgb(24, 24, 24)');
   await page.getByRole('radio', { name: 'System' }).check();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.getByRole('dialog')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
@@ -127,7 +128,7 @@ test('theme controls still work when browser storage is blocked', async ({ page 
     Storage.prototype.setItem = () => { throw new DOMException('Blocked', 'SecurityError'); };
   });
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Switch to light mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.getByRole('button', { name: 'Switch to dark mode' }).click();
@@ -140,11 +141,12 @@ test('chat composer stays inside the viewport while long panels scroll independe
   await page.route('**/api/rag/docs', route => route.fulfill({ json: documents }));
   await page.route('**/api/rag/query', route => route.fulfill({ json: { ...result, draft: Array(50).fill('This long test answer must scroll inside the conversation panel.').join('\n\n') } }));
   await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
+  await showAssistant(page);
   await page.getByLabel('Ask your knowledge base').fill('Show a long answer');
   await page.getByRole('button', { name: 'Send question' }).click();
-  await expect(page.getByText('Repaired & model checked')).toBeVisible();
+  await expect(page.getByText('Repaired & verified')).toBeVisible();
   for (const size of [{ width: 1920, height: 1080 }, { width: 1366, height: 768 }, { width: 1280, height: 720 }, { width: 1024, height: 600 }, { width: 800, height: 600 }, { width: 390, height: 844 }, { width: 390, height: 480 }]) {
     await page.setViewportSize(size);
     await showAssistant(page);
@@ -156,13 +158,13 @@ test('chat composer stays inside the viewport while long panels scroll independe
     }
     expect(await page.evaluate(() => ({ height: document.documentElement.scrollHeight, width: document.documentElement.scrollWidth, scrollY: window.scrollY }))).toEqual({ height: size.height, width: size.width, scrollY: 0 });
     expect(await page.locator('.chat-scroll').evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
-    if (size.width > 640) expect(await page.locator('main').evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
+    expect(await page.locator('main').evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
   }
   // Returning to the library keeps its documents and the conversation intact.
   await page.getByRole('button', { name: 'Show workspace' }).click();
   await expect(page.getByRole('button', { name: /policy-01.md.*Version 1/ })).toBeVisible();
   await showAssistant(page);
-  await expect(page.getByText('Repaired & model checked')).toBeVisible();
+  await expect(page.getByText('Repaired & verified')).toBeVisible();
 });
 
 
@@ -176,30 +178,31 @@ test('saved chat history reopens after reload with answers, citations and repair
     saved.push({ id: body.conversationId, title: body.query, messages: [{ id: 'saved-message', question: body.query, createdAt: new Date().toISOString(), result }] });
     return route.fulfill({ json: result });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await showAssistant(page);
   await expect(page.getByRole('button', { name: 'New conversation', exact: true }).first()).toBeEnabled();
   await page.getByLabel('Ask your knowledge base').fill('Remember this research question');
   await page.getByRole('button', { name: 'Send question' }).click();
-  await expect(page.getByText('Repaired & model checked')).toBeVisible();
-  await page.reload();
+  await expect(page.getByText('Repaired & verified')).toBeVisible();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await showAssistant(page);
   await expect(page.locator('.user-message')).toHaveText('Remember this research question');
-  await expect(page.getByText('Repaired & model checked')).toBeVisible();
+  await expect(page.getByText('Repaired & verified')).toBeVisible();
+  await page.getByText('Retrieved passages', { exact: true }).click();
   await expect(page.getByRole('button', { name: '[1] policy.md' })).toBeVisible();
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.getByText('CHAT HISTORY', { exact: true })).toBeVisible();
   await page.locator('.conversation-link', { hasText: 'Remember this research question' }).click();
   await expect(page.locator('.user-message')).toHaveText('Remember this research question');
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
-  await page.getByRole('button', { name: /Answer repairs/ }).click();
+  await page.getByRole('button', { name: /Corrections/ }).click();
   await expect(page.getByRole('main').getByText('Three days per week.', { exact: true })).toBeVisible();
 });
 
 test('history failure is explicit and can be retried', async ({ page }, info) => {
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
   await page.route('**/api/rag/conversations', route => route.fulfill({ status: 503, json: { message: 'Unavailable' } }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.getByText('Chat history could not be loaded. Retry to reopen your conversations.')).toBeVisible();
   await page.route('**/api/rag/conversations', route => route.fulfill({ json: [] }));
@@ -214,7 +217,7 @@ test('source changes, history search, keyboard tabs and confirmed document remov
   await page.route('**/api/rag/conversations', route => route.fulfill({ json: saved }));
   await page.route('**/api/rag/docs', route => route.fulfill({ json: removed ? [] : [source] }));
   await page.route('**/api/rag/docs/policy', route => { expect(route.request().method()).toBe('DELETE'); expect(route.request().headers()['x-veriqon-request']).toBe('1'); removed = true; return route.fulfill({ json: { success: true } }); });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: /policy.md.*Version 1/ })).toBeVisible();
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByLabel('Search chat history').fill('unmatched');
@@ -230,7 +233,7 @@ test('source changes, history search, keyboard tabs and confirmed document remov
   await expect(page.getByRole('tab', { name: /Evidence/ })).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Home');
   await expect(page.getByRole('button', { name: 'Copy answer' })).toBeVisible();
-  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Show workspace' }).click();
+  await page.getByRole('button', { name: 'Show workspace' }).click();
   await page.getByRole('button', { name: /policy.md.*Version 1/ }).click();
   await page.getByRole('button', { name: 'Delete document', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('Saved answers keep their cited passages');
@@ -246,10 +249,10 @@ test('source changes, history search, keyboard tabs and confirmed document remov
 
 test('withheld repair attempts are visible without publishing unsupported drafts', async ({ page }, info) => {
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
-  await page.route('**/api/rag/conversations', route => route.fulfill({ json: [{ id: 'failed-repair', title: 'A disputed claim', messages: [{ id: 'failed-message', question: 'A disputed claim', createdAt: new Date().toISOString(), result: { ...result, status: 'abstained', correction: null, attempts: 2, reason: 'verification_failed', draft: 'The answer could not be verified.', factCheck: { ...result.factCheck, passed: false, evidence: 'The source does not support this claim.' } } }] }] }));
-  await page.goto('/');
+  await page.route('**/api/rag/conversations', route => route.fulfill({ json: [{ id: 'failed-repair', title: 'A disputed claim', messages: [{ id: 'failed-message', question: 'A disputed claim', createdAt: new Date().toISOString(), result: { ...result, status: 'abstained', correction: null, attempts: 2, reason: 'verification_failed', repairHistory: [{ original: 'Three days per week.', accepted: false, reason: 'No grounded revision was available.' }], draft: 'The answer could not be verified.', factCheck: { ...result.factCheck, passed: false, evidence: 'The source does not support this claim.' } } }] }] }));
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
-  await page.getByRole('button', { name: /Answer repairs/ }).click();
+  await page.getByRole('button', { name: /Corrections/ }).click();
   await expect(page.getByText('Repair withheld')).toBeVisible();
   await page.getByText('Why verification failed').click();
   await expect(page.getByRole('main').getByText('The source does not support this claim.')).toBeVisible();

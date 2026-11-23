@@ -15,7 +15,7 @@ test('recover a password with a saved code, including mismatch and invalid-code 
     calls++; expect(route.request().postDataJSON()).toEqual({ email: user.email, code: codes[0], password: 'new password for tests' });
     return route.fulfill({ status: valid ? 200 : 401, json: valid ? { success: true } : { message: 'Email or recovery code is invalid, used, or replaced.' } });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Forgot password?' }).click();
   await page.getByLabel('Recovery email').fill(user.email);
   await page.getByLabel('Recovery code', { exact: true }).fill(codes[0]);
@@ -37,7 +37,7 @@ test('registration shows one-time codes and requires acknowledgement before clos
   let registered = false;
   await page.route('**/api/auth/me', route => route.fulfill({ status: registered ? 200 : 401, json: registered ? { user } : {} }));
   await page.route('**/api/auth/register', route => { registered = true; return route.fulfill({ status: 201, json: { user, recoveryCodes: codes } }); });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Create an account', exact: true }).click();
   await page.getByLabel('Full name').fill(user.name);
   await page.getByLabel('Email address').fill(user.email);
@@ -61,7 +61,7 @@ test('an existing account can generate backup codes from settings after confirmi
     expect(route.request().postDataJSON()).toEqual({ password: 'current password for tests' });
     return route.fulfill({ json: { codes } });
   });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('button', { name: 'Workspace settings', exact: true }).click();
   const dialog = page.getByRole('dialog');
