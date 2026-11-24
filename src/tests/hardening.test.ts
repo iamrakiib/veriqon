@@ -78,6 +78,24 @@ test('HTTP hardening: account switching, bounded complete history, upload admiss
     assert.equal((await get('/rag/conflicts').then(r=>r.json()) as {records:unknown[]}).records.length,0);
     assert.equal((await database.knowledgeEvents(a.id,archiveFixture.id)).length,1);
 
+    const clearCorrections = (body: unknown, customHeaders: Record<string,string> = headers) => fetch(origin + '/rag/corrections/archive', { method: 'POST', headers: { ...customHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    assert.equal((await clearCorrections({ records: [] }, {})).status, 403);
+    assert.equal((await clearCorrections({ records: [] }, { 'X-Veriqon-Request': '1' })).status, 401);
+    for (const body of [{}, { records: [] }, { records: [null] }, { records: [{ id: 'x', assessmentId: 'bad' }] }, { records: [{ id: 'x', assessmentId: 'a'.repeat(64), ownerId: b.id }] }]) assert.equal((await clearCorrections(body)).status, 400);
+    const correctionId = await database.beginMessage(a.id, randomUUID(), 'Controlled repair history');
+    await database.finishMessage(a.id, correctionId, { draft: 'One day.', correction: { original: 'Three days.', revised: 'One day.' } });
+    const correctionResponse = await get('/rag/corrections');
+    assert.equal(correctionResponse.headers.get('Cache-Control'), 'private, no-store');
+    const correctionRecord = (await correctionResponse.json() as { records: { id: string; assessmentId: string }[] }).records[0];
+    const correctionBody = { records: [{ id: correctionRecord.id, assessmentId: correctionRecord.assessmentId }] };
+    assert.equal((await clearCorrections(correctionBody, { Cookie: b.cookie, 'X-Veriqon-Request': '1', 'X-Veriqon-Account': b.id })).status, 404);
+    assert.equal((await clearCorrections({ records: [{ id: correctionId, assessmentId: '0'.repeat(64) }] })).status, 409);
+    assert.equal((await clearCorrections(correctionBody)).status, 200);
+    assert.equal((await clearCorrections(correctionBody)).status, 200);
+    assert.equal((await database.corrections(a.id)).records.length, 0);
+    // Remove this fixture conversation so the bounded-history assertions below retain their own dataset.
+    await database.run('DELETE FROM conversations WHERE owner_id=? AND id=(SELECT conversation_id FROM messages WHERE owner_id=? AND id=?)', a.id, a.id, correctionId);
+
     const ids = Array.from({ length: 25 }, () => randomUUID());
     for (const id of ids) await database.beginMessage(a.id, id, 'Stored question', randomUUID());
     // Tied times exercise the stable cursor ordering, independently of wall-clock speed.

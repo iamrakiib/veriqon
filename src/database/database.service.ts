@@ -290,6 +290,42 @@ export class DatabaseService extends KnowledgeStore implements OnModuleInit {
       ...(message.result ? { result: (() => { const result = JSON.parse(String(message.result)); return { ...result, sourcesChanged: result.sourceRevision === undefined ? undefined : result.sourceRevision !== revision }; })() } : { error: message.error ? String(message.error) : Date.now() - Number(message.created_at) < 180000 ? 'This answer is still processing. Refresh chat history shortly to check for a result.' : 'This answer was interrupted before completion. You can retry the question.' })
     };
   }
+  private correctionAssessment(result: string) {
+    const parsed = JSON.parse(result);
+    return !parsed.cached && (parsed.repairHistory?.length || parsed.correction)
+      ? createHash('sha256').update(result).digest('hex') : null;
+  }
+  async corrections(ownerId: string) {
+    const rows = await this.all('SELECT id,question,created_at,result FROM messages WHERE owner_id=? AND result IS NOT NULL ORDER BY created_at DESC,id LIMIT 201', ownerId);
+    const candidates = rows.slice(0, 200).flatMap(row => {
+      const assessmentId = this.correctionAssessment(String(row.result));
+      return assessmentId ? [{ row, assessmentId }] : [];
+    });
+    const archived = candidates.length ? await this.all(`SELECT entity_id,payload FROM knowledge_events WHERE owner_id=? AND action='CORRECTION_ARCHIVED'
+      AND entity_id IN (${candidates.map(() => '?').join(',')}) AND payload IN (${candidates.map(() => '?').join(',')})`,
+      ownerId, ...candidates.map(c => c.row.id), ...candidates.map(c => JSON.stringify({ assessmentId: c.assessmentId }))) : [];
+    const hidden = new Set(archived.map(e => `${e.entity_id}:${JSON.parse(String(e.payload)).assessmentId}`));
+    const revision = await this.revision(ownerId);
+    return { reviewedAnswers: Math.min(200, rows.length), truncated: rows.length > 200,
+      records: candidates.filter(c => !hidden.has(`${c.row.id}:${c.assessmentId}`))
+        .map(c => ({ ...this.historyMessage(c.row, revision), assessmentId: c.assessmentId })) };
+  }
+  async archiveCorrections(ownerId: string, records: { id: string; assessmentId: string }[]) {
+    if (!records.length || records.length > 200 || new Set(records.map(r => r.id)).size !== records.length ||
+      records.some(r => !r.id || r.id.length > 160 || !/^[a-f0-9]{64}$/.test(r.assessmentId))) throw new BadRequestException('Choose 1-200 distinct correction records.');
+    return this.transaction(async () => {
+      if (this.dialect === 'postgresql') await this.get('SELECT id FROM users WHERE id=? FOR UPDATE', ownerId);
+      for (const item of records) {
+        const row = await this.get(`SELECT result FROM messages WHERE owner_id=? AND id=?${this.dialect === 'postgresql' ? ' FOR UPDATE' : ''}`, ownerId, item.id);
+        if (!row) throw new NotFoundException('Correction not found.');
+        if (!row.result || this.correctionAssessment(String(row.result)) !== item.assessmentId) throw new ConflictException('The answer assessment changed. Refresh before clearing history.');
+        const payload = JSON.stringify({ assessmentId: item.assessmentId });
+        if (await this.get("SELECT id FROM knowledge_events WHERE owner_id=? AND entity_id=? AND action='CORRECTION_ARCHIVED' AND payload=? LIMIT 1", ownerId, item.id, payload)) continue;
+        await this.auditKnowledge(ownerId, item.id, 'CORRECTION_ARCHIVED', 'Cleared from Corrections; saved answers, versions and background jobs retained.', { assessmentId: item.assessmentId });
+      }
+      return { cleared: records.length };
+    });
+  }
   async savedAnswer(ownerId: string, messageId: string) {
     const row = await this.get('SELECT m.*,c.title FROM messages m JOIN conversations c ON c.id=m.conversation_id AND c.owner_id=m.owner_id WHERE m.owner_id=? AND m.id=?', ownerId, messageId);
     if (!row) throw new NotFoundException('Saved answer not found.');

@@ -47,6 +47,13 @@ class ConflictHistoryItemDto {
 class ClearConflictHistoryDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(200) @ValidateNested({ each: true }) @Type(() => ConflictHistoryItemDto) records!: ConflictHistoryItemDto[];
 }
+class CorrectionHistoryItemDto {
+  @IsString() @Length(1, 160) @NotContains('\0') id!: string;
+  @IsString() @Matches(/^[a-f0-9]{64}$/) assessmentId!: string;
+}
+class ClearCorrectionHistoryDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(200) @ValidateNested({ each: true }) @Type(() => CorrectionHistoryItemDto) records!: CorrectionHistoryItemDto[];
+}
 
 export class QueryDto {
   @IsString()
@@ -230,6 +237,18 @@ export class RagController {
   conflicts(@CurrentUser() user: Account, @Res({ passthrough: true }) response: Response) {
     response.setHeader('Cache-Control', 'private, no-store');
     return this.database.conflicts(user.id);
+  }
+
+  @Get('corrections')
+  corrections(@CurrentUser() user: Account, @Res({ passthrough: true }) response: Response) {
+    response.setHeader('Cache-Control', 'private, no-store');
+    return this.database.corrections(user.id);
+  }
+
+  @Post('corrections/archive')
+  @HttpCode(HttpStatus.OK)
+  clearCorrectionHistory(@CurrentUser() user: Account, @Body() dto: ClearCorrectionHistoryDto) {
+    return this.execute(user.id, () => this.database.archiveCorrections(user.id, dto.records));
   }
 
   @Post('conflicts/archive')

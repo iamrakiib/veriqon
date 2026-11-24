@@ -33,6 +33,38 @@ async function fixture() {
   return { db, store, doc, close: async () => { await db.onModuleDestroy(); if (admin) { await admin.query(`DROP SCHEMA ${schema} CASCADE`); await admin.end(); } process.env = previous; } };
 }
 
+test('correction history archives exact owner assessments atomically without deleting answers or versions', async () => {
+  const f = await fixture();
+  try {
+    const result = { draft: 'One day.', repairHistory: [{ original: 'Three days.', revised: 'One day.', accepted: true }], sourceRevision: 0 };
+    const id = await f.db.beginMessage('a', 'conversation', 'How many days?');
+    await f.db.finishMessage('a', id, result);
+    const cached = await f.db.beginMessage('a', 'conversation', 'Cached answer');
+    await f.db.finishMessage('a', cached, { ...result, cached: true });
+    const visible = await f.db.corrections('a');
+    assert.equal(visible.records.length, 1);
+    const record = { id, assessmentId: visible.records[0].assessmentId };
+    await assert.rejects(f.db.archiveCorrections('b', [record]), /not found/);
+    await assert.rejects(f.db.archiveCorrections('a', [{ ...record, assessmentId: '0'.repeat(64) }]), /changed/);
+    await assert.rejects(f.db.archiveCorrections('a', [record, { ...record, id: 'missing' }]), /not found/);
+    assert.equal((await f.db.corrections('a')).records.length, 1, 'A failed batch must roll back all archival events');
+    assert.equal((await f.db.knowledgeEvents('a', id)).length, 0);
+    const revision = await f.db.revision('a');
+    await f.db.archiveCorrections('a', [record]);
+    await f.db.archiveCorrections('a', [record]);
+    assert.equal((await f.db.corrections('a')).records.length, 0);
+    assert.equal((await f.db.knowledgeEvents('a', id)).length, 1, 'Retries are idempotent');
+    const saved = (await f.db.savedAnswer('a', id)).message;
+    assert.ok('result' in saved); assert.equal(saved.result.draft, result.draft);
+    assert.equal(Number((await f.db.get('SELECT COUNT(*) AS n FROM answer_versions WHERE owner_id=? AND message_id=?', 'a', id))!.n), 1);
+    assert.equal(await f.db.revision('a'), revision, 'Archival does not invalidate document caches or enqueue jobs');
+    await f.db.finishMessage('a', id, { ...result, draft: 'Two days.' });
+    assert.equal((await f.db.corrections('a')).records.length, 1, 'A newer assessment remains visible');
+    await assert.rejects(f.db.archiveCorrections('a', [record]), /changed/);
+    assert.equal((await f.db.corrections('b')).records.length, 0);
+  } finally { await f.close(); }
+});
+
 test('metadata rejects invalid dates, cross-owner sources, lost updates and supersession cycles', async () => {
   const f = await fixture();
   try {

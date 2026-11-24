@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
-import { History, Search, ArrowUpRight, MessageSquare } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { History, Search, ArrowUpRight, MessageSquare, RefreshCw, Ellipsis, Archive } from "lucide-react";
 import type { Citation, DocumentRecord } from "../lib/api";
 import { RevalidationPanel } from "./knowledge-controls";
-import { hasRepairAttempt } from "../lib/api";
+import { request } from "../lib/api";
 import type { Conversation, Message } from "./chat-panel";
-import { EmptyState } from "./ui";
+import { EmptyState, Modal } from "./ui";
 import { RepairDetails, VerificationBadge } from "./answer-details";
 
 export function PageHeading({
@@ -132,20 +132,38 @@ export function ConversationHistory({
   );
 }
 export function Corrections({
-  messages,
-  loading,
-  error,
   onCitation,
   onOpen,
 }: {
-  messages: Message[];
-  loading: boolean;
-  error: string;
   onCitation: (c: Citation) => void;
   onOpen: (id: string) => void;
 }) {
+  type Record = Message & { assessmentId: string };
+  type Response = { records: Record[]; reviewedAnswers: number; truncated: boolean };
+  const [data, setData] = useState<Response | null>(null);
+  const [loading, setLoading] = useState(true), [error, setError] = useState("");
+  const [clearing, setClearing] = useState(false), [clearError, setClearError] = useState("");
+  const [toClear, setToClear] = useState<Record[] | null>(null), [notice, setNotice] = useState("");
+  const load = useCallback(async () => {
+    setLoading(true); setError("");
+    try { setData(await request<Response>("corrections")); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not load corrections."); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+  async function clearHistory() {
+    if (!toClear || clearing) return;
+    setClearing(true); setClearError("");
+    try {
+      await request("corrections/archive", { method: "POST", body: JSON.stringify({ records: toClear.map(({ id, assessmentId }) => ({ id, assessmentId })) }) });
+      const ids = new Set(toClear.map(r => r.id));
+      setData(current => current ? { ...current, records: current.records.filter(r => !ids.has(r.id)) } : current);
+      setToClear(null); setNotice("Correction history cleared. Saved answers, versions and background jobs are retained.");
+    } catch (e) { setClearError(e instanceof Error ? e.message : "Could not clear correction history. Nothing has been removed."); }
+    finally { setClearing(false); }
+  }
   const [filter, setFilter] = useState("all");
-  const attempts = messages.filter((m) => hasRepairAttempt(m.result));
+  const attempts = data?.records || [];
   const accepted = (m: Message) =>
     m.result?.verificationStatus === "REPAIRED_VERIFIED" &&
     m.result.factCheck.passed &&
@@ -161,8 +179,8 @@ export function Corrections({
         eyebrow="ANSWER AUDIT TRAIL"
         description="See what changed, why it changed, and whether the revision passed verification."
       />
-      <div className="view-toolbar">
-        <span className="muted">{attempts.length} answers with repair attempts</span>
+      <div className="view-toolbar correction-toolbar">
+        <span className="muted">{attempts.length} {attempts.length === 1 ? "answer" : "answers"} with repair attempts</span>
         <label className="filter-select">
           <select
             aria-label="Filter corrections"
@@ -174,9 +192,21 @@ export function Corrections({
             <option value="withheld">Withheld / earlier assessments</option>
           </select>
         </label>
+        <button className="button secondary conflict-refresh" aria-label="Refresh corrections" title="Refresh corrections" disabled={loading || clearing} onClick={() => void load()}><RefreshCw size={14} /><span>Refresh corrections</span></button>
+        <details className="conflict-actions" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) e.currentTarget.open = false; }} onKeyDown={e => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}>
+          <summary className="icon-button" aria-label="Correction actions" title="Correction actions"><Ellipsis size={18} /></summary>
+          <div className="conflict-actions-popover">
+            <button disabled={loading || !!error || !rows.length || clearing} onClick={e => { const menu = e.currentTarget.closest("details")!; menu.open = false; menu.querySelector("summary")?.focus(); setClearError(""); setToClear(rows); }}><Archive size={16} />Clear visible history</button>
+          </div>
+        </details>
       </div>
+      {notice && <p role="status" className="scope-note">{notice}</p>}
+      <Modal open={toClear !== null} onClose={() => { if (!clearing) setToClear(null); }} title="Clear correction history?" description={`Remove ${toClear?.length || 0} visible repair ${(toClear?.length || 0) === 1 ? "record" : "records"} from this history. Saved answers, immutable versions and background jobs are retained. New assessments will still appear.`}>
+        {clearError && <p role="alert" className="inline-note">{clearError}</p>}
+        <div className="conflict-clear-actions"><button className="button secondary" disabled={clearing} onClick={() => setToClear(null)}>Cancel</button><button className="button secondary destructive" disabled={clearing} onClick={() => void clearHistory()}>{clearing ? "Clearing..." : "Clear history"}</button></div>
+      </Modal>
       <p className="scope-note">
-        Repair attempts from loaded conversations. Background assessments and their immutable versions are listed separately below.
+        Repair attempts across {data?.reviewedAnswers ?? 0} recent answer assessments.{data?.truncated && " Older answers are outside this view."} Background assessments and their immutable versions are listed separately below.
       </p>
       <RevalidationPanel onCitation={onCitation} />
       {loading ? (

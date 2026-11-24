@@ -53,6 +53,14 @@ test('real lifecycle: register, queued upload, conflict review, automatic correc
   const rejected=await(await rejectedResponse).json();expect(rejected.verificationStatus).not.toBe('REPAIRED_VERIFIED');expect(rejected.repairHistory.some((h:{accepted:boolean})=>!h.accepted)).toBe(true);expect(rejected.draft).not.toContain('pays travel expenses');
   expect(rejected.repairHistory.some((h:{after?:{atomicClaims?:{text:string;verdict:string}[]}})=>h.after?.atomicClaims?.some(c=>c.text.includes('travel expenses')&&c.verdict==='INSUFFICIENT_EVIDENCE'))).toBe(true);
   await page.getByRole('button',{name:'Corrections',exact:true}).click();await page.getByLabel('Filter corrections').selectOption('withheld');await expect(page.getByText('Repair withheld',{exact:true})).toBeVisible();
+  const beforeClear=await page.request.get(`/api/rag/messages/${rejected.messageId}/version-history`).then(r=>r.json());
+  await page.getByLabel('Correction actions',{exact:true}).click();await page.getByRole('button',{name:'Clear visible history'}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Clear history',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);await page.getByRole('button',{name:'Refresh corrections',exact:true}).click();
+  await expect(page.getByText('Repair withheld',{exact:true})).toHaveCount(0);
+  const afterClear=await page.request.get(`/api/rag/messages/${rejected.messageId}/version-history`).then(r=>r.json());
+  expect(afterClear.items).toEqual(beforeClear.items);
+  expect((await page.request.get(`/api/rag/messages/${rejected.messageId}`)).status()).toBe(200);
   const conflict=await page.request.get('/api/rag/conflicts').then(r=>r.json());const conflictId=conflict.records[0].id;
   const archive=await page.request.get(`/api/rag/docs/${old.id}/version-history`).then(r=>r.json());
   const other=await browser.newContext({baseURL:'http://127.0.0.1:3015'});

@@ -1,6 +1,6 @@
 # Cloud deployment: Vercel, Render, Neon and Redis
 
-Prepared 17 November 2026. **Configuration preparation, not a completed cloud deployment.** Milestone 5 validates local Docker; milestone 6 requires the staging checks below. Use [INSTALLATION.md](INSTALLATION.md) for the complete local installation. No current changes have been published or deployed.
+Updated 24 November 2026. The existing Vercel frontend and free Render API are deployed at commit `febdf8bfced91e8e03c474015a00dc5b9a828458`; Neon migrations 1–4 and a real PDF/query smoke passed. That service uses integrated SQL processing, not the separate always-on worker/BullMQ profile documented below. Full cloud lifecycle acceptance remains open. See [RELEASE_READINESS.md](RELEASE_READINESS.md) for exact evidence and limitations; [INSTALLATION.md](INSTALLATION.md) covers local Docker installation.
 
 ## Architecture and prerequisites
 
@@ -8,7 +8,7 @@ Vercel serves Next.js and proxies `/api/auth/*` and `/api/rag/*` to the Render A
 
 Use `sc-rag` as the Git repository root. Obtain release approval and a resource budget before creating services. The supplied `render.yaml` selects one paid Starter API and one paid Starter worker, Singapore region, manual deployments. These are initial configuration choices, **not measured production capacity**. Render free services do not provide a free background worker. Verify current costs, region availability and plan limits before applying the Blueprint. [Render workers](https://render.com/docs/background-workers), [free-service limits](https://render.com/docs/free).
 
-Staging must have separate Neon data, Redis namespaces and provider spending limits. Do not use existing personal documents or production accounts in acceptance tests. Keep original credentials private; templates contain no credentials. The account-aware Render validator currently returns HTTP 401 with this machine's CLI session; reauthentication is needed before cloud validation.
+Staging must have separate Neon data, Redis namespaces and provider spending limits. Do not use existing personal documents or production accounts in acceptance tests. Keep original credentials private; templates contain no credentials. CLI authentication was renewed for the 24 November release; future deployments must check their own authorization.
 
 ## 1. Establish the release candidate
 
@@ -18,7 +18,7 @@ The existing GitHub workflow validates code and Docker installation; it does not
 
 ## 2. Create isolated Neon storage
 
-Create a PostgreSQL database/branch near the Render region. Use a TLS connection URL with `sslmode=verify-full`; retain certificate and hostname verification. Do not set `NODE_TLS_REJECT_UNAUTHORIZED=0` or use a developer's local CA file path. Neon supports pgvector, but this candidate still needs live extension/migration validation. [Secure connections](https://neon.com/docs/connect/connect-securely), [pgvector](https://neon.com/docs/extensions/pgvector).
+Create a PostgreSQL database/branch near the Render region. Use a TLS connection URL with `sslmode=verify-full`; retain certificate and hostname verification. Do not set `NODE_TLS_REJECT_UNAUTHORIZED=0` or use a developer's local CA file path. The existing deployment passed extension/migration checks; repeat them for each fresh target and whenever migrations change. [Secure connections](https://neon.com/docs/connect/connect-securely), [pgvector](https://neon.com/docs/extensions/pgvector).
 
 For the initial staged deployment, put the **direct** URL in `DATABASE_URL`. The API pre-deploy command owns migrations and uses that URL. API and worker startup both have `DB_MIGRATE_ON_START=false`; the worker must never be the migration owner. The existing migration runner obtains a PostgreSQL transaction advisory lock and checks migration checksums. Do not edit an applied migration or import a local SQLite database into an existing populated cloud database.
 

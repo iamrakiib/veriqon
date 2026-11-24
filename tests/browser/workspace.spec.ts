@@ -9,6 +9,7 @@ const source = { id: 'policy', text: 'Employees may work remotely one day per we
 const result = { draft: 'One day per week. [1]', status: 'repaired', verificationStatus: 'REPAIRED_VERIFIED', factCheck: { verdict: 'All claims supported by model assessment', evidence: 'Supported: One day per week.', passed: true, claims: [] }, citations: [{ index: 1, documentId: 'policy', source: 'policy.md', chunkIndex: 0, excerpt: source.text }], attempts: 2, durationMs: 1200, correction: { original: 'Three days per week.', revised: 'One day per week. [1]', reason: 'Repaired using the retrieved policy.' } };
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/rag/corrections', route => route.fulfill({ json: { records: [{ id: 'saved-message', question: 'How many days?', createdAt: new Date().toISOString(), result, assessmentId: 'a'.repeat(64) }], reviewedAnswers: 1, truncated: false } }));
   await page.route('**/api/rag/conversations', route => route.fulfill({ json: [] }));
   await page.route('**/api/auth/status', route => route.fulfill({ json: { needsSetup: false, registrationEnabled: true } }));
   await page.route('**/api/auth/me', route => route.fulfill({ json: { user: { id: 'fixture', email: 'alex@example.com', name: 'Alex Morgan', role: 'owner' } } }));
@@ -248,6 +249,7 @@ test('source changes, history search, keyboard tabs and confirmed document remov
 
 
 test('withheld repair attempts are visible without publishing unsupported drafts', async ({ page }, info) => {
+  await page.route('**/api/rag/corrections', route => route.fulfill({ json: { records: [{ id: 'failed-message', question: 'A disputed claim', createdAt: new Date().toISOString(), assessmentId: 'a'.repeat(64), result: { ...result, status: 'abstained', correction: null, repairHistory: [{ original: 'Three days per week.', accepted: false, reason: 'No grounded revision was available.' }], factCheck: { ...result.factCheck, passed: false, evidence: 'The source does not support this claim.' } } }], reviewedAnswers: 1, truncated: false } }));
   await page.route('**/api/rag/docs', route => route.fulfill({ json: [] }));
   await page.route('**/api/rag/conversations', route => route.fulfill({ json: [{ id: 'failed-repair', title: 'A disputed claim', messages: [{ id: 'failed-message', question: 'A disputed claim', createdAt: new Date().toISOString(), result: { ...result, status: 'abstained', correction: null, attempts: 2, reason: 'verification_failed', repairHistory: [{ original: 'Three days per week.', accepted: false, reason: 'No grounded revision was available.' }], draft: 'The answer could not be verified.', factCheck: { ...result.factCheck, passed: false, evidence: 'The source does not support this claim.' } } }] }] }));
   await page.goto('/', { waitUntil: 'domcontentloaded' });

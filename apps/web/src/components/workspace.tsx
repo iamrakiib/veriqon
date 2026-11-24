@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import {
   api,
-  hasRepairAttempt,
   citationChunkLabel,
   type Citation,
   type DocumentRecord,
@@ -134,15 +133,11 @@ export function Workspace({
   const requestLock = useRef(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const active = conversations.find((c) => c.id === activeId);
-  const answers = conversations
-    .flatMap((c) => c.messages)
-    .filter((m) => m.result);
   const visibleConversations = conversations.filter(
     (c) =>
       c.messages.length > 0 &&
       c.title.toLowerCase().includes(historySearch.toLowerCase()),
   );
-  const attemptedRepairs = answers.filter((m) => hasRepairAttempt(m.result));
   const connected = Boolean(health);
 
   const refresh = useCallback(async (quiet = false) => {
@@ -477,7 +472,6 @@ export function Workspace({
           setMenuOpen={setMenuOpen}
           setSettings={setSettings}
           documentCount={documents.length}
-          repairCount={attemptedRepairs.length}
           pending={pending}
           historyLoading={historyLoading}
           historyError={historyError}
@@ -660,9 +654,6 @@ export function Workspace({
             )}
             {view === "corrections" && (
               <Corrections
-                messages={conversations.flatMap((c) => c.messages)}
-                loading={historyLoading}
-                error={historyError}
                 onCitation={inspectCitation}
                 onOpen={openAnswer}
               />

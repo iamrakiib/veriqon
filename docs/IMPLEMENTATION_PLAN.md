@@ -1,6 +1,21 @@
 # Veriqon implementation and release plan
 
-Prepared: 11 November 2026. Scope: current local working tree, not the hosted application.
+Prepared: 11 November 2026. Updated: 25 November 2026. Current release evidence is below; subsequent dated entries retain their original scope.
+
+## Current follow-up: layout, correction history and quote recovery
+
+- Published baseline: PR #10 merged as `febdf8bfced91e8e03c474015a00dc5b9a828458`; required `verify` and `docker-installation` checks passed. Vercel and Render were verified on that commit, Neon migrations 1–4 applied, and 11 live PDF/query smoke assertions passed. See [release readiness](RELEASE_READINESS.md). This is the existing free integrated-SQL deployment, not full separate-worker cloud acceptance.
+- Reproduced history search growing to 563.6 px on desktop / 199.2 px on mobile and wide-screen Analytics metrics offset by 210 px. Scoped flex sizing and automatic inline margins fix these without changing chat width or composer behavior.
+- Added Corrections overflow action and confirmation: server-side, owner-scoped, exact-assessment archival with atomic rollback, optimistic concurrency and idempotent retries. Saved answers, immutable versions and background jobs remain intact. New assessments remain visible. Removed the misleading sidebar count derived from a different, unfiltered history window; the Corrections page displays its authoritative count and coverage.
+- Deployed verification failure at 08:34 UTC was an exact-quote contract mismatch after a retry; generation and all provider calls completed. Added exact source-segment references on that existing retry, followed by all normal verification checks. Unknown references, cross-passage IDs, altered values and extra fields remain rejected. No extra provider call or factual-repair badge is introduced.
+- Real-provider retry check: one synthetic policy claim passed in 2,356 ms with exact source text retained, 1,133 input / 75 output tokens. Initial malformed assessment and decomposition were controlled. This is narrow contract-recovery evidence, not a general accuracy or latency claim.
+- Consolidated 15 superseded audit/status files into [historical reviews](HISTORICAL_REVIEWS.md), retaining immutable originals in Git history. Added [documentation index](README.md) and replaced contradictory current-release summaries. Architecture/methodology, milestone reports, evaluation data and operating guides remain available.
+- Backend: **189 passed, zero failed, seven infrastructure-only skips** (`data/current-backend-final.log`). PostgreSQL/Redis: **80 passed, zero failed, one dedicated Redis-restart skip** (`data/current-infra-test.log`), including correction archival on PostgreSQL and worker crash/replay recovery. Final atomic suite: 37 passed. All seven controlled research scenarios and four release-tool tests passed.
+- Full browser run: 117 passed, three intentional viewport skips, two confirmation-text assertions failed because the running tests retained the earlier plural wording while the dialog was corrected to singular. The updated tests and final mobile toolbar geometry passed on rerun: **37 passed, zero failed, one viewport skip** (`data/current-ui-final.log`). Earlier focused frontend run: 52 passed / two viewport skips. GitHub CI reruns the full suite on the fixed candidate.
+- Full frontend/API/PostgreSQL/Redis lifecycle: **one passed** (`data/current-lifecycle-final.log`), including automatic correction, retained immutable versions, recovery/account isolation and the new Corrections clear action. Inference is scripted for this test; the separate real-provider retry is described above.
+- Production frontend build, subsequent TypeScript check and lint passed (`data/current-web-build.log`, `data/current-web-check.log`, `data/current-lint-final.log`). Documentation check: 177 local links checked across 43 Markdown files, none missing. Source/history publication audit passed with no findings. Protected CI and hosting results are recorded with the release candidate.
+
+Local acceptance is complete within the tests above. Publish through the protected PR workflow and record the exact hosting deployments on its release record; do not infer deployment from a frontend page loading. No paid services are authorized. Independent factual evaluation, LIVE-002, complete hosted worker/revalidation/persistence acceptance and longer workload testing remain open; this follow-up does not close them.
 
 ## Release gate follow-up: 24 November 2026
 

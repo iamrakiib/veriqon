@@ -84,6 +84,7 @@ async function navigate(page: Page, title: string) {
   await page.getByRole("button", { name: title, exact: true }).click();
 }
 test.beforeEach(async ({ page }) => {
+  await page.route("**/api/rag/corrections", r => r.fulfill({ json: { records: [{ ...message, assessmentId: "a".repeat(64) }], reviewedAnswers: 1, truncated: false } }));
   await page.route("**/api/auth/status", (r) =>
     r.fulfill({ json: { needsSetup: false, registrationEnabled: true } }),
   );
@@ -164,6 +165,85 @@ test("navigation, theme and route screenshots remain accessible at desktop and m
   }
   expect(errors).toEqual([]);
 });
+test("history search stays compact in both themes and after filtering", async ({ page }) => {
+  await page.goto("/");
+  for (const theme of ["dark", "light"]) {
+    if (theme === "light") await page.getByRole("button", { name: "Switch to light mode" }).click();
+    await navigate(page, "Chat history");
+    const search = page.getByRole("textbox", { name: "Search conversations" });
+    for (const query of ["", "no matching history"]) {
+      await search.fill(query);
+      const box = await search.locator("..").boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(36);
+      expect(box!.height).toBeLessThanOrEqual(52);
+    }
+  }
+});
+
+test("correction actions clear only the confirmed filter, retain failures and persist after reload", async ({ page }, info) => {
+  let records = [
+    { ...message, assessmentId: "a".repeat(64) },
+    { ...message, id: "withheld", question: "Withheld attempt", assessmentId: "b".repeat(64), result: { ...result, status: "abstained", verificationStatus: "VERIFICATION_FAILED", factCheck: { ...result.factCheck, passed: false } } },
+  ];
+  let posts = 0, fail = true;
+  await page.route("**/api/rag/corrections", r => r.fulfill({ json: { records, reviewedAnswers: 2, truncated: false } }));
+  await page.route("**/api/rag/revalidations*", r => r.fulfill({ json: { jobs: [], total: 0 } }));
+  await page.route("**/api/rag/corrections/archive", r => {
+    posts++; expect(r.request().postDataJSON()).toEqual({ records: [{ id: message.id, assessmentId: "a".repeat(64) }] });
+    if (fail) return r.fulfill({ status: 409, json: { message: "The answer assessment changed. Refresh before clearing history." } });
+    records = records.filter(record => record.id !== message.id);
+    return r.fulfill({ json: { cleared: 1 } });
+  });
+  await page.goto("/"); await navigate(page, "Corrections");
+  await page.getByLabel("Filter corrections").selectOption("verified");
+  const actions = page.getByLabel("Correction actions", { exact: true });
+  if (info.project.name === "mobile") {
+    const filter = await page.getByLabel("Filter corrections").boundingBox();
+    for (const control of [actions, page.getByRole("button", { name: "Refresh corrections", exact: true })]) {
+      const box = await control.boundingBox();
+      expect(Math.abs(box!.y + box!.height / 2 - filter!.y - filter!.height / 2)).toBeLessThan(2);
+    }
+  }
+  for (const theme of ["dark", "light"]) {
+    if (theme === "light") await page.getByRole("button", { name: "Switch to light mode" }).click();
+    await actions.focus(); await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name: "Clear visible history" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.keyboard.press("Escape"); await expect(actions).toBeFocused();
+  }
+  await actions.click(); await page.getByRole("button", { name: "Clear visible history" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Remove 1 visible repair record");
+  await expect(page.getByRole("dialog")).toContainText("background jobs are retained");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click(); expect(posts).toBe(0);
+  await expect(actions).toBeFocused();
+  await actions.click(); await page.getByRole("button", { name: "Clear visible history" }).click();
+  await page.getByRole("button", { name: "Clear history", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Refresh before clearing");
+  await expect(page.locator(".correction-record")).toHaveCount(1);
+  fail = false; await page.getByRole("button", { name: "Clear history", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0); await expect(actions).toBeFocused();
+  await expect(page.getByText("No matching repairs", { exact: true })).toBeVisible();
+  await page.reload(); await navigate(page, "Corrections");
+  await expect(page.locator(".correction-record")).toHaveCount(1);
+  await expect(page.locator(".correction-record")).toContainText("Withheld attempt");
+  expect(posts).toBe(2);
+  await page.screenshot({ path: `data/correction-history-${info.project.name}.png` });
+});
+
+test("analytics metrics align with the page heading on wide and narrow screens", async ({ page }, info) => {
+  if (info.project.name === "desktop") await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/");
+  for (const theme of ["dark", "light"]) {
+    if (theme === "light") await page.getByRole("button", { name: "Switch to light mode" }).click();
+    await navigate(page, "Analytics");
+    const heading = await page.locator(".route-content > .section-heading").boundingBox();
+    const metrics = await page.locator(".metrics-grid").boundingBox();
+    expect(Math.abs(metrics!.x - heading!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics!.width - heading!.width)).toBeLessThanOrEqual(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 test("claim diff, exact evidence relationship and version are connected to recorded assessments", async ({
   page,
 }) => {
@@ -206,6 +286,7 @@ test("analytics uses recorded tokens and honest partial coverage; legacy repairs
       modelUsage: undefined,
     },
   };
+  await page.route("**/api/rag/corrections", r => r.fulfill({ json: { records: [message, legacy].map(m => ({ ...m, assessmentId: "a".repeat(64) })), reviewedAnswers: 3, truncated: false } }));
   await page.route("**/api/rag/conversations", (r) =>
     r.fulfill({
       json: [
