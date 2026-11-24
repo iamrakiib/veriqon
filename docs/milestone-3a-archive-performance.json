@@ -1,0 +1,322 @@
+{
+  "measuredAt": "2026-11-12T17:47:01.359Z",
+  "node": "v22.19.0",
+  "hardware": {
+    "cpu": "AMD Ryzen 5 5500U with Radeon Graphics         ",
+    "memoryBytes": 7931146240
+  },
+  "workload": {
+    "versions": 9,
+    "charactersPerVersion": 499900,
+    "acceptedVersions": 7,
+    "acceptedSerializedBytes": 8388608,
+    "rejectedSerializedBytes": 10612494,
+    "limitBytes": 8388608,
+    "samples": 8,
+    "warmups": 1,
+    "concurrency": 1,
+    "modelCalls": 0
+  },
+  "latencyMs": {
+    "p50": 214.85969999999998,
+    "p95": 336.55160000000024,
+    "samples": [
+      206.45479999999998,
+      207.58100000000013,
+      211.19500000000016,
+      214.85969999999998,
+      222.0893000000001,
+      226.04690000000028,
+      228.04600000000028,
+      336.55160000000024
+    ]
+  },
+  "memoryBytes": {
+    "nodePeakProcessRss": 122109952,
+    "nodeMaxSampleRss": 122048512,
+    "nodeMaxSampleHeap": 38222656,
+    "databaseBefore": {
+      "current": 84934656,
+      "peak": 114483200
+    },
+    "databaseAfter": {
+      "current": 85704704,
+      "peak": 134311936
+    }
+  },
+  "rejectedPayloadBytes": 0,
+  "queryPlan": [
+    {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 26.14,
+        "Total Cost": 26.19,
+        "Plan Rows": 2,
+        "Plan Width": 108,
+        "Actual Startup Time": 116.082,
+        "Actual Total Time": 116.086,
+        "Actual Rows": 9,
+        "Actual Loops": 1,
+        "Shared Hit Blocks": 348,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Plans": [
+          {
+            "Node Type": "Incremental Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 26.14,
+            "Total Cost": 26.19,
+            "Plan Rows": 2,
+            "Plan Width": 108,
+            "Actual Startup Time": 116.081,
+            "Actual Total Time": 116.084,
+            "Actual Rows": 9,
+            "Actual Loops": 1,
+            "Sort Key": [
+              "ranked.document_id",
+              "ranked.recorded_at DESC",
+              "ranked.version_id"
+            ],
+            "Presorted Key": [
+              "ranked.document_id"
+            ],
+            "Full-sort Groups": {
+              "Group Count": 1,
+              "Sort Methods Used": [
+                "quicksort"
+              ],
+              "Sort Space Memory": {
+                "Average Sort Space Used": 27,
+                "Peak Sort Space Used": 27
+              }
+            },
+            "Shared Hit Blocks": 348,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Subquery Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Alias": "ranked",
+                "Startup Cost": 9.57,
+                "Total Cost": 26.13,
+                "Plan Rows": 1,
+                "Plan Width": 108,
+                "Actual Startup Time": 51.969,
+                "Actual Total Time": 116.038,
+                "Actual Rows": 9,
+                "Actual Loops": 1,
+                "Filter": "((ranked.\"position\" = 1) AND (((ranked.snapshot)::jsonb #>> '{metadata,effectiveFrom}'::text[]) IS NOT NULL) AND (((ranked.snapshot)::jsonb #>> '{metadata,effectiveFrom}'::text[]) < '2029-01-01'::text) AND ((((ranked.snapshot)::jsonb #>> '{metadata,effectiveTo}'::text[]) IS NULL) OR (((ranked.snapshot)::jsonb #>> '{metadata,effectiveTo}'::text[]) >= '2020-01-01'::text)) AND (((ranked.snapshot)::jsonb #>> '{text}'::text[]) <> (SubPlan 1)))",
+                "Rows Removed by Filter": 0,
+                "Shared Hit Blocks": 348,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "WindowAgg",
+                    "Parent Relationship": "Subquery",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 9.57,
+                    "Total Cost": 9.68,
+                    "Plan Rows": 2,
+                    "Plan Width": 148,
+                    "Actual Startup Time": 30.885,
+                    "Actual Total Time": 30.988,
+                    "Actual Rows": 9,
+                    "Actual Loops": 1,
+                    "Run Condition": "(row_number() OVER (?) <= 1)",
+                    "Shared Hit Blocks": 84,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Sort",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 9.57,
+                        "Total Cost": 9.57,
+                        "Plan Rows": 2,
+                        "Plan Width": 140,
+                        "Actual Startup Time": 30.876,
+                        "Actual Total Time": 30.891,
+                        "Actual Rows": 9,
+                        "Actual Loops": 1,
+                        "Sort Key": [
+                          "document_versions.document_id",
+                          "(COALESCE(((document_versions.snapshot)::jsonb #>> '{version}'::text[]), ((document_versions.snapshot)::jsonb #>> '{text}'::text[])))",
+                          "(COALESCE((((document_versions.snapshot)::jsonb #>> '{metadataRevision}'::text[]))::integer, 0)) DESC",
+                          "document_versions.recorded_at DESC",
+                          "document_versions.version_id DESC"
+                        ],
+                        "Sort Method": "quicksort",
+                        "Sort Space Used": 25,
+                        "Sort Space Type": "Memory",
+                        "Shared Hit Blocks": 84,
+                        "Shared Read Blocks": 0,
+                        "Shared Dirtied Blocks": 0,
+                        "Shared Written Blocks": 0,
+                        "Local Hit Blocks": 0,
+                        "Local Read Blocks": 0,
+                        "Local Dirtied Blocks": 0,
+                        "Local Written Blocks": 0,
+                        "Temp Read Blocks": 0,
+                        "Temp Written Blocks": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Bitmap Heap Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "document_versions",
+                            "Alias": "document_versions",
+                            "Startup Cost": 4.16,
+                            "Total Cost": 9.56,
+                            "Plan Rows": 2,
+                            "Plan Width": 140,
+                            "Actual Startup Time": 7.793,
+                            "Actual Total Time": 30.835,
+                            "Actual Rows": 9,
+                            "Actual Loops": 1,
+                            "Recheck Cond": "(owner_id = 'bench'::text)",
+                            "Rows Removed by Index Recheck": 0,
+                            "Exact Heap Blocks": 1,
+                            "Lossy Heap Blocks": 0,
+                            "Shared Hit Blocks": 84,
+                            "Shared Read Blocks": 0,
+                            "Shared Dirtied Blocks": 0,
+                            "Shared Written Blocks": 0,
+                            "Local Hit Blocks": 0,
+                            "Local Read Blocks": 0,
+                            "Local Dirtied Blocks": 0,
+                            "Local Written Blocks": 0,
+                            "Temp Read Blocks": 0,
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Bitmap Index Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Index Name": "document_versions_pkey",
+                                "Startup Cost": 0,
+                                "Total Cost": 4.16,
+                                "Plan Rows": 2,
+                                "Plan Width": 0,
+                                "Actual Startup Time": 0.012,
+                                "Actual Total Time": 0.012,
+                                "Actual Rows": 9,
+                                "Actual Loops": 1,
+                                "Index Cond": "(owner_id = 'bench'::text)",
+                                "Shared Hit Blocks": 1,
+                                "Shared Read Blocks": 0,
+                                "Shared Dirtied Blocks": 0,
+                                "Shared Written Blocks": 0,
+                                "Local Hit Blocks": 0,
+                                "Local Read Blocks": 0,
+                                "Local Dirtied Blocks": 0,
+                                "Local Written Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "SubPlan",
+                    "Subplan Name": "SubPlan 1",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "documents_pkey",
+                    "Relation Name": "documents",
+                    "Alias": "documents",
+                    "Startup Cost": 0.14,
+                    "Total Cost": 8.16,
+                    "Plan Rows": 1,
+                    "Plan Width": 32,
+                    "Actual Startup Time": 0.02,
+                    "Actual Total Time": 0.02,
+                    "Actual Rows": 1,
+                    "Actual Loops": 9,
+                    "Index Cond": "((owner_id = 'bench'::text) AND (id = ranked.document_id))",
+                    "Rows Removed by Index Recheck": 0,
+                    "Shared Hit Blocks": 18,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "Planning": {
+        "Shared Hit Blocks": 0,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.175,
+      "Triggers": [],
+      "Execution Time": 119.259
+    }
+  ],
+  "limitations": [
+    "Peak process RSS includes setup; it is not isolated query allocation.",
+    "Container cgroup memory includes database shared buffers, tmpfs data and file cache; not just query executor memory.",
+    "Eight serial samples do not establish multi-tenant capacity or leak freedom."
+  ]
+}

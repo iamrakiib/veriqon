@@ -1,0 +1,120 @@
+{
+  "reportHash": "6015bc4f34a04b00b864387030c881d852be2c759e8aec92d80b2caeba0e891a",
+  "reviewerId": "",
+  "independentReview": false,
+  "instructions": "An independent reviewer must enumerate ALL factual claims (exact answer spans), label each SUPPORTED, CONTRADICTED or INSUFFICIENT_EVIDENCE, and provide documentId/quote evidence for supported/contradicted claims. Set coverageConfirmed only after checking omissions. citationSupported is a separate judgment about the answer citation, not retrieval relevance. An abstention can have no factual claims. Do not use the tested LLM as the sole reviewer.",
+  "rows": [
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "incorrect-number",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "incorrect-number",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "already-correct",
+      "answer": "The adapter used two datasets. The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "already-correct",
+      "answer": "The adapter used two datasets. The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "targeted-retrieval",
+      "answer": "The adapter used two datasets.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "targeted-retrieval",
+      "answer": "The adapter used two datasets.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "missing-evidence",
+      "answer": "The adapter achieved 95% accuracy.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "missing-evidence",
+      "answer": "The retrieved passages do not establish the requested information. I cannot supply an unsupported value. Try identifying the relevant paper, results table, or section.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "historical-policy",
+      "answer": "In 2024, remote work was permitted one day per week. Manager approval was required.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "historical-policy",
+      "answer": "In 2024, remote work was permitted three days per week. [1] Manager approval was required.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "superficial-rewrite",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "superficial-rewrite",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "new-error-in-repair",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "new-error-in-repair",
+      "answer": "The adapter used two datasets. [1] The adapter used four architectures.",
+      "executionFailure": false,
+      "coverageConfirmed": false,
+      "claims": []
+    }
+  ]
+}

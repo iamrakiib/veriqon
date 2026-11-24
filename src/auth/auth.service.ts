@@ -37,6 +37,15 @@ export class AuthService {
       if (Number(row!.count) > maximum) throw new HttpException('Too many sign-in attempts. Try again in 15 minutes.', 429);
     }
   }
+  async limitRefresh(ip: string) {
+    const key = `refresh-ip:${digest(ip)}`;
+    const message = 'Too many session renewal attempts. Wait one minute and retry.';
+    if (this.redis?.enabled) return this.redis.limit(key, 120, 60000, message);
+    const now = Date.now();
+    await this.database.run('DELETE FROM auth_limits WHERE reset_at<=?', now);
+    const row = await this.database.get('INSERT INTO auth_limits VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET count=auth_limits.count+1 RETURNING count', key, now + 60000);
+    if (Number(row!.count) > 120) throw new HttpException(message, 429);
+  }
   async register(email: string, name: string, password: string, setupCode?: string) {
     email = email.trim().toLowerCase(); name = name.trim();
     const needsSetup = !(await this.database.hasUsers());
@@ -48,16 +57,17 @@ export class AuthService {
     const salt = randomBytes(16).toString('hex');
     const passwordHash = `scrypt$${salt}$${(await derive(password, salt)).toString('hex')}`;
     const user: Account = { id: randomUUID(), email, name, role: needsSetup ? 'owner' : 'member' };
-    let recoveryCodes: string[] = [];
-    await this.database.transaction(async () => {
+    return this.database.transaction(async () => {
       if (this.database.dialect === 'postgresql') await this.database.get('SELECT pg_advisory_xact_lock(742902)');
       if (needsSetup && await this.database.hasUsers()) throw new ConflictException('Setup is already complete. Sign in or create a regular account.');
       if (await this.database.get('SELECT id FROM users WHERE email=?', email)) throw new ConflictException('An account with this email already exists. Sign in instead.');
       await this.database.run('INSERT INTO users(id,email,name,password_hash,role,created_at) VALUES(?,?,?,?,?,?)', user.id, email, name, passwordHash, user.role, Date.now());
       if (needsSetup) await this.database.importLegacy(user.id);
-      recoveryCodes = await this.replaceRecoveryCodes(user.id);
+      const recoveryCodes = await this.replaceRecoveryCodes(user.id);
+      // A failed session insert must not leave an account (or owner setup) half
+      // created with recovery codes that were never delivered to the user.
+      return { ...await this.createSession(user), recoveryCodes };
     });
-    return { ...await this.createSession(user), recoveryCodes };
   }
   private async securityEvent(userId: string, event: string) {
     await this.database.run('INSERT INTO security_events VALUES(?,?,?,?)', randomUUID(), userId, event, Date.now());
@@ -129,6 +139,7 @@ export class AuthService {
     return row;
   }
   async refresh(token: string) {
+    if (!/^[A-Za-z0-9_-]{64}$/.test(token)) throw new UnauthorizedException('Your session has expired. Please sign in.');
     const row = await this.database.get('SELECT s.id AS session_id,u.id,u.email,u.name,u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.refresh_hash=? AND s.expires_at>?', digest(token), Date.now()) as (Account & { session_id: string }) | undefined;
     if (!row) throw new UnauthorizedException('Your session has expired. Please sign in.');
     const refresh = randomBytes(48).toString('base64url');

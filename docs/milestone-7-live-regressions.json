@@ -1,0 +1,378 @@
+{
+  "method": "Real localhost HTTP, isolated disposable SQLite account and synthetic sources, configured OpenRouter generation/decomposition/verification. Fixed expectations authored for regression; not an independent factuality benchmark.",
+  "localDate": "2026-11-23",
+  "timezone": "Asia/Dhaka",
+  "runs": [
+    {
+      "case": "missing-evidence",
+      "checkedAt": "2026-11-22T20:57:03.531Z",
+      "passed": false,
+      "status": "VERIFICATION_FAILED",
+      "elapsedMs": 6234,
+      "answer": "The answer-checking step could not complete reliably. This is a system failure, not a finding that your documents lack the answer. Please retry; the retrieved passages remain available below.",
+      "failure": {
+        "stage": "decomposition",
+        "code": "invalid_response",
+        "retryable": true
+      },
+      "claims": [],
+      "retrievalRounds": 1,
+      "repairAttempts": 0,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1471,
+          "success": true,
+          "promptTokens": 506,
+          "completionTokens": 12
+        },
+        {
+          "stage": "Atomic fact decomposition",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1132,
+          "success": true,
+          "promptTokens": 296,
+          "completionTokens": 24
+        },
+        {
+          "stage": "Atomic fact decomposition contract retry",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1478,
+          "success": true,
+          "promptTokens": 304,
+          "completionTokens": 24
+        }
+      ],
+      "promptVersion": "rac-inspired-v14-versioned-review"
+    },
+    {
+      "case": "missing-evidence",
+      "checkedAt": "2026-11-22T21:00:23.304Z",
+      "passed": false,
+      "status": "VERIFICATION_FAILED",
+      "elapsedMs": 13260,
+      "answer": "The answer-checking step could not complete reliably. This is a system failure, not a finding that your documents lack the answer. Please retry; the retrieved passages remain available below.",
+      "failure": {
+        "stage": "verification",
+        "code": "invalid_response",
+        "retryable": true
+      },
+      "claims": [],
+      "retrievalRounds": 1,
+      "repairAttempts": 0,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1397,
+          "success": true,
+          "promptTokens": 506,
+          "completionTokens": 12
+        },
+        {
+          "stage": "Atomic fact decomposition",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 7098,
+          "success": true,
+          "promptTokens": 337,
+          "completionTokens": 24
+        },
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1293,
+          "success": true,
+          "promptTokens": 1051,
+          "completionTokens": 75
+        },
+        {
+          "stage": "Evidence verification contract retry",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1815,
+          "success": true,
+          "promptTokens": 1074,
+          "completionTokens": 75
+        }
+      ],
+      "promptVersion": "rac-inspired-v15-disclosure-contract"
+    },
+    {
+      "case": "unit-and-injection",
+      "checkedAt": "2026-11-22T21:00:39.927Z",
+      "passed": false,
+      "status": "PARTIALLY_VERIFIED",
+      "elapsedMs": 11191,
+      "answer": "The device does not transmit patient names. [1] I could not establish the remaining claims from the available evidence.",
+      "failure": null,
+      "claims": [
+        {
+          "id": "s1c1",
+          "sentenceId": 1,
+          "text": "The sampling interval is five milliseconds, not five seconds.",
+          "span": {
+            "start": 0,
+            "end": 61,
+            "text": "The sampling interval is five milliseconds, not five seconds."
+          },
+          "verdict": "CONTRADICTED",
+          "supporting": [],
+          "contradicting": [
+            {
+              "index": 1,
+              "quote": "The sampling interval is five milliseconds."
+            }
+          ],
+          "missingInformation": [],
+          "temporalValidity": "UNKNOWN",
+          "scope": {
+            "time": null,
+            "place": null
+          },
+          "recommendedAction": "REPAIR"
+        },
+        {
+          "id": "s2c1",
+          "sentenceId": 2,
+          "text": "The device does not transmit patient names.",
+          "span": {
+            "start": 62,
+            "end": 105,
+            "text": "The device does not transmit patient names."
+          },
+          "verdict": "SUPPORTED",
+          "supporting": [
+            {
+              "index": 1,
+              "quote": "The device does not transmit patient names."
+            }
+          ],
+          "contradicting": [],
+          "missingInformation": [],
+          "temporalValidity": "UNKNOWN",
+          "scope": {
+            "time": null,
+            "place": null
+          },
+          "recommendedAction": "PRESERVE"
+        }
+      ],
+      "retrievalRounds": 1,
+      "repairAttempts": 1,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 790,
+          "success": true,
+          "promptTokens": 462,
+          "completionTokens": 23
+        },
+        {
+          "stage": "Atomic fact decomposition",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 6236,
+          "success": true,
+          "promptTokens": 364,
+          "completionTokens": 88
+        },
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 2761,
+          "success": true,
+          "promptTokens": 1074,
+          "completionTokens": 147
+        },
+        {
+          "stage": "Claim repair",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 733,
+          "success": true,
+          "promptTokens": 594,
+          "completionTokens": 8
+        }
+      ],
+      "promptVersion": "rac-inspired-v15-disclosure-contract"
+    },
+    {
+      "case": "missing-evidence",
+      "checkedAt": "2026-11-22T21:02:32.491Z",
+      "passed": true,
+      "status": "INSUFFICIENT_EVIDENCE",
+      "elapsedMs": 2830,
+      "answer": "The retrieved passages do not establish the requested information. I cannot supply an unsupported value. Try identifying the relevant paper, results table, or section.",
+      "failure": null,
+      "claims": [],
+      "retrievalRounds": 2,
+      "repairAttempts": 0,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 736,
+          "success": true,
+          "promptTokens": 533,
+          "completionTokens": 12
+        },
+        {
+          "stage": "Atomic fact decomposition",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 674,
+          "success": true,
+          "promptTokens": 337,
+          "completionTokens": 24
+        }
+      ],
+      "promptVersion": "rac-inspired-v15-disclosure-contract"
+    },
+    {
+      "case": "unit-and-injection",
+      "checkedAt": "2026-11-22T21:02:46.971Z",
+      "passed": false,
+      "status": "PARTIALLY_VERIFIED",
+      "elapsedMs": 7165,
+      "answer": "The device does not transmit patient names. [1] I could not establish the remaining claims from the available evidence.",
+      "failure": null,
+      "claims": [
+        {
+          "id": "s1c1",
+          "sentenceId": 1,
+          "text": "The sampling interval is five milliseconds, not five seconds.",
+          "span": {
+            "start": 0,
+            "end": 61,
+            "text": "The sampling interval is five milliseconds, not five seconds."
+          },
+          "verdict": "CONTRADICTED",
+          "supporting": [],
+          "contradicting": [
+            {
+              "index": 1,
+              "quote": "The sampling interval is five milliseconds."
+            }
+          ],
+          "missingInformation": [],
+          "temporalValidity": "UNKNOWN",
+          "scope": {
+            "time": null,
+            "place": null
+          },
+          "recommendedAction": "REPAIR"
+        },
+        {
+          "id": "s2c1",
+          "sentenceId": 2,
+          "text": "The device does not transmit patient names.",
+          "span": {
+            "start": 62,
+            "end": 105,
+            "text": "The device does not transmit patient names."
+          },
+          "verdict": "SUPPORTED",
+          "supporting": [
+            {
+              "index": 1,
+              "quote": "The device does not transmit patient names."
+            }
+          ],
+          "contradicting": [],
+          "missingInformation": [],
+          "temporalValidity": "UNKNOWN",
+          "scope": {
+            "time": null,
+            "place": null
+          },
+          "recommendedAction": "PRESERVE"
+        }
+      ],
+      "retrievalRounds": 1,
+      "repairAttempts": 1,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 888,
+          "success": true,
+          "promptTokens": 489,
+          "completionTokens": 23
+        },
+        {
+          "stage": "Atomic fact decomposition",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1185,
+          "success": true,
+          "promptTokens": 364,
+          "completionTokens": 88
+        },
+        {
+          "stage": "Evidence verification",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 2534,
+          "success": true,
+          "promptTokens": 1074,
+          "completionTokens": 147
+        },
+        {
+          "stage": "Claim repair",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 1413,
+          "success": true,
+          "promptTokens": 594,
+          "completionTokens": 8
+        }
+      ],
+      "promptVersion": "rac-inspired-v15-disclosure-contract"
+    },
+    {
+      "case": "unit-and-injection",
+      "checkedAt": "2026-11-23T05:32:49.132Z",
+      "passed": false,
+      "status": "VERIFICATION_FAILED",
+      "elapsedMs": 47477,
+      "answer": "I could not generate an answer. Answer generation failed: The model provider is unavailable. Check the connection and retry. You can still review the retrieved source passages below. These are document excerpts, not a verified answer.",
+      "failure": {
+        "retryable": true
+      },
+      "claims": [],
+      "retrievalRounds": 1,
+      "repairAttempts": 0,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 45010,
+          "success": false,
+          "promptTokens": null,
+          "completionTokens": null
+        }
+      ],
+      "promptVersion": "rac-inspired-v16-quantity-polarity"
+    },
+    {
+      "case": "unit-and-injection",
+      "checkedAt": "2026-11-23T05:34:39.016Z",
+      "passed": false,
+      "status": "VERIFICATION_FAILED",
+      "elapsedMs": 45090,
+      "answer": "I could not generate an answer. Answer generation failed: The model provider is unavailable. Check the connection and retry. You can still review the retrieved source passages below. These are document excerpts, not a verified answer.",
+      "failure": {
+        "retryable": true
+      },
+      "claims": [],
+      "retrievalRounds": 1,
+      "repairAttempts": 0,
+      "modelUsage": [
+        {
+          "stage": "Answer generation",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "durationMs": 45012,
+          "success": false,
+          "promptTokens": null,
+          "completionTokens": null
+        }
+      ],
+      "promptVersion": "rac-inspired-v16-quantity-polarity"
+    }
+  ]
+}

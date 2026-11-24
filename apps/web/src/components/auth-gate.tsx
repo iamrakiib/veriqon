@@ -1,7 +1,7 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, Check, Eye, EyeOff, Fingerprint, LoaderCircle, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react';
-import { authRequest, AuthRequestError, type Account } from '../lib/session';
+import { authRequest, AuthRequestError, setSessionAccount, type Account } from '../lib/session';
 import { BrandMark } from './ui';
 import { ThemeToggle } from './theme-provider';
 import { Workspace } from './workspace';
@@ -18,15 +18,16 @@ export function AuthGate() {
   const [visible, setVisible] = useState(false);
   const [recovering, setRecovering] = useState(false);
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const sessionChannel = useRef<BroadcastChannel | null>(null);
   const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
       const configuration = await authRequest<{ needsSetup: boolean; registrationEnabled: boolean }>('status');
-      setStatus(configuration); if (configuration.needsSetup) { setMode('register'); setUser(null); return; }
-      try { const session = await authRequest<{ user: Account }>('me'); setUser(session.user); }
+      setStatus(configuration); if (configuration.needsSetup) { setMode('register'); setSessionAccount(null); setUser(null); return; }
+      try { const session = await authRequest<{ user: Account }>('me'); setSessionAccount(session.user.id); setUser(session.user); }
       catch (failure) {
         if (!(failure instanceof AuthRequestError) || failure.status !== 401) throw failure;
-        setUser(null); setError('');
+        setSessionAccount(null); setUser(null); setRecoveryCodes([]); setError('');
       }
     } catch { setStatus(null); setError('Could not reach your workspace. Please try again in a moment.'); }
     finally { setLoading(false); }
@@ -39,13 +40,16 @@ export function AuthGate() {
   }, [loading]);
   useEffect(() => {
     void load();
-    const expired = () => { setUser(null); setError('Your session has expired. Sign in to continue.'); };
+    const expired = () => { setSessionAccount(null); setUser(null); setRecoveryCodes([]); setError('Your session has expired. Sign in to continue.'); };
+    const changed = () => { setSessionAccount(null); setUser(null); setRecoveryCodes([]); void load(); };
     const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('veriqon-session') : null;
-    if (channel) channel.onmessage = () => { void load(); };
+    sessionChannel.current = channel;
+    if (channel) channel.onmessage = changed;
     window.addEventListener('veriqon:session-expired', expired);
-    return () => { channel?.close(); window.removeEventListener('veriqon:session-expired', expired); };
+    window.addEventListener('veriqon:account-changed', changed);
+    return () => { channel?.close(); sessionChannel.current = null; window.removeEventListener('veriqon:session-expired', expired); window.removeEventListener('veriqon:account-changed', changed); };
   }, [load]);
-  function notifyTabs() { if (typeof BroadcastChannel !== 'undefined') { const channel = new BroadcastChannel('veriqon-session'); channel.postMessage('changed'); channel.close(); } }
+  function notifyTabs() { sessionChannel.current?.postMessage('changed'); }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (busy) return;
     const values = new FormData(event.currentTarget); setBusy(true); setError('');
@@ -53,12 +57,12 @@ export function AuthGate() {
       const body = { email: String(values.get('email')), password: String(values.get('password')), ...(mode === 'register' ? { name: String(values.get('name')), ...(status?.needsSetup ? { setupCode: String(values.get('setupCode')) } : {}) } : {}) };
       const result = await authRequest<{ user: Account; recoveryCodes?: string[] }>(mode, body);
       setRecoveryCodes(result.recoveryCodes || []);
-      setUser(result.user); setStatus(current => current && { ...current, needsSetup: false }); notifyTabs();
+      setSessionAccount(result.user.id); setUser(result.user); setStatus(current => current && { ...current, needsSetup: false }); notifyTabs();
     } catch (failure) { setError(failure instanceof Error ? failure.message : 'Sign-in failed. Please try again.'); }
     finally { setBusy(false); }
   }
   async function logout() {
-    await authRequest('logout', {}); setUser(null); setMode('login'); setError(''); notifyTabs();
+    await authRequest('logout', {}); setSessionAccount(null); setUser(null); setRecoveryCodes([]); setMode('login'); setError(''); notifyTabs();
   }
   if (loading) return <div className="auth-loading"><BrandMark /><LoaderCircle size={18} className="spin" /><span role="status">{waking ? 'Waking up your workspace. This can take about a minute.' : 'Opening your workspace'}</span></div>;
   if (user) return <><Workspace key={user.id} account={user} onLogout={logout} /><RecoveryCodesDialog codes={recoveryCodes} onDone={() => setRecoveryCodes([])} /></>;

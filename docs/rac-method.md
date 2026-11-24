@@ -1,5 +1,7 @@
 # RAC-inspired correction in Veriqon
 
+Current checkpoint, 12 November 2026: milestone 2 passed its controlled local acceptance tests. See [the current contract, fixes and actual results](MILESTONE_2_RESULTS.md). Two additional safeguards prevent recognized qualifier loss during decomposition and distinguish malformed repair responses from missing evidence. The official paper/code attribution below was rechecked at the same pinned commit. The October comparison, deployments and pass counts below are historical and are not current release evidence; current lifecycle limitations are tracked in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+
 Implementation review: 30 October 2026. Previous Veriqon implementation: `7b06e3e`. Official RAC code inspected at `15d0ae83a7de700a1304b345a54f9878eba51d53`.
 
 ## What the sources actually implement
@@ -20,7 +22,7 @@ The new production path is:
 4. Preserve supported answers. Search once more when support is missing, then reassess the same facts. Withhold unresolved facts; preserve conflicts for inspection.
 5. Ask for corrections only to contradicted or temporally invalid claims. Validate claim IDs, quotes, quantities, nonoverlapping spans and preservation of supported spans.
 6. Apply the validated span patches deterministically. Rebuild only the edited sentence's citation markers from actual evidence indexes. Decompose and verify the complete revised answer to catch newly introduced errors.
-7. Require a substantive numerical/negation change before assigning `REPAIRED_VERIFIED`. Persist the original, proposed edit, quotes, assessments, rejection reasons and model usage with the account-scoped answer.
+7. Require a substantive factual change before assigning `REPAIRED_VERIFIED`. The later local hardening also permits conservatively recognized unit and named-entity replacements when validated localized edits and final quoted support establish them. Persist the original, proposed edit, quotes, assessments, rejection reasons and model usage with the account-scoped answer. See [the current hardening record](rag-hardening.md); the historical comparison below has not been rerun or overwritten.
 
 This is **RAC-inspired, not a faithful reproduction**. Targeted retrieval, abstention instead of retaining unsupported Not Mentioned facts, strict schemas, quoted provenance, deterministic span revision, final re-verification, authorization, deadlines, snapshot checks and the substantive-change guard are Veriqon safeguards. The code does not train models. `DECOMPOSER_MODEL`, `VERIFIER_MODEL` and `LLM_MODEL` select existing providers; decomposition defaults to the verifier model. `MAX_REPAIR_ATTEMPTS=1` bounds repair. Existing authentication, NestJS, OpenRouter, PostgreSQL/pgvector and frontend remain.
 
@@ -30,7 +32,11 @@ New uploads without a supplied version receive a content SHA-256 version identif
 
 `GET /rag/conflicts` reads only the signed-in account's latest 200 saved answer assessments. Stable conflict IDs link to the affected answer, both quoted passages, source versions and model-assessed scope. The UI supports scope filtering, source inspection, loading/error/retry and explicit unresolved status. It does not invent a library scan, authority hierarchy or automatic resolution. No manual override or background conflict scanner is claimed. Model-assessed temporal scope is not authoritative metadata.
 
-## Reproducing the controlled comparison
+## Reproducing the research workflow
+
+For a fresh checkout, use `npm ci` then `npm run research:demo`. The seven-case corpus and protocol checks are included in the repository, require no credentials or private worktree, and use the current production orchestration. `npm run research:live` evaluates the configured provider against the same fixed drafts and evidence, with an uncorrected-draft baseline. This is distinct from the historical comparison below. See [research instructions](../research/README.md) for measurement limits and independent review.
+
+## Reproducing the historical controlled comparison
 
 Use Node 22 and the repository dependencies. From the repository root:
 
@@ -38,7 +44,7 @@ Use Node 22 and the repository dependencies. From the repository root:
 git worktree add --detach data/rac-baseline 7b06e3e
 node node_modules/typescript/bin/tsc -p data/rac-baseline/tsconfig.json --outDir data/rac-baseline/dist
 $env:EVAL_ENV_FILE = '.env.docker'
-npm run evaluate:rac
+npm run evaluate:rac:legacy
 ```
 
 Reuse an existing baseline checkout instead of running `worktree add` twice. Provider credentials stay in the ignored env file. This command consumes the configured provider quota; only synthetic passages are sent. Results go to ignored `data/rac-comparison*.json`. The script verifies the baseline checkout and records its compiled module hash and the dataset hash.
@@ -74,4 +80,4 @@ Release `f35d717` passed [GitHub CI](https://github.com/iamrakiib/veriqon/action
 
 The live answer was `VERIFIED_UNCHANGED` with one supported claim and a content-versioned citation. It took **57.15 seconds**: generation 4.29 s, decomposition 15.73 s and verification 35.84 s, plus transport/retrieval overhead. This confirms the deployed path works but also demonstrates that free-provider latency remains significant. The bounded retries and deadlines do not guarantee prompt answers or provider availability.
 
-Semantic correctness and complete fact decomposition still depend on models. The conservative substantive-change guard can reject valid entity-only corrections. There is no temporal authority engine, publication/effective-date database, scheduled revalidation, administrator resolution workflow, human-labeled general-domain benchmark or calibrated confidence. Current source versions and dates are retained when supplied; dates are never derived from ingestion time. Provider failures remain explicit, and failed revisions are never certified as repaired.
+Semantic correctness and complete fact decomposition still depend on models. The conservative substantive-change guard supports some grounded named-entity corrections but can still reject valid lowercase, relational or otherwise unrecognized corrections. Literal unit checks do not perform unit conversion or mathematical entailment. There is no temporal authority engine, publication/effective-date database, scheduled revalidation, administrator resolution workflow, human-labeled general-domain benchmark or calibrated confidence. Current source versions and dates are retained when supplied; dates are never derived from ingestion time. Provider failures remain explicit, and failed revisions are never certified as repaired.

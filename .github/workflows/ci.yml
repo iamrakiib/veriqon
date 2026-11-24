@@ -25,19 +25,32 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - run: npm run release:audit
+      - run: npm run test:release
+      - run: node --test scripts/docker-config.test.mjs
       - run: npm audit --audit-level=high
       - run: npm run lint
       - run: npm test
+      - run: npm run research:demo
       - run: npm run test:infra
+      - run: npm run test:load
+        env:
+          TEST_DATABASE_URL: postgresql://veriqon_test:local_test_only@127.0.0.1:55432/veriqon_test
       - run: npm run web:build
       - run: npm run web:check
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser
+      - run: npm run test:browser -- --workers=1
+      - run: npm run test:lifecycle
+        env:
+          TEST_DATABASE_URL: postgresql://veriqon_test:local_test_only@127.0.0.1:55432/veriqon_test
+          TEST_REDIS_URL: redis://127.0.0.1:56379
       - run: docker build -t veriqon-api:ci .
       - run: docker build -f apps/web/Dockerfile -t veriqon-web:ci .
       - uses: actions/upload-artifact@v4
@@ -45,3 +58,36 @@ jobs:
         with:
           name: browser-failures
           path: test-results/
+  docker-installation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/init-docker.mjs
+      - run: mkdir -p data
+      - run: docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml build
+      - run: docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml up -d --no-build --wait --wait-timeout 180
+      - run: node scripts/test-docker-workflow.mjs exercise data/docker-state.json
+      - run: |
+          docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml restart
+          docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml up -d --no-build --wait --wait-timeout 180
+          node scripts/test-docker-workflow.mjs verify data/docker-state.json
+      - run: node scripts/docker-database.mjs backup --project veriqon-m5 --file data/acceptance.dump
+      - run: node scripts/test-docker-recovery.mjs veriqon-m5 data/docker-state.json
+      - run: |
+          docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml down
+          docker compose -p veriqon-m5-restore --env-file .env.docker up -d --wait postgres
+          node scripts/docker-database.mjs restore --project veriqon-m5-restore --file data/acceptance.dump
+          docker image tag veriqon-m5-api veriqon-m5-restore-api
+          docker image tag veriqon-m5-worker veriqon-m5-restore-worker
+          docker image tag veriqon-m5-web veriqon-m5-restore-web
+          docker compose -p veriqon-m5-restore --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml up -d --no-build --wait --wait-timeout 180
+      - run: node scripts/test-docker-workflow.mjs verify data/docker-state.json
+      - run: node scripts/test-docker-failures.mjs veriqon-m5-restore
+      - if: always()
+        run: |
+          docker compose -p veriqon-m5 --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml down -v
+          docker compose -p veriqon-m5-restore --env-file .env.docker -f compose.yaml -f compose.acceptance.yaml down -v

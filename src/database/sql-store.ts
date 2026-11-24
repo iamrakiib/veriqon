@@ -23,7 +23,7 @@ export class SqlStore {
     if (this.dialect === 'postgresql') {
       this.pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 10000,
         idleTimeoutMillis: 30000, statement_timeout: 15000, idle_in_transaction_session_timeout: 20000,
-        application_name: 'veriqon-api' });
+        application_name: process.env.VERIQON_PROCESS_ROLE === 'worker' ? 'veriqon-worker' : 'veriqon-api' });
       this.pool.on('error', () => console.error('PostgreSQL connection failed; the pool will reconnect.'));
     } else {
       if (process.env.NODE_ENV === 'production') throw new Error('DATABASE_URL is required in production. SQLite is local development only.');
@@ -45,7 +45,7 @@ export class SqlStore {
       await this.transaction(async () => {
         await this.get('SELECT pg_advisory_xact_lock(742901)');
         await this.run('CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, checksum TEXT NOT NULL, applied_at BIGINT NOT NULL)');
-        for (const [index, file] of ['001_postgresql.sql', '002_recovery_codes.sql'].entries()) {
+        for (const [index, file] of ['001_postgresql.sql', '002_recovery_codes.sql', '003_ingestion_jobs.sql', '004_knowledge_lifecycle.sql'].entries()) {
           const sql = readFileSync(join(process.cwd(), 'migrations', file), 'utf8').replace(/\r\n/g, '\n');
           const checksum = createHash('sha256').update(sql).digest('hex');
           const existing = await this.get('SELECT checksum FROM schema_migrations WHERE version=?', index + 1);
@@ -58,7 +58,7 @@ export class SqlStore {
       });
     }
     const version = await this.get('SELECT MAX(version) AS version FROM schema_migrations');
-    if (Number(version?.version) !== 2) throw new Error('Database migrations are not current. Run npm run db:migrate.');
+    if (Number(version?.version) !== 4) throw new Error('Database migrations are not current. Run npm run db:migrate.');
   }
 
   private serialized<T>(task: () => Promise<T>): Promise<T> {

@@ -1,17 +1,28 @@
-# Assumes this directory (sc-rag) is the Git repository root.
+# Repository root must be sc-rag. Creating this Blueprint incurs cost.
+# Release API first (its pre-deploy owns migrations), then worker at the SAME commit.
+# See docs/DEPLOYMENT.md. Service references share settings, not startup readiness.
 services:
   - type: web
     name: veriqon-api
     runtime: docker
-    plan: free
+    plan: starter
+    region: singapore
+    numInstances: 1
+    autoDeployTrigger: 'off'
     dockerfilePath: ./Dockerfile
     dockerContext: .
+    dockerCommand: node dist/src/main.js
+    preDeployCommand: node dist/scripts/migrate.js
     healthCheckPath: /rag/ready
+    maxShutdownDelaySeconds: 30
     envVars:
-      - key: NODE_ENV
-        value: production
+      - fromGroup: veriqon-runtime
+      - key: VERIQON_PROCESS_ROLE
+        value: api
       - key: HOST
         value: 0.0.0.0
+      - key: TRUST_PROXY_HOPS
+        value: '1'
       - key: JWT_SECRET
         generateValue: true
       - key: SETUP_CODE
@@ -20,6 +31,8 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+      - key: QUEUE_REDIS_URL
+        sync: false
       - key: APP_ORIGINS
         sync: false
       - key: OPENROUTER_API_KEY
@@ -27,14 +40,70 @@ services:
       - key: LLM_MODEL
         sync: false
       - key: EMBEDDING_MODEL
-        value: openai/text-embedding-3-small
+        sync: false
+  - type: worker
+    name: veriqon-worker
+    runtime: docker
+    plan: starter
+    region: singapore
+    numInstances: 1
+    autoDeployTrigger: 'off'
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: node dist/src/worker.js
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - fromGroup: veriqon-runtime
+      - key: VERIQON_PROCESS_ROLE
+        value: worker
+      - key: WORKER_HEARTBEAT_PATH
+        value: /tmp/veriqon-worker-heartbeat.json
+      - key: DATABASE_URL
+        fromService: {type: web, name: veriqon-api, envVarKey: DATABASE_URL}
+      - key: REDIS_URL
+        fromService: {type: web, name: veriqon-api, envVarKey: REDIS_URL}
+      - key: QUEUE_REDIS_URL
+        fromService: {type: web, name: veriqon-api, envVarKey: QUEUE_REDIS_URL}
+      - key: JWT_SECRET
+        fromService: {type: web, name: veriqon-api, envVarKey: JWT_SECRET}
+      - key: SETUP_CODE
+        fromService: {type: web, name: veriqon-api, envVarKey: SETUP_CODE}
+      - key: APP_ORIGINS
+        fromService: {type: web, name: veriqon-api, envVarKey: APP_ORIGINS}
+      - key: OPENROUTER_API_KEY
+        fromService: {type: web, name: veriqon-api, envVarKey: OPENROUTER_API_KEY}
+      - key: LLM_MODEL
+        fromService: {type: web, name: veriqon-api, envVarKey: LLM_MODEL}
+      - key: EMBEDDING_MODEL
+        fromService: {type: web, name: veriqon-api, envVarKey: EMBEDDING_MODEL}
+envVarGroups:
+  - name: veriqon-runtime
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JOB_QUEUE_MODE
+        value: bullmq
+      - key: DB_MIGRATE_ON_START
+        value: 'false'
+      - key: REDIS_PREFIX
+        value: veriqon-staging
+      - key: QUEUE_PREFIX
+        value: veriqon-staging-jobs
       - key: AUTH_COOKIE_SECURE
         value: 'true'
       - key: ALLOW_REGISTRATION
         value: 'false'
-      - key: DB_MIGRATE_ON_START
+      - key: REVALIDATION_ENABLED
         value: 'true'
+      - key: REVALIDATION_PER_HOUR
+        value: '10'
+      - key: PROVIDER_TIMEOUT_MS
+        value: '30000'
       - key: RAG_TIMEOUT_MS
         value: '90000'
-      - key: TRUST_PROXY_HOPS
+      - key: MAX_REPAIR_ATTEMPTS
         value: '1'
+      - key: EMBEDDING_BATCH_SIZE
+        value: '1'
+      - key: EMBEDDING_MIN_INTERVAL_MS
+        value: '3000'

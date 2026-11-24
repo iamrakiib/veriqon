@@ -1,0 +1,3271 @@
+{
+  "generatedAt": "2026-11-01T13:51:57.151Z",
+  "liveEmbeddingsAndGate": false,
+  "semanticIntents": 20,
+  "protocol": "Same 100 requests per mode: 20 original questions, 20 exact repeats, 20 whitespace-only repeats, 40 authored paraphrases. Real production cache orchestration with a fresh instance per mode. Retrieval, answer generation and evidence verification use fixed synthetic ground truth. No user data or database writes.",
+  "similarityAndGate": "Ideal one-hot vectors and an annotated equivalence gate are fixtures. This run measures wiring and policy, NOT semantic model accuracy.",
+  "limits": "Equivalence labels are authored, not independently reviewed. Positive paraphrases only in the 100-request set; adversarial scope and isolation checks are separate unit tests. No live answer generation, independently measured factual accuracy, provider cost estimate, or production hit rate. Reported request duration excludes batched embedding preprocessing and actual answer-generation latency.",
+  "configuration": {
+    "threshold": 0.92,
+    "timeoutMs": 8000,
+    "ttlMs": 300000,
+    "embeddingModel": "fixture",
+    "gateModel": "fixture"
+  },
+  "reportedGateTokens": 0,
+  "usageComplete": true,
+  "runs": [
+    {
+      "mode": "exact-only",
+      "requests": 100,
+      "hits": 40,
+      "misses": 60,
+      "breakdown": [
+        {
+          "kind": "first_question",
+          "requests": 20,
+          "hits": 0
+        },
+        {
+          "kind": "exact_repeat",
+          "requests": 20,
+          "hits": 20
+        },
+        {
+          "kind": "whitespace_repeat",
+          "requests": 20,
+          "hits": 20
+        },
+        {
+          "kind": "paraphrase_a",
+          "requests": 20,
+          "hits": 0
+        },
+        {
+          "kind": "paraphrase_b",
+          "requests": 20,
+          "hits": 0
+        }
+      ],
+      "callsFor100": {
+        "searches": 60,
+        "generations": 60,
+        "verifications": 60,
+        "equivalenceChecks": 0
+      },
+      "incorrectReuses": 0,
+      "isolationChecks": {
+        "differentOwnerMiss": true,
+        "changedSourceRevisionMiss": true
+      },
+      "rows": [
+        {
+          "group": 1,
+          "kind": "first_question",
+          "question": "How many datasets were used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 10.998100000000022
+        },
+        {
+          "group": 2,
+          "kind": "first_question",
+          "question": "How many backbones were evaluated?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.1052999999999429
+        },
+        {
+          "group": 3,
+          "kind": "first_question",
+          "question": "What accuracy did the model report?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.756199999999808
+        },
+        {
+          "group": 4,
+          "kind": "first_question",
+          "question": "How many epochs did training run?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.4864999999999782
+        },
+        {
+          "group": 5,
+          "kind": "first_question",
+          "question": "What batch size was used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.1164000000001124
+        },
+        {
+          "group": 6,
+          "kind": "first_question",
+          "question": "What learning rate was used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.47499999999990905
+        },
+        {
+          "group": 7,
+          "kind": "first_question",
+          "question": "How many random seeds were used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3483000000001084
+        },
+        {
+          "group": 8,
+          "kind": "first_question",
+          "question": "How long did training take?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.42689999999993233
+        },
+        {
+          "group": 9,
+          "kind": "first_question",
+          "question": "How many layers does the encoder have?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.7623999999998432
+        },
+        {
+          "group": 10,
+          "kind": "first_question",
+          "question": "What is the embedding dimension?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.571100000000115
+        },
+        {
+          "group": 11,
+          "kind": "first_question",
+          "question": "How many remote days are allowed per week?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4128000000000611
+        },
+        {
+          "group": 12,
+          "kind": "first_question",
+          "question": "How many annual leave days are provided?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.30559999999991305
+        },
+        {
+          "group": 13,
+          "kind": "first_question",
+          "question": "How long is the probation period?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3469000000000051
+        },
+        {
+          "group": 14,
+          "kind": "first_question",
+          "question": "What is the meal reimbursement limit?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.2759000000000924
+        },
+        {
+          "group": 15,
+          "kind": "first_question",
+          "question": "How many vacation days may be carried over?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.2825000000000273
+        },
+        {
+          "group": 16,
+          "kind": "first_question",
+          "question": "What is the upload size limit?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3046999999999116
+        },
+        {
+          "group": 17,
+          "kind": "first_question",
+          "question": "How many files can be uploaded in a batch?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.2717000000000098
+        },
+        {
+          "group": 18,
+          "kind": "first_question",
+          "question": "How long are access tokens valid?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.2599999999999909
+        },
+        {
+          "group": 19,
+          "kind": "first_question",
+          "question": "How many recovery codes are generated?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.268100000000004
+        },
+        {
+          "group": 20,
+          "kind": "first_question",
+          "question": "How long are cached answers retained?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31130000000007385
+        },
+        {
+          "group": 1,
+          "kind": "exact_repeat",
+          "question": "How many datasets were used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many datasets were used?",
+            "ageMs": 12,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1895999999999276
+        },
+        {
+          "group": 2,
+          "kind": "exact_repeat",
+          "question": "How many backbones were evaluated?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.15210000000001855
+        },
+        {
+          "group": 3,
+          "kind": "exact_repeat",
+          "question": "What accuracy did the model report?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What accuracy did the model report?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11339999999995598
+        },
+        {
+          "group": 4,
+          "kind": "exact_repeat",
+          "question": "How many epochs did training run?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many epochs did training run?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.14170000000012806
+        },
+        {
+          "group": 5,
+          "kind": "exact_repeat",
+          "question": "What batch size was used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What batch size was used?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11550000000011096
+        },
+        {
+          "group": 6,
+          "kind": "exact_repeat",
+          "question": "What learning rate was used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What learning rate was used?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.12409999999999854
+        },
+        {
+          "group": 7,
+          "kind": "exact_repeat",
+          "question": "How many random seeds were used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many random seeds were used?",
+            "ageMs": 6,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10630000000014661
+        },
+        {
+          "group": 8,
+          "kind": "exact_repeat",
+          "question": "How long did training take?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long did training take?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10370000000011714
+        },
+        {
+          "group": 9,
+          "kind": "exact_repeat",
+          "question": "How many layers does the encoder have?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.12460000000010041
+        },
+        {
+          "group": 10,
+          "kind": "exact_repeat",
+          "question": "What is the embedding dimension?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the embedding dimension?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10290000000009059
+        },
+        {
+          "group": 11,
+          "kind": "exact_repeat",
+          "question": "How many remote days are allowed per week?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "ageMs": 4,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11019999999984975
+        },
+        {
+          "group": 12,
+          "kind": "exact_repeat",
+          "question": "How many annual leave days are provided?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "ageMs": 4,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11120000000005348
+        },
+        {
+          "group": 13,
+          "kind": "exact_repeat",
+          "question": "How long is the probation period?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long is the probation period?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1145000000001346
+        },
+        {
+          "group": 14,
+          "kind": "exact_repeat",
+          "question": "What is the meal reimbursement limit?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11660000000006221
+        },
+        {
+          "group": 15,
+          "kind": "exact_repeat",
+          "question": "How many vacation days may be carried over?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11179999999990287
+        },
+        {
+          "group": 16,
+          "kind": "exact_repeat",
+          "question": "What is the upload size limit?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the upload size limit?",
+            "ageMs": 4,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.13510000000019318
+        },
+        {
+          "group": 17,
+          "kind": "exact_repeat",
+          "question": "How many files can be uploaded in a batch?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1110999999998512
+        },
+        {
+          "group": 18,
+          "kind": "exact_repeat",
+          "question": "How long are access tokens valid?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are access tokens valid?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10979999999995016
+        },
+        {
+          "group": 19,
+          "kind": "exact_repeat",
+          "question": "How many recovery codes are generated?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10150000000021464
+        },
+        {
+          "group": 20,
+          "kind": "exact_repeat",
+          "question": "How long are cached answers retained?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are cached answers retained?",
+            "ageMs": 2,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1192999999998392
+        },
+        {
+          "group": 1,
+          "kind": "whitespace_repeat",
+          "question": "  How many datasets were used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many datasets were used?",
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11779999999998836
+        },
+        {
+          "group": 2,
+          "kind": "whitespace_repeat",
+          "question": "  How many backbones were evaluated?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "ageMs": 13,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1374999999998181
+        },
+        {
+          "group": 3,
+          "kind": "whitespace_repeat",
+          "question": "  What accuracy did the model report?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What accuracy did the model report?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.12080000000014479
+        },
+        {
+          "group": 4,
+          "kind": "whitespace_repeat",
+          "question": "  How many epochs did training run?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many epochs did training run?",
+            "ageMs": 10,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10419999999999163
+        },
+        {
+          "group": 5,
+          "kind": "whitespace_repeat",
+          "question": "  What batch size was used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What batch size was used?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10270000000014079
+        },
+        {
+          "group": 6,
+          "kind": "whitespace_repeat",
+          "question": "  What learning rate was used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What learning rate was used?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10209999999983665
+        },
+        {
+          "group": 7,
+          "kind": "whitespace_repeat",
+          "question": "  How many random seeds were used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many random seeds were used?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.18810000000007676
+        },
+        {
+          "group": 8,
+          "kind": "whitespace_repeat",
+          "question": "  How long did training take?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long did training take?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.12340000000017426
+        },
+        {
+          "group": 9,
+          "kind": "whitespace_repeat",
+          "question": "  How many layers does the encoder have?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10599999999999454
+        },
+        {
+          "group": 10,
+          "kind": "whitespace_repeat",
+          "question": "  What is the embedding dimension?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the embedding dimension?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11220000000002983
+        },
+        {
+          "group": 11,
+          "kind": "whitespace_repeat",
+          "question": "  How many remote days are allowed per week?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "ageMs": 7,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09699999999997999
+        },
+        {
+          "group": 12,
+          "kind": "whitespace_repeat",
+          "question": "  How many annual leave days are provided?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09490000000005239
+        },
+        {
+          "group": 13,
+          "kind": "whitespace_repeat",
+          "question": "  How long is the probation period?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long is the probation period?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.11940000000004147
+        },
+        {
+          "group": 14,
+          "kind": "whitespace_repeat",
+          "question": "  What is the meal reimbursement limit?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09730000000013206
+        },
+        {
+          "group": 15,
+          "kind": "whitespace_repeat",
+          "question": "  How many vacation days may be carried over?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09459999999990032
+        },
+        {
+          "group": 16,
+          "kind": "whitespace_repeat",
+          "question": "  What is the upload size limit?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the upload size limit?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09519999999997708
+        },
+        {
+          "group": 17,
+          "kind": "whitespace_repeat",
+          "question": "  How many files can be uploaded in a batch?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1326000000001386
+        },
+        {
+          "group": 18,
+          "kind": "whitespace_repeat",
+          "question": "  How long are access tokens valid?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are access tokens valid?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10410000000001673
+        },
+        {
+          "group": 19,
+          "kind": "whitespace_repeat",
+          "question": "  How many recovery codes are generated?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09439999999995052
+        },
+        {
+          "group": 20,
+          "kind": "whitespace_repeat",
+          "question": "  How long are cached answers retained?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are cached answers retained?",
+            "ageMs": 5,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10249999999996362
+        },
+        {
+          "group": 1,
+          "kind": "paraphrase_a",
+          "question": "What is the number of datasets used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.6005999999999858
+        },
+        {
+          "group": 2,
+          "kind": "paraphrase_a",
+          "question": "What number of backbones was evaluated?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4396999999999025
+        },
+        {
+          "group": 3,
+          "kind": "paraphrase_a",
+          "question": "What was the reported model accuracy?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5507999999999811
+        },
+        {
+          "group": 4,
+          "kind": "paraphrase_a",
+          "question": "What was the number of training epochs?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.6477999999999611
+        },
+        {
+          "group": 5,
+          "kind": "paraphrase_a",
+          "question": "What was the training batch size?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5078000000000884
+        },
+        {
+          "group": 6,
+          "kind": "paraphrase_a",
+          "question": "Which learning rate was used for training?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.6603999999999814
+        },
+        {
+          "group": 7,
+          "kind": "paraphrase_a",
+          "question": "What was the count of random seeds?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.6385999999999967
+        },
+        {
+          "group": 8,
+          "kind": "paraphrase_a",
+          "question": "What was the training duration?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.455600000000004
+        },
+        {
+          "group": 9,
+          "kind": "paraphrase_a",
+          "question": "What is the number of encoder layers?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5639999999998508
+        },
+        {
+          "group": 10,
+          "kind": "paraphrase_a",
+          "question": "How many dimensions do the embeddings have?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.38370000000008986
+        },
+        {
+          "group": 11,
+          "kind": "paraphrase_a",
+          "question": "What is the weekly remote-work day allowance?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3709000000001197
+        },
+        {
+          "group": 12,
+          "kind": "paraphrase_a",
+          "question": "What is the annual leave allowance in days?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4312999999999647
+        },
+        {
+          "group": 13,
+          "kind": "paraphrase_a",
+          "question": "What is the duration of probation?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4568000000001575
+        },
+        {
+          "group": 14,
+          "kind": "paraphrase_a",
+          "question": "What is the maximum meal reimbursement?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3846000000000913
+        },
+        {
+          "group": 15,
+          "kind": "paraphrase_a",
+          "question": "What is the vacation carryover allowance?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.32970000000000255
+        },
+        {
+          "group": 16,
+          "kind": "paraphrase_a",
+          "question": "What is the maximum upload file size?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4352000000001226
+        },
+        {
+          "group": 17,
+          "kind": "paraphrase_a",
+          "question": "What is the batch upload file limit?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.39170000000012806
+        },
+        {
+          "group": 18,
+          "kind": "paraphrase_a",
+          "question": "What is the access-token lifetime?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3546999999998661
+        },
+        {
+          "group": 19,
+          "kind": "paraphrase_a",
+          "question": "What is the number of generated recovery codes?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3488000000002103
+        },
+        {
+          "group": 20,
+          "kind": "paraphrase_a",
+          "question": "What is the answer-cache retention duration?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.38200000000006185
+        },
+        {
+          "group": 1,
+          "kind": "paraphrase_b",
+          "question": "How many datasets did the experiment use?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.387000000000171
+        },
+        {
+          "group": 2,
+          "kind": "paraphrase_b",
+          "question": "How many backbone models were tested?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.37979999999993197
+        },
+        {
+          "group": 3,
+          "kind": "paraphrase_b",
+          "question": "What accuracy value was reported for the model?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4673999999999978
+        },
+        {
+          "group": 4,
+          "kind": "paraphrase_b",
+          "question": "For how many epochs was the model trained?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5028999999999542
+        },
+        {
+          "group": 5,
+          "kind": "paraphrase_b",
+          "question": "How large was each training batch?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.43790000000012697
+        },
+        {
+          "group": 6,
+          "kind": "paraphrase_b",
+          "question": "What was the training learning rate?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4414000000001579
+        },
+        {
+          "group": 7,
+          "kind": "paraphrase_b",
+          "question": "How many seeds were used in the experiment?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.38020000000005894
+        },
+        {
+          "group": 8,
+          "kind": "paraphrase_b",
+          "question": "How much time did training require?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 2.538099999999986
+        },
+        {
+          "group": 9,
+          "kind": "paraphrase_b",
+          "question": "How many layers are in the encoder?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5488000000000284
+        },
+        {
+          "group": 10,
+          "kind": "paraphrase_b",
+          "question": "What dimensionality do the embeddings use?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.449100000000044
+        },
+        {
+          "group": 11,
+          "kind": "paraphrase_b",
+          "question": "How many days a week may employees work remotely?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4093000000000302
+        },
+        {
+          "group": 12,
+          "kind": "paraphrase_b",
+          "question": "How many days of annual leave are available?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4219999999997981
+        },
+        {
+          "group": 13,
+          "kind": "paraphrase_b",
+          "question": "How many months does probation last?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3848000000000411
+        },
+        {
+          "group": 14,
+          "kind": "paraphrase_b",
+          "question": "How much may be reimbursed for a meal?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.387000000000171
+        },
+        {
+          "group": 15,
+          "kind": "paraphrase_b",
+          "question": "How many unused vacation days can carry over?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.8266000000000986
+        },
+        {
+          "group": 16,
+          "kind": "paraphrase_b",
+          "question": "How large can an uploaded file be?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.1398999999998978
+        },
+        {
+          "group": 17,
+          "kind": "paraphrase_b",
+          "question": "What is the maximum number of files per upload batch?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.3465000000001055
+        },
+        {
+          "group": 18,
+          "kind": "paraphrase_b",
+          "question": "How much time passes before an access token expires?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.6549000000002252
+        },
+        {
+          "group": 19,
+          "kind": "paraphrase_b",
+          "question": "How many backup recovery codes are issued?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 3,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 3.6192000000000917
+        },
+        {
+          "group": 20,
+          "kind": "paraphrase_b",
+          "question": "How much time can an answer remain cached?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "disabled",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.47910000000001673
+        }
+      ]
+    },
+    {
+      "mode": "semantic",
+      "requests": 100,
+      "hits": 80,
+      "misses": 20,
+      "breakdown": [
+        {
+          "kind": "first_question",
+          "requests": 20,
+          "hits": 0
+        },
+        {
+          "kind": "exact_repeat",
+          "requests": 20,
+          "hits": 20
+        },
+        {
+          "kind": "whitespace_repeat",
+          "requests": 20,
+          "hits": 20
+        },
+        {
+          "kind": "paraphrase_a",
+          "requests": 20,
+          "hits": 20
+        },
+        {
+          "kind": "paraphrase_b",
+          "requests": 20,
+          "hits": 20
+        }
+      ],
+      "callsFor100": {
+        "searches": 20,
+        "generations": 20,
+        "verifications": 20,
+        "equivalenceChecks": 40
+      },
+      "incorrectReuses": 0,
+      "isolationChecks": {
+        "differentOwnerMiss": true,
+        "changedSourceRevisionMiss": true
+      },
+      "rows": [
+        {
+          "group": 1,
+          "kind": "first_question",
+          "question": "How many datasets were used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "no_candidate",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5327000000002045
+        },
+        {
+          "group": 2,
+          "kind": "first_question",
+          "question": "How many backbones were evaluated?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.5554999999999382
+        },
+        {
+          "group": 3,
+          "kind": "first_question",
+          "question": "What accuracy did the model report?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3693000000000666
+        },
+        {
+          "group": 4,
+          "kind": "first_question",
+          "question": "How many epochs did training run?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3309999999999036
+        },
+        {
+          "group": 5,
+          "kind": "first_question",
+          "question": "What batch size was used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.44029999999997926
+        },
+        {
+          "group": 6,
+          "kind": "first_question",
+          "question": "What learning rate was used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31999999999993634
+        },
+        {
+          "group": 7,
+          "kind": "first_question",
+          "question": "How many random seeds were used?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.38229999999998654
+        },
+        {
+          "group": 8,
+          "kind": "first_question",
+          "question": "How long did training take?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3627999999998792
+        },
+        {
+          "group": 9,
+          "kind": "first_question",
+          "question": "How many layers does the encoder have?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.37400000000002365
+        },
+        {
+          "group": 10,
+          "kind": "first_question",
+          "question": "What is the embedding dimension?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4635999999998148
+        },
+        {
+          "group": 11,
+          "kind": "first_question",
+          "question": "How many remote days are allowed per week?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3898999999998978
+        },
+        {
+          "group": 12,
+          "kind": "first_question",
+          "question": "How many annual leave days are provided?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.386600000000044
+        },
+        {
+          "group": 13,
+          "kind": "first_question",
+          "question": "How long is the probation period?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4978000000000975
+        },
+        {
+          "group": 14,
+          "kind": "first_question",
+          "question": "What is the meal reimbursement limit?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4331999999999425
+        },
+        {
+          "group": 15,
+          "kind": "first_question",
+          "question": "How many vacation days may be carried over?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.7439999999999145
+        },
+        {
+          "group": 16,
+          "kind": "first_question",
+          "question": "What is the upload size limit?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.581000000000131
+        },
+        {
+          "group": 17,
+          "kind": "first_question",
+          "question": "How many files can be uploaded in a batch?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.5584000000001197
+        },
+        {
+          "group": 18,
+          "kind": "first_question",
+          "question": "How long are access tokens valid?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.9538000000000011
+        },
+        {
+          "group": 19,
+          "kind": "first_question",
+          "question": "How many recovery codes are generated?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 1.3438000000001011
+        },
+        {
+          "group": 20,
+          "kind": "first_question",
+          "question": "How long are cached answers retained?",
+          "cacheHit": false,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "miss",
+            "reason": "below_threshold",
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.8584000000000742
+        },
+        {
+          "group": 1,
+          "kind": "exact_repeat",
+          "question": "How many datasets were used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many datasets were used?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.20730000000003201
+        },
+        {
+          "group": 2,
+          "kind": "exact_repeat",
+          "question": "How many backbones were evaluated?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "ageMs": 11,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10389999999983957
+        },
+        {
+          "group": 3,
+          "kind": "exact_repeat",
+          "question": "What accuracy did the model report?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What accuracy did the model report?",
+            "ageMs": 10,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09770000000003165
+        },
+        {
+          "group": 4,
+          "kind": "exact_repeat",
+          "question": "How many epochs did training run?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many epochs did training run?",
+            "ageMs": 10,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09910000000013497
+        },
+        {
+          "group": 5,
+          "kind": "exact_repeat",
+          "question": "What batch size was used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What batch size was used?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09259999999994761
+        },
+        {
+          "group": 6,
+          "kind": "exact_repeat",
+          "question": "What learning rate was used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What learning rate was used?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0988999999999578
+        },
+        {
+          "group": 7,
+          "kind": "exact_repeat",
+          "question": "How many random seeds were used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many random seeds were used?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08960000000001855
+        },
+        {
+          "group": 8,
+          "kind": "exact_repeat",
+          "question": "How long did training take?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long did training take?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09359999999992397
+        },
+        {
+          "group": 9,
+          "kind": "exact_repeat",
+          "question": "How many layers does the encoder have?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0884000000000924
+        },
+        {
+          "group": 10,
+          "kind": "exact_repeat",
+          "question": "What is the embedding dimension?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the embedding dimension?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09199999999987085
+        },
+        {
+          "group": 11,
+          "kind": "exact_repeat",
+          "question": "How many remote days are allowed per week?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08690000000001419
+        },
+        {
+          "group": 12,
+          "kind": "exact_repeat",
+          "question": "How many annual leave days are provided?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08919999999989159
+        },
+        {
+          "group": 13,
+          "kind": "exact_repeat",
+          "question": "How long is the probation period?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long is the probation period?",
+            "ageMs": 7,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0887000000000171
+        },
+        {
+          "group": 14,
+          "kind": "exact_repeat",
+          "question": "What is the meal reimbursement limit?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08769999999981337
+        },
+        {
+          "group": 15,
+          "kind": "exact_repeat",
+          "question": "How many vacation days may be carried over?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10619999999994434
+        },
+        {
+          "group": 16,
+          "kind": "exact_repeat",
+          "question": "What is the upload size limit?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the upload size limit?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0989999999999327
+        },
+        {
+          "group": 17,
+          "kind": "exact_repeat",
+          "question": "How many files can be uploaded in a batch?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08699999999998909
+        },
+        {
+          "group": 18,
+          "kind": "exact_repeat",
+          "question": "How long are access tokens valid?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are access tokens valid?",
+            "ageMs": 4,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08960000000001855
+        },
+        {
+          "group": 19,
+          "kind": "exact_repeat",
+          "question": "How many recovery codes are generated?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "ageMs": 3,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08609999999998763
+        },
+        {
+          "group": 20,
+          "kind": "exact_repeat",
+          "question": "How long are cached answers retained?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are cached answers retained?",
+            "ageMs": 2,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0888999999999669
+        },
+        {
+          "group": 1,
+          "kind": "whitespace_repeat",
+          "question": "  How many datasets were used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many datasets were used?",
+            "ageMs": 13,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08949999999981628
+        },
+        {
+          "group": 2,
+          "kind": "whitespace_repeat",
+          "question": "  How many backbones were evaluated?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "ageMs": 12,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0906999999999698
+        },
+        {
+          "group": 3,
+          "kind": "whitespace_repeat",
+          "question": "  What accuracy did the model report?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What accuracy did the model report?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09199999999987085
+        },
+        {
+          "group": 4,
+          "kind": "whitespace_repeat",
+          "question": "  How many epochs did training run?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many epochs did training run?",
+            "ageMs": 12,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08659999999986212
+        },
+        {
+          "group": 5,
+          "kind": "whitespace_repeat",
+          "question": "  What batch size was used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What batch size was used?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09009999999989304
+        },
+        {
+          "group": 6,
+          "kind": "whitespace_repeat",
+          "question": "  What learning rate was used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What learning rate was used?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08770000000004075
+        },
+        {
+          "group": 7,
+          "kind": "whitespace_repeat",
+          "question": "  How many random seeds were used?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many random seeds were used?",
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09000000000014552
+        },
+        {
+          "group": 8,
+          "kind": "whitespace_repeat",
+          "question": "  How long did training take?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long did training take?",
+            "ageMs": 10,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.1897999999998774
+        },
+        {
+          "group": 9,
+          "kind": "whitespace_repeat",
+          "question": "  How many layers does the encoder have?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "ageMs": 10,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0963000000001557
+        },
+        {
+          "group": 10,
+          "kind": "whitespace_repeat",
+          "question": "  What is the embedding dimension?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the embedding dimension?",
+            "ageMs": 10,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10030000000006112
+        },
+        {
+          "group": 11,
+          "kind": "whitespace_repeat",
+          "question": "  How many remote days are allowed per week?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.088799999999992
+        },
+        {
+          "group": 12,
+          "kind": "whitespace_repeat",
+          "question": "  How many annual leave days are provided?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08770000000004075
+        },
+        {
+          "group": 13,
+          "kind": "whitespace_repeat",
+          "question": "  How long is the probation period?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long is the probation period?",
+            "ageMs": 9,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08989999999994325
+        },
+        {
+          "group": 14,
+          "kind": "whitespace_repeat",
+          "question": "  What is the meal reimbursement limit?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "ageMs": 9,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0885000000000673
+        },
+        {
+          "group": 15,
+          "kind": "whitespace_repeat",
+          "question": "  How many vacation days may be carried over?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08770000000004075
+        },
+        {
+          "group": 16,
+          "kind": "whitespace_repeat",
+          "question": "  What is the upload size limit?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "What is the upload size limit?",
+            "ageMs": 8,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.10819999999989705
+        },
+        {
+          "group": 17,
+          "kind": "whitespace_repeat",
+          "question": "  How many files can be uploaded in a batch?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "ageMs": 7,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.09129999999981919
+        },
+        {
+          "group": 18,
+          "kind": "whitespace_repeat",
+          "question": "  How long are access tokens valid?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are access tokens valid?",
+            "ageMs": 6,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08769999999981337
+        },
+        {
+          "group": 19,
+          "kind": "whitespace_repeat",
+          "question": "  How many recovery codes are generated?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "ageMs": 5,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.0989999999999327
+        },
+        {
+          "group": 20,
+          "kind": "whitespace_repeat",
+          "question": "  How long are cached answers retained?  ",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "exact",
+            "matchedQuestion": "How long are cached answers retained?",
+            "ageMs": 4,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.08690000000001419
+        },
+        {
+          "group": 1,
+          "kind": "paraphrase_a",
+          "question": "What is the number of datasets used?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many datasets were used?",
+            "similarity": 1,
+            "ageMs": 16,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4562999999998283
+        },
+        {
+          "group": 2,
+          "kind": "paraphrase_a",
+          "question": "What number of backbones was evaluated?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "similarity": 1,
+            "ageMs": 15,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.34540000000015425
+        },
+        {
+          "group": 3,
+          "kind": "paraphrase_a",
+          "question": "What was the reported model accuracy?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What accuracy did the model report?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31379999999990105
+        },
+        {
+          "group": 4,
+          "kind": "paraphrase_a",
+          "question": "What was the number of training epochs?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many epochs did training run?",
+            "similarity": 1,
+            "ageMs": 15,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3048999999998614
+        },
+        {
+          "group": 5,
+          "kind": "paraphrase_a",
+          "question": "What was the training batch size?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What batch size was used?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3260999999999967
+        },
+        {
+          "group": 6,
+          "kind": "paraphrase_a",
+          "question": "Which learning rate was used for training?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What learning rate was used?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.4175000000000182
+        },
+        {
+          "group": 7,
+          "kind": "paraphrase_a",
+          "question": "What was the count of random seeds?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many random seeds were used?",
+            "similarity": 1,
+            "ageMs": 15,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.32590000000004693
+        },
+        {
+          "group": 8,
+          "kind": "paraphrase_a",
+          "question": "What was the training duration?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long did training take?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.29179999999996653
+        },
+        {
+          "group": 9,
+          "kind": "paraphrase_a",
+          "question": "What is the number of encoder layers?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.29769999999984975
+        },
+        {
+          "group": 10,
+          "kind": "paraphrase_a",
+          "question": "How many dimensions do the embeddings have?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the embedding dimension?",
+            "similarity": 1,
+            "ageMs": 15,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.29950000000008004
+        },
+        {
+          "group": 11,
+          "kind": "paraphrase_a",
+          "question": "What is the weekly remote-work day allowance?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.33780000000001564
+        },
+        {
+          "group": 12,
+          "kind": "paraphrase_a",
+          "question": "What is the annual leave allowance in days?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.32100000000014006
+        },
+        {
+          "group": 13,
+          "kind": "paraphrase_a",
+          "question": "What is the duration of probation?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long is the probation period?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.30340000000001055
+        },
+        {
+          "group": 14,
+          "kind": "paraphrase_a",
+          "question": "What is the maximum meal reimbursement?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.29670000000010077
+        },
+        {
+          "group": 15,
+          "kind": "paraphrase_a",
+          "question": "What is the vacation carryover allowance?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "similarity": 1,
+            "ageMs": 13,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3795000000000073
+        },
+        {
+          "group": 16,
+          "kind": "paraphrase_a",
+          "question": "What is the maximum upload file size?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the upload size limit?",
+            "similarity": 1,
+            "ageMs": 14,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31989999999996144
+        },
+        {
+          "group": 17,
+          "kind": "paraphrase_a",
+          "question": "What is the batch upload file limit?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "similarity": 1,
+            "ageMs": 13,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3850999999999658
+        },
+        {
+          "group": 18,
+          "kind": "paraphrase_a",
+          "question": "What is the access-token lifetime?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long are access tokens valid?",
+            "similarity": 1,
+            "ageMs": 12,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3429999999998472
+        },
+        {
+          "group": 19,
+          "kind": "paraphrase_a",
+          "question": "What is the number of generated recovery codes?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "similarity": 1,
+            "ageMs": 12,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3109999999999218
+        },
+        {
+          "group": 20,
+          "kind": "paraphrase_a",
+          "question": "What is the answer-cache retention duration?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long are cached answers retained?",
+            "similarity": 1,
+            "ageMs": 11,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.30189999999993233
+        },
+        {
+          "group": 1,
+          "kind": "paraphrase_b",
+          "question": "How many datasets did the experiment use?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many datasets were used?",
+            "similarity": 1,
+            "ageMs": 22,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3065000000001419
+        },
+        {
+          "group": 2,
+          "kind": "paraphrase_b",
+          "question": "How many backbone models were tested?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many backbones were evaluated?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.29359999999996944
+        },
+        {
+          "group": 3,
+          "kind": "paraphrase_b",
+          "question": "What accuracy value was reported for the model?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What accuracy did the model report?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.35609999999996944
+        },
+        {
+          "group": 4,
+          "kind": "paraphrase_b",
+          "question": "For how many epochs was the model trained?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many epochs did training run?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3969999999999345
+        },
+        {
+          "group": 5,
+          "kind": "paraphrase_b",
+          "question": "How large was each training batch?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What batch size was used?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3876000000000204
+        },
+        {
+          "group": 6,
+          "kind": "paraphrase_b",
+          "question": "What was the training learning rate?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What learning rate was used?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.38570000000004256
+        },
+        {
+          "group": 7,
+          "kind": "paraphrase_b",
+          "question": "How many seeds were used in the experiment?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many random seeds were used?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.34209999999984575
+        },
+        {
+          "group": 8,
+          "kind": "paraphrase_b",
+          "question": "How much time did training require?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long did training take?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3592999999998483
+        },
+        {
+          "group": 9,
+          "kind": "paraphrase_b",
+          "question": "How many layers are in the encoder?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many layers does the encoder have?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3815999999999349
+        },
+        {
+          "group": 10,
+          "kind": "paraphrase_b",
+          "question": "What dimensionality do the embeddings use?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the embedding dimension?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3531000000000404
+        },
+        {
+          "group": 11,
+          "kind": "paraphrase_b",
+          "question": "How many days a week may employees work remotely?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many remote days are allowed per week?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3403000000000702
+        },
+        {
+          "group": 12,
+          "kind": "paraphrase_b",
+          "question": "How many days of annual leave are available?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many annual leave days are provided?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3342000000000098
+        },
+        {
+          "group": 13,
+          "kind": "paraphrase_b",
+          "question": "How many months does probation last?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long is the probation period?",
+            "similarity": 1,
+            "ageMs": 20,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3050999999998112
+        },
+        {
+          "group": 14,
+          "kind": "paraphrase_b",
+          "question": "How much may be reimbursed for a meal?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the meal reimbursement limit?",
+            "similarity": 1,
+            "ageMs": 21,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3130999999998494
+        },
+        {
+          "group": 15,
+          "kind": "paraphrase_b",
+          "question": "How many unused vacation days can carry over?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many vacation days may be carried over?",
+            "similarity": 1,
+            "ageMs": 20,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3526999999999134
+        },
+        {
+          "group": 16,
+          "kind": "paraphrase_b",
+          "question": "How large can an uploaded file be?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "What is the upload size limit?",
+            "similarity": 1,
+            "ageMs": 20,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3231999999998152
+        },
+        {
+          "group": 17,
+          "kind": "paraphrase_b",
+          "question": "What is the maximum number of files per upload batch?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many files can be uploaded in a batch?",
+            "similarity": 1,
+            "ageMs": 20,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3324000000000069
+        },
+        {
+          "group": 18,
+          "kind": "paraphrase_b",
+          "question": "How much time passes before an access token expires?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long are access tokens valid?",
+            "similarity": 1,
+            "ageMs": 19,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31340000000000146
+        },
+        {
+          "group": 19,
+          "kind": "paraphrase_b",
+          "question": "How many backup recovery codes are issued?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How many recovery codes are generated?",
+            "similarity": 1,
+            "ageMs": 18,
+            "lookupMs": 0,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.3484000000000833
+        },
+        {
+          "group": 20,
+          "kind": "paraphrase_b",
+          "question": "How much time can an answer remain cached?",
+          "cacheHit": true,
+          "answerMatchesGroundTruth": true,
+          "cache": {
+            "kind": "semantic",
+            "matchedQuestion": "How long are cached answers retained?",
+            "similarity": 1,
+            "ageMs": 18,
+            "lookupMs": 1,
+            "policyVersion": "semantic-v1"
+          },
+          "modelUsage": [],
+          "durationMs": 0.31209999999987303
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 
 try {
   const settings = ['POSTGRES_PASSWORD', 'JWT_SECRET', 'SETUP_CODE'].map(key => `${key}=${randomBytes(32).toString('hex')}`).join('\n');
-  writeFileSync('.env.docker', `${settings}\nALLOW_REGISTRATION=false\nOPENROUTER_API_KEY=\nLLM_MODEL=\n`, { flag: 'wx', mode: 0o600 });
+  writeFileSync('.env.docker', `${settings}\nALLOW_REGISTRATION=false\nOPENROUTER_API_KEY=\nEMBEDDING_MODEL=\nEMBEDDING_BATCH_SIZE=1\nLLM_MODEL=\nVERIFIER_MODEL=\nREVALIDATION_ENABLED=true\nREVALIDATION_PER_HOUR=10\n`, { flag: 'wx', mode: 0o600 });
   console.log('Created private .env.docker settings. Add your provider key/model there before asking questions.');
 } catch (error) {
   if (error.code === 'EEXIST') console.log('Existing .env.docker preserved.');

@@ -1,0 +1,25 @@
+# Test-only override. No real provider keys, private files or production volumes.
+services:
+  provider:
+    image: node:22-bookworm-slim
+    command: [node, /fixture/docker-provider.mjs]
+    volumes:
+      - ./scripts/fixtures/docker-provider.mjs:/fixture/docker-provider.mjs:ro
+  api:
+    environment: &fixture-environment
+      OPENROUTER_API_KEY: synthetic-fixture-only
+      OPENROUTER_BASE_URL: http://provider:8080/v1
+      EMBEDDING_MODEL: fixture-embedding
+      LLM_MODEL: fixture-chat
+      VERIFIER_MODEL: fixture-chat
+      DECOMPOSER_MODEL: fixture-chat
+      EMBEDDING_MIN_INTERVAL_MS: '0'
+      EMBEDDING_BATCH_SIZE: '1'
+      REVALIDATION_PER_HOUR: '100'
+      SEMANTIC_CACHE_ENABLED: 'false'
+    depends_on:
+      provider: {condition: service_started}
+  worker:
+    environment: *fixture-environment
+    depends_on:
+      provider: {condition: service_started}

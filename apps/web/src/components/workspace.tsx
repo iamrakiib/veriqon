@@ -1,167 +1,741 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Activity, ArrowDownToLine, ArrowUpRight, BookOpen, Check, ChevronDown, ChevronRight, CircleHelp, Database, FileText, GitCompareArrows, History, LoaderCircle, Menu, MessageSquare, Plus, RefreshCw, Search, Trash2, LogOut, Settings2, ShieldCheck, X, AlertTriangle } from 'lucide-react';
-import { api, citationChunkLabel, type Citation, type DocumentRecord, type Health, type QueryResult } from '../lib/api';
-import type { Account } from '../lib/session';
-import { BrandMark, EmptyState, Modal } from './ui';
-import { ThemeSettings, ThemeToggle } from './theme-provider';
-import { RecoverySettings } from './recovery';
-import { ConflictCenter } from './conflict-center';
-import { DocumentLibrary } from './document-library';
-import { ChatPanel, type Conversation } from './chat-panel';
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Activity,
+  BookOpen,
+  ChevronRight,
+  CircleHelp,
+  GitCompareArrows,
+  History,
+  Menu,
+  MessageSquare,
+  RefreshCw,
+  ShieldCheck,
+  X,
+  AlertTriangle,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
+import {
+  api,
+  hasRepairAttempt,
+  citationChunkLabel,
+  type Citation,
+  type DocumentRecord,
+  type Health,
+  type QueryResult,
+} from "../lib/api";
+import type { Account } from "../lib/session";
+import { WorkspaceSidebar, type WorkspaceView } from "./workspace-sidebar";
+import { AnswerVersionHistory } from "./knowledge-controls";
+import { WorkspaceDialogs, type SourcePreview } from "./workspace-dialogs";
+import { ThemeToggle } from "./theme-provider";
+import { ConflictCenter } from "./conflict-center";
+import { DocumentLibrary } from "./document-library";
+import { ChatPanel, type Conversation, type Message } from "./chat-panel";
+import { Modal } from "./ui";
+import { RepairDetails, VerificationBadge } from "./answer-details";
+import {
+  Analytics,
+  Corrections,
+  ConversationHistory,
+  PageHeading,
+} from "./research-views";
 
-type View = 'knowledge' | 'chat' | 'conflicts' | 'corrections' | 'analytics';
+type View = WorkspaceView;
 const navigation = [
-  { id: 'knowledge' as const, title: 'Knowledge base', icon: BookOpen },
-  { id: 'chat' as const, title: 'Chat workspace', icon: MessageSquare },
-  { id: 'conflicts' as const, title: 'Conflict center', icon: GitCompareArrows },
-  { id: 'corrections' as const, title: 'Answer repairs', icon: History },
-  { id: 'analytics' as const, title: 'Reliability', icon: Activity }
+  { id: "knowledge" as const, title: "Knowledge base", icon: BookOpen },
+  { id: "chat" as const, title: "Chat workspace", icon: MessageSquare },
+  { id: "history" as const, title: "Chat history", icon: History },
+  {
+    id: "conflicts" as const,
+    title: "Conflict center",
+    icon: GitCompareArrows,
+  },
+  { id: "corrections" as const, title: "Corrections", icon: History },
+  { id: "analytics" as const, title: "Analytics", icon: Activity },
 ];
-const freshConversation = (): Conversation => ({ id: crypto.randomUUID(), title: 'New conversation', messages: [] });
+const freshConversation = (): Conversation => ({
+  id: crypto.randomUUID(),
+  title: "New conversation",
+  messages: [],
+});
+const CONVERSATION_WINDOW = 40;
+const MESSAGE_WINDOW = 60;
+function protectedHistory(items: Conversation[], drafts: Record<string, string>, activeId = "") {
+  return new Set(items.filter(c => c.id === activeId || drafts[c.id] || c.messages.some(m => !m.result && !m.error) || (!c.cursor && c.messages.some(m => m.error))).map(c => c.id));
+}
+function retainHistory(items: Conversation[], protectedIds: Set<string>, older = false) {
+  const unique = [...new Map(items.map(c => [c.id, c])).values()];
+  const pinned = unique.filter(c => protectedIds.has(c.id));
+  const rest = unique.filter(c => !protectedIds.has(c.id));
+  const room = Math.max(0, CONVERSATION_WINDOW - pinned.length);
+  const keep = new Set([...pinned, ...(room === 0 ? [] : older ? rest.slice(-room) : rest.slice(0, room))].map(c => c.id));
+  return unique.filter(c => keep.has(c.id));
+}
 
-export function Workspace({ account, onLogout }: { account: Account; onLogout: () => Promise<void> }) {
-  const [view, setView] = useState<View>('knowledge');
-  const [mobilePane, setMobilePane] = useState<'workspace' | 'assistant'>('workspace');
+export function Workspace({
+  account,
+  onLogout,
+}: {
+  account: Account;
+  onLogout: () => Promise<void>;
+}) {
+  const [view, setView] = useState<View>("knowledge");
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem("veriqon-sidebar") === "collapsed");
+    } catch {}
+  }, []);
+  function toggleSidebar() {
+    setCollapsed((value) => {
+      try {
+        localStorage.setItem(
+          "veriqon-sidebar",
+          !value ? "collapsed" : "expanded",
+        );
+      } catch {}
+      return !value;
+    });
+  }
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [health, setHealth] = useState<Health | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [historyError, setHistoryError] = useState('');
-  const [historySearch, setHistorySearch] = useState('');
+  const [historyError, setHistoryError] = useState("");
+  const [historyCursor, setHistoryCursor] = useState<string | undefined>();
+  const [loadingMoreHistory, setLoadingMoreHistory] = useState(false);
+  const [moreHistoryError, setMoreHistoryError] = useState("");
+  const [loadingOlder, setLoadingOlder] = useState("");
+  const [olderError, setOlderError] = useState<{ id: string; message: string } | null>(null);
+  const paginationLock = useRef(false);
+  const [historySearch, setHistorySearch] = useState("");
+  const [conversationSearch, setConversationSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [activeId, setActiveId] = useState('');
+  const [activeId, setActiveId] = useState("");
+  const [focusedMessage, setFocusedMessage] = useState("");
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [historyWindowed, setHistoryWindowed] = useState(false);
+  const historyState = useRef({ conversations, drafts, activeId });
+  historyState.current = { conversations, drafts, activeId };
+  const refreshController = useRef<AbortController | null>(null);
   const [pending, setPending] = useState(false);
-  const [busy, setBusy] = useState('');
+  const [busy, setBusy] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState(false);
   const [help, setHelp] = useState(false);
-  const [preview, setPreview] = useState<{ title: string; text: string; metadata: string; documentId?: string; hasOriginal?: boolean } | null>(null);
+  const [preview, setPreview] = useState<SourcePreview | null>(null);
+  const [savedAnswer, setSavedAnswer] = useState<{ title: string; message: Message } | null>(null);
   const requestLock = useRef(false);
   const sidebarRef = useRef<HTMLElement>(null);
-  const active = conversations.find(c => c.id === activeId);
-  const answers = conversations.flatMap(c => c.messages).filter(m => m.result);
-  const visibleConversations = conversations.filter(c => c.messages.length > 0 && c.title.toLowerCase().includes(historySearch.toLowerCase()));
-  const attemptedRepairs = answers.filter(m => m.result?.repairHistory?.length || m.result?.correction || m.result?.attempts === 2);
-  const repairs = answers.filter(m => m.result?.verificationStatus === 'REPAIRED_VERIFIED');
+  const active = conversations.find((c) => c.id === activeId);
+  const answers = conversations
+    .flatMap((c) => c.messages)
+    .filter((m) => m.result);
+  const visibleConversations = conversations.filter(
+    (c) =>
+      c.messages.length > 0 &&
+      c.title.toLowerCase().includes(historySearch.toLowerCase()),
+  );
+  const attemptedRepairs = answers.filter((m) => hasRepairAttempt(m.result));
   const connected = Boolean(health);
-  const chunkCount = documents.reduce((sum, doc) => sum + doc.chunkCount, 0);
 
   const refresh = useCallback(async (quiet = false) => {
+    if (quiet && refreshController.current) return;
+    refreshController.current?.abort();
+    const controller = new AbortController();
+    refreshController.current = controller;
     if (!quiet) setLoading(true);
     try {
-      const [docs, status] = await Promise.all([api.documents(), api.health()]);
-      setDocuments(docs); setHealth(status); setError('');
+      const [docs, status] = await Promise.all([api.documents(controller.signal), api.health(controller.signal)]);
+      if (controller.signal.aborted) return;
+      setDocuments(docs);
+      setHealth(status);
+      setError("");
     } catch (error) {
-      setHealth(null); setError(error instanceof Error ? error.message : 'Could not refresh the workspace.');
-    } finally { setLoading(false); }
+      if (controller.signal.aborted) return;
+      setHealth(null);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Could not refresh the workspace.",
+      );
+    } finally {
+      if (refreshController.current === controller) refreshController.current = null;
+      if (!controller.signal.aborted) setLoading(false);
+      controller.abort();
+    }
   }, []);
   const loadHistory = useCallback(async () => {
-    setHistoryLoading(true); setHistoryError('');
+    if (paginationLock.current || requestLock.current) return;
+    paginationLock.current = true;
+    setHistoryLoading(true);
+    setHistoryError("");
     try {
       const saved = await api.conversations();
-      const items = saved.length ? saved : [freshConversation()];
-      setConversations(items); setActiveId(current => items.some(c => c.id === current) ? current : items[0].id);
-    } catch { setHistoryError('Chat history could not be loaded. Retry to reopen your conversations.'); }
-    finally { setHistoryLoading(false); }
+      setHistoryCursor(saved[0]?.hasMoreConversations ? saved[saved.length - 1]?.cursor : undefined);
+      setMoreHistoryError("");
+      const current = historyState.current;
+      const protectedIds = protectedHistory(current.conversations, current.drafts);
+      // Preserve unsent drafts and local failures; saved server rows supply the current paging cursor.
+      const pinned = current.conversations.filter(c => protectedIds.has(c.id)).map(c => ({ ...c, cursor: saved.find(row => row.id === c.id)?.cursor || c.cursor }));
+      const items = retainHistory([...saved.filter(c => !protectedIds.has(c.id)), ...pinned], protectedIds);
+      if (!items.length) items.push(freshConversation());
+      setConversations(items);
+      setHistoryWindowed(false);
+      setActiveId((current) =>
+        items.some((c) => c.id === current) ? current : items[0].id,
+      );
+    } catch {
+      setHistoryError(
+        "Chat history could not be loaded. Retry to reopen your conversations.",
+      );
+    } finally {
+      paginationLock.current = false;
+      setHistoryLoading(false);
+    }
   }, []);
-  useEffect(() => { void refresh(); void loadHistory(); }, [refresh, loadHistory]);
+  async function loadMoreHistory() {
+    if (!historyCursor || paginationLock.current) return;
+    paginationLock.current = true; setLoadingMoreHistory(true); setMoreHistoryError("");
+    try {
+      const pinned = protectedHistory(conversations, drafts, activeId);
+      if (pinned.size >= CONVERSATION_WINDOW) throw new Error("Finish or clear an unsent draft before opening another history window.");
+      const saved = await api.conversations(historyCursor);
+      setConversations(items => retainHistory([...items, ...saved.filter(c => !items.some(existing => existing.id === c.id))], protectedHistory(items, historyState.current.drafts, historyState.current.activeId), true));
+      if (conversations.length + saved.length > CONVERSATION_WINDOW) setHistoryWindowed(true);
+      setHistoryCursor(saved[0]?.hasMoreConversations ? saved[saved.length - 1]?.cursor : undefined);
+    } catch (error) { setMoreHistoryError(error instanceof Error ? error.message : "Older conversations could not be loaded. Please retry."); }
+    finally { paginationLock.current = false; setLoadingMoreHistory(false); }
+  }
+  async function loadOlderMessages() {
+    if (!active?.olderMessagesCursor || paginationLock.current || requestLock.current) return;
+    const id = active.id;
+    paginationLock.current = true; setLoadingOlder(id); setOlderError(null);
+    try {
+      const page = await api.olderMessages(id, active.olderMessagesCursor);
+      setConversations(items => items.map(c => {
+        if (c.id !== id) return c;
+        const messages = [...page.messages.filter(m => !c.messages.some(existing => existing.id === m.id)), ...c.messages];
+        return { ...c, olderMessagesCursor: page.olderMessagesCursor, messages: messages.slice(0, MESSAGE_WINDOW), newerMessagesOmitted: c.newerMessagesOmitted || messages.length > MESSAGE_WINDOW };
+      }));
+    } catch { setOlderError({ id, message: "Older messages could not be loaded. Please retry." }); }
+    finally { paginationLock.current = false; setLoadingOlder(""); }
+  }
+  async function loadLatestMessages() {
+    if (!active || paginationLock.current || requestLock.current) return;
+    const id = active.id;
+    paginationLock.current = true; setLoadingOlder(id); setOlderError(null);
+    try {
+      const page = await api.olderMessages(id);
+      setConversations(items => items.map(c => c.id === id ? { ...c, ...page, newerMessagesOmitted: false } : c));
+    } catch { setOlderError({ id, message: "Latest messages could not be loaded. Please retry; your draft is unchanged." }); }
+    finally { paginationLock.current = false; setLoadingOlder(""); }
+  }
   useEffect(() => {
-    const reconnect = () => { void refresh(true); };
+    void refresh();
+    void loadHistory();
+    return () => { refreshController.current?.abort(); };
+  }, [refresh, loadHistory]);
+  useEffect(() => {
+    const reconnect = () => {
+      if (!document.hidden) void refresh(true);
+    };
     const timer = setInterval(reconnect, 30000);
-    window.addEventListener('online', reconnect);
-    return () => { clearInterval(timer); window.removeEventListener('online', reconnect); };
+    window.addEventListener("online", reconnect);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("online", reconnect);
+    };
   }, [refresh]);
-  useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(''), 7000); return () => clearTimeout(timer); }, [notice]);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(""), 7000);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     if (!menuOpen) return;
-    const first = sidebarRef.current?.querySelector<HTMLButtonElement>('.mobile-nav-close');
+    const first =
+      sidebarRef.current?.querySelector<HTMLButtonElement>(".mobile-nav-close");
     first?.focus();
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { event.preventDefault(); setMenuOpen(false); return; }
-      if (event.key !== 'Tab') return;
-      const controls = Array.from(sidebarRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input') || []).filter(element => element.offsetParent !== null);
-      const firstControl = controls[0], lastControl = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === firstControl) { event.preventDefault(); lastControl?.focus(); }
-      else if (!event.shiftKey && document.activeElement === lastControl) { event.preventDefault(); firstControl?.focus(); }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const controls = Array.from(
+        sidebarRef.current?.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), a[href], input",
+        ) || [],
+      ).filter((element) => element.offsetParent !== null);
+      const firstControl = controls[0],
+        lastControl = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === firstControl) {
+        event.preventDefault();
+        lastControl?.focus();
+      } else if (!event.shiftKey && document.activeElement === lastControl) {
+        event.preventDefault();
+        firstControl?.focus();
+      }
     };
-    document.addEventListener('keydown', handleKey);
-    return () => { document.removeEventListener('keydown', handleKey); document.querySelector<HTMLButtonElement>('.mobile-menu')?.focus(); };
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.querySelector<HTMLButtonElement>(".mobile-menu")?.focus();
+    };
   }, [menuOpen]);
 
-  function navigate(next: View) { setView(next); setMobilePane(next === 'chat' ? 'assistant' : 'workspace'); setMenuOpen(false); }
+  function navigate(next: View) {
+    setFocusedMessage("");
+    setView(next);
+    setMenuOpen(false);
+  }
+  async function openAnswer(messageId: string) {
+    const conversation = conversations.find((c) =>
+      c.messages.some((m) => m.id === messageId),
+    );
+    if (conversation) {
+      setActiveId(conversation.id);
+      navigate("chat");
+      setFocusedMessage(messageId);
+    } else {
+      try { setSavedAnswer(await api.savedAnswer(messageId)); }
+      catch (error) { setNotice(error instanceof Error ? error.message : "Could not load that saved answer. Try opening it again."); }
+    }
+  }
   function newConversation() {
-    setHistorySearch('');
-    if (requestLock.current || historyLoading || historyError) return;
-    const conversation = freshConversation(); setConversations(items => [conversation, ...items]); setActiveId(conversation.id); navigate('chat');
+    setHistorySearch("");
+    if (requestLock.current || paginationLock.current || historyLoading || historyError) return;
+    const conversation = freshConversation();
+    const pinned = protectedHistory(conversations, drafts, activeId);
+    if (pinned.size >= CONVERSATION_WINDOW) { setNotice("Finish or clear an unsent draft before starting another conversation."); return; }
+    setConversations((items) => retainHistory([conversation, ...items], new Set([...pinned, conversation.id])));
+    if (conversations.length >= CONVERSATION_WINDOW) setHistoryWindowed(true);
+    setActiveId(conversation.id);
+    navigate("chat");
   }
   async function send(question: string) {
-    if (requestLock.current || historyLoading || historyError) return;
-    requestLock.current = true; setPending(true);
+    if (requestLock.current || paginationLock.current || historyLoading || historyError || active?.newerMessagesOmitted) return;
+    requestLock.current = true;
+    setPending(true);
     const conversationId = activeId;
-    const message = { id: crypto.randomUUID(), question, createdAt: new Date().toISOString() };
-    setConversations(items => items.map(c => c.id === conversationId ? { ...c, title: c.messages.length ? c.title : question.slice(0, 42), messages: [...c.messages, message] } : c));
-    const complete = (update: { result?: QueryResult; error?: string }) => setConversations(items => items.map(c => c.id === conversationId ? { ...c, messages: c.messages.map(m => m.id === message.id ? { ...m, ...update } : m) } : c));
-    try { complete({ result: await api.query(question, conversationId, message.id) }); }
-    catch (error) { complete({ error: error instanceof Error ? error.message : 'Request failed.' }); }
-    finally { requestLock.current = false; setPending(false); }
+    if ((active?.messages.length || 0) >= MESSAGE_WINDOW) {
+      try {
+        const page = await api.olderMessages(conversationId);
+        setConversations(items => items.map(c => c.id === conversationId ? { ...c, ...page, newerMessagesOmitted: false } : c));
+      } catch {
+        setDrafts(items => ({ ...items, [conversationId]: question }));
+        setNotice("Could not refresh the latest messages. Your question was kept as a draft; please retry.");
+        requestLock.current = false; setPending(false); return;
+      }
+    }
+    const message = {
+      id: crypto.randomUUID(),
+      question,
+      createdAt: new Date().toISOString(),
+    };
+    setConversations((items) =>
+      items.map((c) =>
+        c.id === conversationId
+          ? {
+              ...c,
+              title: c.messages.length ? c.title : question.slice(0, 42),
+              messages: [...c.messages, message],
+            }
+          : c,
+      ),
+    );
+    const complete = (update: { result?: QueryResult; error?: string }) =>
+      setConversations((items) =>
+        items.map((c) =>
+          c.id === conversationId
+            ? {
+                ...c,
+                messages: c.messages.map((m) =>
+                  m.id === message.id ? { ...m, ...update } : m,
+                ),
+              }
+            : c,
+        ),
+      );
+    try {
+      complete({
+        result: await api.query(question, conversationId, message.id),
+      });
+    } catch (error) {
+      complete({
+        error: error instanceof Error ? error.message : "Request failed.",
+      });
+    } finally {
+      requestLock.current = false;
+      setPending(false);
+    }
   }
   async function signOut() {
-    if (busy) return; setBusy('logout');
-    try { await onLogout(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : 'Could not sign out. Try again.'); }
-    finally { setBusy(''); }
+    if (busy) return;
+    setBusy("logout");
+    try {
+      await onLogout();
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Could not sign out. Try again.",
+      );
+    } finally {
+      setBusy("");
+    }
   }
   async function downloadOriginal() {
-    if (!preview?.documentId || busy) return; setBusy('download');
-    try { await api.download(preview.documentId, preview.title); }
-    catch (error) { setNotice(error instanceof Error ? error.message : 'Download failed.'); }
-    finally { setBusy(''); }
+    if (!preview?.documentId || busy) return;
+    setBusy("download");
+    try {
+      await api.download(preview.documentId, preview.title);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Download failed.");
+    } finally {
+      setBusy("");
+    }
   }
   async function removeDocument() {
-    if (!preview?.documentId || busy) return; setBusy('delete');
+    if (!preview?.documentId || busy) return;
+    setBusy("delete");
     try {
-      await api.removeDocument(preview.documentId); setPreview(null); setConfirmDelete(false);
-      await refresh(); await loadHistory(); setNotice('Document removed from retrieval. Earlier chat citations remain as historical records.');
-    } catch (failure) { setNotice(failure instanceof Error ? failure.message : 'Could not delete the document.'); }
-    finally { setBusy(''); }
+      await api.removeDocument(preview.documentId);
+      setPreview(null);
+      setConfirmDelete(false);
+      await refresh();
+      await loadHistory();
+      setNotice(
+        "Document removed from retrieval. Earlier chat citations remain as historical records.",
+      );
+    } catch (failure) {
+      setNotice(
+        failure instanceof Error
+          ? failure.message
+          : "Could not delete the document.",
+      );
+    } finally {
+      setBusy("");
+    }
   }
-  function inspectDocument(doc: DocumentRecord) { setConfirmDelete(false); setPreview({ title: doc.source || doc.id, text: doc.text, documentId: doc.id, hasOriginal: doc.hasOriginal, metadata: `${doc.chunkCount} chunks · ${doc.version ? `Version ${doc.version}` : 'Version not specified'} · Effective date unknown` }); }
-  function inspectCitation(citation: Citation) { setPreview({ title: citation.source, text: citation.excerpt, metadata: `Retrieved evidence [${citation.index}] · ${citationChunkLabel(citation)}${citation.page ? ` · Page ${citation.page}` : ''} · ${citation.version ? `Version ${citation.version}` : 'Version unknown'}` }); }
+  function inspectDocument(doc: DocumentRecord) {
+    setConfirmDelete(false);
+    setPreview({
+      title: doc.source || doc.id,
+      text: doc.text,
+      version: doc.version,
+      kind: "document",
+      chunkCount: doc.chunkCount,
+      documentId: doc.id,
+      hasOriginal: doc.hasOriginal,
+      metadata: `${doc.chunkCount} chunks · ${doc.version ? `Version ${doc.version}` : "Version not specified"} · Effective date unknown`,
+    });
+  }
+  function inspectCitation(citation: Citation) {
+    setPreview({
+      title: citation.source,
+      text: citation.excerpt,
+      relations: citation.relations,
+      sourceMetadata: citation.metadata,
+      version: citation.version,
+      kind: "citation",
+      metadata: `Retrieved evidence [${citation.index}] · ${citationChunkLabel(citation)}${citation.page ? ` · Page ${citation.page}` : ""} · ${citation.version ? `Version ${citation.version}` : "Version unknown"}`,
+    });
+  }
 
-  return <div className="app-background"><a className="skip-link" href="#main">Skip to workspace</a><div className="app-shell">
-    {menuOpen && <button className="mobile-backdrop" tabIndex={-1} aria-label="Dismiss navigation overlay" onClick={() => setMenuOpen(false)} />}
-    <aside ref={sidebarRef} role={menuOpen ? 'dialog' : undefined} aria-modal={menuOpen || undefined} className={`sidebar ${menuOpen ? 'is-open' : ''}`} aria-label="Workspace navigation"><button className="icon-button mobile-nav-close" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={19} /></button><div className="window-dots" aria-hidden="true"><span /><span /><span /></div><a className="brand" href="#" onClick={event => { event.preventDefault(); navigate('knowledge'); }}><BrandMark /><span>Veriqon</span></a>
-      <button className="workspace-switch" onClick={() => setSettings(true)}><span className="workspace-avatar">VQ</span><span><strong>My workspace</strong><small>Private knowledge library</small></span><ChevronDown size={14} /></button>
-      <div className="nav-group"><span className="nav-label">WORKSPACE</span><nav>{navigation.map(item => <button key={item.id} data-view={item.id} className={`nav-item ${view === item.id ? 'active' : ''}`} aria-current={view === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><item.icon size={17} strokeWidth={1.6} /><span>{item.title}</span>{item.id === 'knowledge' && <span className="nav-count">{documents.length}</span>}{item.id === 'corrections' && attemptedRepairs.length > 0 && <span className="nav-count">{attemptedRepairs.length}</span>}</button>)}</nav></div>
-      <div className="nav-group conversations"><div className="nav-label-row"><span className="nav-label">CHAT HISTORY</span><button className="icon-button" aria-label="Refresh chat history" disabled={pending || historyLoading} onClick={() => void loadHistory()}><RefreshCw size={13} className={historyLoading ? 'spin' : ''} /></button><button className="icon-button" aria-label="Create conversation" onClick={newConversation} disabled={pending || historyLoading || Boolean(historyError)}><Plus size={14} /></button></div><label className="history-search"><Search size={13} /><input aria-label="Search chat history" placeholder="Find a conversation" value={historySearch} onChange={event => setHistorySearch(event.target.value)} />{historySearch && <button className="icon-button" aria-label="Clear chat search" onClick={() => setHistorySearch('')}><X size={12} /></button>}</label>{historyLoading ? <p className="nav-empty">Loading saved chats...</p> : historyError ? <div className="nav-empty" role="alert">{historyError}<button className="text-button" onClick={() => void loadHistory()}>Retry chat history</button></div> : visibleConversations.length ? visibleConversations.map(c => <button className={`conversation-link ${c.id === activeId && view === 'chat' ? 'selected' : ''}`} key={c.id} onClick={() => { setActiveId(c.id); navigate('chat'); }}><MessageSquare size={14} /><span>{c.title}</span></button>) : <p className="nav-empty">{historySearch ? 'No matching recent conversations.' : <>Your saved conversations<br />will appear here.</>}</p>}<button className="new-conversation" onClick={newConversation} disabled={pending || historyLoading || Boolean(historyError)}><Plus size={14} /> New conversation</button></div>
-      <div className="sidebar-bottom"><div className="foundation-card"><span><ShieldCheck size={16} /> Built on evidence</span><p>Retrieve. Verify. Repair.<br />Keep the sources in sight.</p><button onClick={() => setHelp(true)}>How it works <ArrowUpRight size={13} /></button></div><button className="nav-item" onClick={() => setSettings(true)}><Settings2 size={17} /> Workspace settings</button><div className="profile"><div className="profile-avatar">{account.name.slice(0, 2).toUpperCase()}</div><div className="profile-details"><strong title={account.name}>{account.name}</strong><small>{account.role === 'owner' ? 'Workspace owner' : 'Personal account'}</small></div><button className="icon-button" aria-label="Sign out" title="Sign out" disabled={Boolean(busy)} onClick={() => void signOut()}><LogOut size={16} /></button></div></div>
-    </aside>
-    <div className="workspace-main" inert={menuOpen}><header className="topbar"><div className="breadcrumb"><button className="icon-button mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Open navigation"><Menu size={20} /></button><span className="breadcrumb-root">Workspace</span><ChevronRight size={13} /><strong>{navigation.find(n => n.id === view)?.title}</strong></div><div className="topbar-actions"><ThemeToggle /><span className={`connection-badge ${connected ? '' : 'disconnected'}`}><span className="status-dot" />{loading ? 'Connecting' : connected ? 'Connected' : 'Connection lost'}</span><button className="icon-button" aria-label="Refresh workspace" title="Refresh workspace" disabled={loading} onClick={() => void refresh()}><RefreshCw size={16} className={loading ? 'spin' : ''} /></button><span className="topbar-divider" /><button className="icon-button" aria-label="Help" onClick={() => setHelp(true)}><CircleHelp size={18} /></button></div></header>
-      {health && !health.providerConfigured && <div className="connection-error" role="alert"><AlertTriangle size={16} /><span>AI is not configured for this workspace. Contact the owner to enable document indexing and answers.</span></div>}
-      {error && <div className="connection-error" role="alert"><AlertTriangle size={16} /><span>{error}</span><button onClick={() => void refresh()}>Retry</button></div>}
-      <div className="mobile-pane-switch" role="group" aria-label="Workspace panels"><button aria-label="Show workspace" aria-pressed={mobilePane === 'workspace'} onClick={() => setMobilePane('workspace')}><BookOpen size={15} /> Workspace</button><button aria-label="Show assistant" aria-pressed={mobilePane === 'assistant'} onClick={() => setMobilePane('assistant')}><MessageSquare size={15} /> Assistant</button></div>
-      <div className={`workspace-columns ${view === 'chat' ? 'chat-focused' : ''}`} data-mobile-pane={mobilePane}><main id="main" className="main-content">
-        {view === 'knowledge' && <DocumentLibrary documents={documents} loading={loading} connected={connected} onRefresh={refresh} onPreview={inspectDocument} />}
-        {view === 'chat' && <><div className="section-heading"><div><span className="eyebrow">A CONVERSATION WITH CONTEXT</span><h1>Ask. Inspect.<br />Understand<span className="title-dot">.</span></h1><p>Your sources, with a second look at every answer.</p></div></div><div className="context-card"><div className="card-title"><Database size={19} /><h2>Connected knowledge</h2><span className="count">{documents.length}</span></div><p>Each question searches your private indexed documents.</p>{documents.slice(0, 5).map(doc => <button className="context-document" key={doc.id} onClick={() => inspectDocument(doc)}><FileText size={16} /><span>{doc.source || doc.id}</span><ArrowUpRight size={14} /></button>)}{!documents.length && <button className="button secondary" onClick={() => navigate('knowledge')}><Plus size={15} /> Add your first source</button>}</div><div className="workflow"><span className="eyebrow">BEHIND EVERY ANSWER</span>{[{ n: '01', title: 'Find relevant evidence', text: 'Retrieve document chunks with semantic search.' }, { n: '02', title: 'Check each statement', text: 'Assess whether the retrieved evidence supports the draft.' }, { n: '03', title: 'Repair or abstain', text: 'Retrieve missing evidence, correct established errors, and recheck changed claims.' }].map(step => <div key={step.n}><span>{step.n}</span><section><h3>{step.title}</h3><p>{step.text}</p></section></div>)}</div><p className="session-disclosure">Your conversations are saved to your account. Reopen them from Chat history; the latest 100 conversations are shown. Each question is independent; previous messages are not sent as context.</p></>}
-        {view === 'conflicts' && <><PageHeading eyebrow="MAKE DISAGREEMENT VISIBLE" title="Conflict center" description="Inspect unresolved evidence from your saved answers." /><ConflictCenter onCitation={inspectCitation} /></>}
-        {view === 'corrections' && <><PageHeading eyebrow="TRANSPARENT BY DESIGN" title="Answer repairs" description="See saved repairs from your recent conversations." /><div className="inline-note"><History size={16} /> Immediate repairs only. Repairs are saved with conversations. Continuous revalidation is not implemented.</div>{attemptedRepairs.length ? attemptedRepairs.map(message => message.result?.correction ? <article className="repair-card" key={message.id}><div className="repair-heading"><span className="badge green"><Check size={12} /> Repaired</span><time>{new Date(message.createdAt).toLocaleString()}</time></div><h2>{message.question}</h2><label>ORIGINAL DRAFT</label><p className="original-draft">{message.result!.correction!.original}</p><label>REVISED ANSWER</label><p>{message.result!.correction!.revised}</p><div className="repair-reason"><ShieldCheck size={16} /><p>{message.result!.correction!.reason}</p></div></article> : <article className="repair-card" key={message.id}><div className="repair-heading"><span className="badge amber">Repair withheld</span><time>{new Date(message.createdAt).toLocaleString()}</time></div><h2>{message.question}</h2><p>The revised answer did not pass verification. No unsupported answer was accepted.</p><details className="verification-detail"><summary>Why verification failed</summary><p className="pre-wrap">{message.result?.factCheck.evidence}</p></details></article>) : <EmptyState icon={<History size={30} strokeWidth={1.4} />} title="Every repair leaves a trace" description="Repair attempts appear here after an answer fails its first assessment. You can see successful revisions and attempts that were withheld." />}</>}
-        {view === 'analytics' && <><PageHeading eyebrow="OBSERVE, THEN IMPROVE" title="Reliability overview" description="Workspace counts and results from the loaded chat history." /><div className="metrics-grid"><Metric icon={<FileText size={18} />} title="Indexed documents" value={connected ? documents.length : '—'} caption="Current API store" /><Metric icon={<Database size={18} />} title="Searchable chunks" value={connected ? chunkCount : '—'} caption="Current API store" /><Metric icon={<MessageSquare size={18} />} title="Completed answers" value={answers.length} caption="Loaded chat history" /><Metric icon={<History size={18} />} title="Repaired answers" value={repairs.length} caption="Verified factual corrections" /></div><div className="reliability-card"><h2>Answer outcomes <span className="badge neutral">Saved chat data</span></h2>{[{ label: 'Supported on first pass', count: answers.filter(m => m.result?.status === 'supported').length, color: 'green' }, { label: 'Repaired and checked', count: repairs.length, color: 'teal' }, { label: 'Abstained', count: answers.filter(m => m.result?.status === 'abstained').length, color: 'amber' }].map(row => <div className="outcome" key={row.label}><div><span className={`legend-dot ${row.color}`} />{row.label}<strong>{row.count}</strong></div><div className="bar-track"><span className={row.color} style={{ width: `${answers.length ? row.count / answers.length * 100 : 0}%` }} /></div></div>)}<p className="muted">Model assessments are not measured factual accuracy. Independent evaluation is still required.</p></div><div className="reliability-card"><h2>Measurement coverage</h2><dl className="coverage"><div><dt>Average answer latency</dt><dd>{answers.length ? `${(answers.reduce((sum, m) => sum + (m.result?.durationMs || 0), 0) / answers.length / 1000).toFixed(1)} s` : 'No observations'}</dd></div><div><dt>API cost & token usage</dt><dd>Not instrumented</dd></div><div><dt>Temporal accuracy & STER benchmarks</dt><dd>Not evaluated</dd></div><div><dt>Background revalidation</dt><dd>Not implemented</dd></div></dl></div></>}
-        <footer className="content-footer"><span><ShieldCheck size={13} /> Veriqon RAG</span><span>Evidence over assumptions</span></footer>
-      </main><ChatPanel key={activeId} title={active?.title || 'New conversation'} messages={active?.messages || []} pending={pending} connected={connected && Boolean(activeId) && !historyLoading && !historyError} documentCount={documents.length} onSend={send} onNew={newConversation} onCitation={inspectCitation} /></div>
+  return (
+    <div className="app-background">
+      <a className="skip-link" href="#main">
+        Skip to workspace
+      </a>
+      <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
+        {menuOpen && (
+          <button
+            className="mobile-backdrop"
+            tabIndex={-1}
+            aria-label="Dismiss navigation overlay"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
+        <WorkspaceSidebar
+          account={account}
+          menuOpen={menuOpen}
+          sidebarRef={sidebarRef}
+          collapsed={collapsed}
+          view={view}
+          navigation={navigation}
+          navigate={navigate}
+          setMenuOpen={setMenuOpen}
+          setSettings={setSettings}
+          documentCount={documents.length}
+          repairCount={attemptedRepairs.length}
+          pending={pending}
+          historyLoading={historyLoading}
+          historyError={historyError}
+          historySearch={historySearch}
+          setHistorySearch={setHistorySearch}
+          loadHistory={loadHistory}
+          newConversation={newConversation}
+          visibleConversations={visibleConversations}
+          activeId={activeId}
+          setActiveId={setActiveId}
+          busy={busy}
+          signOut={signOut}
+        />
+        <div className="workspace-main" inert={menuOpen}>
+          <header className="topbar">
+            <div className="breadcrumb">
+              <button
+                className="icon-button collapse-sidebar"
+                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                onClick={toggleSidebar}
+              >
+                {collapsed ? (
+                  <PanelLeftOpen size={18} />
+                ) : (
+                  <PanelLeftClose size={18} />
+                )}
+              </button>
+              <button
+                className="icon-button mobile-menu"
+                onClick={() => setMenuOpen(true)}
+                aria-label="Open navigation"
+              >
+                <Menu size={20} />
+              </button>
+              <span className="breadcrumb-root">Workspace</span>
+              <ChevronRight size={13} />
+              <strong>{navigation.find((n) => n.id === view)?.title}</strong>
+            </div>
+            <div className="topbar-actions">
+              <button
+                className="button secondary open-assistant"
+                aria-label={
+                  view === "chat" ? "Show workspace" : "Show assistant"
+                }
+                onClick={() => navigate(view === "chat" ? "knowledge" : "chat")}
+              >
+                {view === "chat" ? (
+                  <BookOpen size={15} />
+                ) : (
+                  <MessageSquare size={15} />
+                )}
+                <span>
+                  {view === "chat" ? "Knowledge base" : "Ask a question"}
+                </span>
+              </button>
+              <ThemeToggle />
+              <span
+                className={`connection-badge ${connected ? "" : "disconnected"}`}
+              >
+                <span className="status-dot" />
+                {loading
+                  ? "Connecting"
+                  : connected
+                    ? "Connected"
+                    : "Connection lost"}
+              </span>
+              <button
+                className="icon-button"
+                aria-label="Refresh workspace"
+                title="Refresh workspace"
+                disabled={loading}
+                onClick={() => void refresh()}
+              >
+                <RefreshCw size={16} className={loading ? "spin" : ""} />
+              </button>
+              <span className="topbar-divider" />
+              <button
+                className="icon-button"
+                aria-label="Help"
+                onClick={() => setHelp(true)}
+              >
+                <CircleHelp size={18} />
+              </button>
+            </div>
+          </header>
+          {health && !health.providerConfigured && (
+            <div className="connection-error" role="alert">
+              <AlertTriangle size={16} />
+              <span>
+                AI is not configured for this workspace. Contact the owner to
+                enable document indexing and answers.
+              </span>
+            </div>
+          )}
+          {error && (
+            <div className="connection-error" role="alert">
+              <AlertTriangle size={16} />
+              <span>{error}</span>
+              <button onClick={() => void refresh()}>Retry</button>
+            </div>
+          )}
+          <main
+            id="main"
+            className={`main-content route-content ${view === "chat" ? "chat-route" : ""}`}
+            inert={menuOpen}
+          >
+            {view === "knowledge" && (
+              <DocumentLibrary
+                documents={documents}
+                loading={loading}
+                connected={connected}
+                durableUploads={health?.capabilities?.durableUploads === true}
+                onRefresh={refresh}
+                onPreview={inspectDocument}
+              />
+            )}
+            {view === "chat" && (
+              <ChatPanel
+                query={drafts[activeId] || ""}
+                onQueryChange={(value) =>
+                  setDrafts((items) => { const next = { ...items }; if (value) next[activeId] = value; else delete next[activeId]; return next; })
+                }
+                focusMessageId={focusedMessage}
+                key={activeId}
+                title={active?.title || "New conversation"}
+                messages={active?.messages || []}
+                pending={pending}
+                connected={
+                  connected &&
+                  Boolean(activeId) &&
+                  !historyLoading &&
+                  !loadingMoreHistory &&
+                  !historyError &&
+                  !loadingOlder
+                }
+                documentCount={documents.length}
+                onSend={send}
+                onNew={newConversation}
+                onHistory={() => navigate("history")}
+                onCitation={inspectCitation}
+                hasOlderMessages={Boolean(active?.olderMessagesCursor)}
+                loadingOlderMessages={loadingOlder === activeId}
+                olderMessagesError={olderError?.id === activeId ? olderError.message : ""}
+                onLoadOlder={loadOlderMessages}
+                newerMessagesOmitted={active?.newerMessagesOmitted}
+                onLoadLatest={loadLatestMessages}
+              />
+            )}
+            {view === "history" && (
+              <ConversationHistory
+                search={conversationSearch}
+                onSearch={setConversationSearch}
+                conversations={conversations}
+                loading={historyLoading}
+                error={historyError}
+                onRetry={() => void loadHistory()}
+                hasMore={Boolean(historyCursor)}
+                loadingMore={loadingMoreHistory}
+                moreError={moreHistoryError}
+                onLoadMore={() => void loadMoreHistory()}
+                windowed={historyWindowed}
+                onOpen={(id) => {
+                  setActiveId(id);
+                  navigate("chat");
+                }}
+              />
+            )}
+            {view === "conflicts" && (
+              <>
+                <PageHeading
+                  title="Conflict center"
+                  eyebrow="EVIDENCE RECONCILIATION"
+                  description="Compare source passages. Keep unresolved disagreements visible."
+                />
+                <ConflictCenter
+                  onCitation={inspectCitation}
+                  onOpen={openAnswer}
+                />
+              </>
+            )}
+            {view === "corrections" && (
+              <Corrections
+                messages={conversations.flatMap((c) => c.messages)}
+                loading={historyLoading}
+                error={historyError}
+                onCitation={inspectCitation}
+                onOpen={openAnswer}
+              />
+            )}
+            {view === "analytics" && (
+              <Analytics
+                documents={documents}
+                messages={conversations.flatMap((c) => c.messages)}
+                loading={loading || historyLoading}
+                connected={connected}
+                error={historyError}
+              />
+            )}
+            {view !== "chat" && (
+              <footer className="content-footer">
+                <span>
+                  <ShieldCheck size={13} /> Private research workspace
+                </span>
+                <span>Veriqon / Evidence first</span>
+              </footer>
+            )}
+          </main>
+        </div>
+      </div>
+      <div className="outside-caption">
+        <span>VERIQON</span>
+        <span>A little more context. A lot more clarity.</span>
+        <span>RESEARCH WORKSPACE / 01</span>
+      </div>
+      {notice && (
+        <div className="toast" role="status">
+          <span>{notice}</span>
+          <button
+            className="icon-button"
+            onClick={() => setNotice("")}
+            aria-label="Dismiss notification"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
+      <WorkspaceDialogs sources={documents}
+        preview={preview}
+        setPreview={setPreview}
+        busy={busy}
+        pending={pending}
+        confirmDelete={confirmDelete}
+        setConfirmDelete={setConfirmDelete}
+        downloadOriginal={downloadOriginal}
+        removeDocument={removeDocument}
+        settings={settings}
+        setSettings={setSettings}
+        account={account}
+        connected={connected}
+        health={health}
+        signOut={signOut}
+        help={help}
+        setHelp={setHelp}
+      />
+      <Modal open={Boolean(savedAnswer)} onClose={() => setSavedAnswer(null)} title="Saved answer" description={savedAnswer?.title || "Recorded answer details"} drawer>
+        {savedAnswer && <>
+          <h2>{savedAnswer.message.question}</h2>
+          <p className="muted">{new Date(savedAnswer.message.createdAt).toLocaleString()}</p>
+          {savedAnswer.message.result ? <>
+            <VerificationBadge result={savedAnswer.message.result} />
+            {savedAnswer.message.result.sourcesChanged && <p className="inline-note">The library has changed since this answer was recorded. These are the original saved passages.</p>}
+            <p className="answer-text">{savedAnswer.message.result.draft}</p>
+            {savedAnswer.message.result.citations.map(c => <button className="source-button" key={c.index} onClick={() => inspectCitation(c)}>[{c.index}] {c.source}</button>)}
+            <RepairDetails result={savedAnswer.message.result} onCitation={inspectCitation} />
+            <AnswerVersionHistory key={savedAnswer.message.id} messageId={savedAnswer.message.id} onCitation={inspectCitation} />
+          </> : <p role="alert">{savedAnswer.message.error || "No completed answer was recorded."}</p>}
+        </>}
+      </Modal>
     </div>
-  </div><div className="outside-caption"><span>VERIQON</span><span>A little more context. A lot more clarity.</span><span>RESEARCH WORKSPACE / 01</span></div>
-    {notice && <div className="toast" role="status"><span>{notice}</span><button className="icon-button" onClick={() => setNotice('')} aria-label="Dismiss notification"><X size={15} /></button></div>}
-    <Modal open={Boolean(preview)} onClose={() => setPreview(null)} title={preview?.title || 'Source preview'} description={preview?.metadata || 'Source details'}><div className="document-preview">{preview?.text}</div>{preview?.hasOriginal && <div className="preview-actions"><button className="button secondary" disabled={Boolean(busy)} onClick={() => void downloadOriginal()}>{busy === 'download' ? <LoaderCircle className="spin" size={15} /> : <ArrowDownToLine size={15} />} Download original</button></div>}{preview?.documentId && <div className="delete-document">{confirmDelete ? <><p>Remove this document and its original file from your library? Saved answers keep their cited passages, but future questions will not use this document.</p><div><button className="button secondary" onClick={() => setConfirmDelete(false)} disabled={Boolean(busy)}>Keep document</button><button className="button danger" disabled={Boolean(busy) || pending} onClick={() => void removeDocument()}>{busy === 'delete' ? <LoaderCircle className="spin" size={15} /> : <Trash2 size={15} />} Confirm delete</button></div></> : <button className="text-button" disabled={Boolean(busy) || pending} onClick={() => setConfirmDelete(true)}><Trash2 size={14} /> Delete document</button>}</div>}</Modal>
-    <Modal open={settings} onClose={() => setSettings(false)} title="Workspace settings" description="Appearance, account, and storage for your workspace."><ThemeSettings /><div className="account-summary"><div className="profile-avatar">{account.name.slice(0, 2).toUpperCase()}</div><div><strong>{account.name}</strong><span>{account.email}</span></div><span className="badge neutral">{account.role}</span></div><RecoverySettings /><dl className="settings-list"><div><dt>API connection</dt><dd>{connected ? 'Connected' : 'Offline'}</dd></div><div><dt>Document storage</dt><dd>{health?.storage === 'postgresql' ? 'PostgreSQL' : health?.storage === 'sqlite' ? 'SQLite (local)' : 'Unavailable'} / Saved automatically</dd></div><div><dt>Access control</dt><dd>Private library / JWT sessions</dd></div><div><dt>Original uploads</dt><dd>Stored with your documents</dd></div><div><dt>Historical date filtering</dt><dd>Not available yet</dd></div></dl><p className="muted">Your indexed documents survive restarts. Chat history and answer repairs are saved to your account and remain after reload or sign-out. Older imported documents retain their extracted text; re-upload to save the original file.</p><div className="settings-actions"><button className="button secondary" disabled={Boolean(busy)} onClick={() => void signOut()}>{busy === 'logout' ? <LoaderCircle className="spin" size={15} /> : <LogOut size={15} />} Sign out of this session</button></div></Modal>
-    <Modal open={help} onClose={() => setHelp(false)} title="A workspace built around evidence" description="From your documents to answers you can inspect."><ol className="help-steps"><li><strong>Add knowledge.</strong> Upload PDF, DOCX, or UTF-8 TXT/Markdown documents. Your documents are indexed so the assistant can find relevant passages.</li><li><strong>Ask a question.</strong> The model retrieves relevant chunks, drafts an answer, and checks each statement against those passages.</li><li><strong>Inspect the result.</strong> Open source citations, review the model assessment, and compare any repaired answer.</li><li><strong>Keep your knowledge.</strong> Your files and indexed text are saved to your private library automatically.</li></ol><div className="inline-note"><ShieldCheck size={18} /> Answers reflect the sources available when you ask. They are not automatically updated when your documents change.</div></Modal>
-  </div>;
+  );
 }
-
-function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) { return <div className="section-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}<span className="title-dot">.</span></h1><p>{description}</p></div></div>; }
-function Metric({ icon, title, value, caption }: { icon: React.ReactNode; title: string; value: string | number; caption: string }) { return <div className="metric"><span>{icon}{title}</span><strong>{value}</strong><small>{caption}</small></div>; }

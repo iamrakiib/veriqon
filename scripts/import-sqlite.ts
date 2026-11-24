@@ -9,7 +9,7 @@ async function importSqlite() {
   if (!sourcePath || !process.env.DATABASE_URL) throw new Error('Use --from=<sqlite-file> and set DATABASE_URL for an EMPTY PostgreSQL database.');
   const source = new DatabaseSync(resolve(sourcePath), { readOnly: true });
   const target = new DatabaseService();
-  const tables = ['users', 'documents', 'chunks', 'settings', 'conversations', 'messages', 'recovery_codes', 'security_events'] as const;
+  const tables = ['users', 'documents', 'chunks', 'settings', 'conversations', 'messages', 'recovery_codes', 'security_events', 'ingestion_jobs', 'ingestion_vectors'] as const;
   try {
     await target.initialize(true);
     source.exec('BEGIN');
@@ -20,7 +20,7 @@ async function importSqlite() {
       }
       for (const table of tables) {
         if (!source.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) {
-          if (table === 'recovery_codes' || table === 'security_events') continue;
+          if (['recovery_codes', 'security_events', 'ingestion_jobs', 'ingestion_vectors'].includes(table)) continue;
           throw new Error('Required source table is missing.');
         }
         const rows = source.prepare(`SELECT * FROM ${table}`).all();
@@ -35,6 +35,8 @@ async function importSqlite() {
         if (count !== rows.length) throw new Error('Import row count mismatch.');
         console.log(`${table}: ${count} rows copied`);
       }
+      // Offline cutover must not retain leases held by the stopped SQLite worker.
+      await target.run("UPDATE ingestion_jobs SET lease_until=0 WHERE status='processing'");
     });
     console.log('Import committed. Source untouched. All users must sign in again; sessions and rate counters were not copied.');
   } finally {

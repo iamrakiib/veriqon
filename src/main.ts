@@ -6,11 +6,13 @@ import { AppModule } from './app.module';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import { validateEnvironment } from './common/config';
+import { backgroundConfig } from './common/background-config';
 
 dotenv.config();
 
 async function bootstrap() {
   validateEnvironment();
+  if (backgroundConfig().role === 'worker') throw new Error('Start the worker with npm run worker:prod, not the HTTP entrypoint.');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.disable('x-powered-by');
   // Configure only the hop count of the reverse proxy that actually fronts this deployment.

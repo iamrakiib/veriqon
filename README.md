@@ -2,167 +2,187 @@
 
 # Veriqon
 
-**Better answers. Built on your sources.**
+**Document answers you can inspect. Corrections you can trace.**
 
-A document research workspace that retrieves evidence, checks each claim, and repairs unsupported answers before showing them to you.
+A research workspace for evidence-grounded question answering, factual correction and source-conflict review.
 
 [![CI](https://github.com/iamrakiib/veriqon/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrakiib/veriqon/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-111111?logo=nextdotjs&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL_%2B_pgvector-4169E1?logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![PostgreSQL + pgvector](https://img.shields.io/badge/PostgreSQL_%2B_pgvector-4169E1?logo=postgresql&logoColor=white)
 
-[Open Veriqon](https://veriqon-two.vercel.app) · [Deployment](DEPLOYMENT.md) · [API examples](POSTMAN_TESTS.md) · [Security](SECURITY.md)
+[Quick start](#run-locally) | [Architecture](docs/ARCHITECTURE.md) | [Research](research/README.md) | [Deployment](docs/DEPLOYMENT.md) | [Hosted demo](https://veriqon-two.vercel.app)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/workspace-desktop.png">
-  <img alt="Veriqon document library and evidence assistant" src="docs/screenshots/workspace-desktop-light.png" width="1200">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/chat-dark.png">
+  <img src="docs/screenshots/chat-light.png" alt="Veriqon chat workspace with a policy answer, passage citation and verification details" width="1440">
 </picture>
 
 </div>
 
-## Research with the evidence in view
+## Why Veriqon
 
-Upload a paper, ask how it works, and inspect the passages behind the answer. Veriqon keeps documents, citations, chat history and answer repairs together in a responsive monochrome interface with dark, light and system themes.
+Research papers and policies change. Documents disagree. A plausible answer alone does not show which source supports it, whether that source still applies, or what changed after a correction.
 
-- **A private library for every account:** PDF, DOCX, TXT and Markdown ingestion, search, source previews, original-file downloads and persistent conversations.
-- **Account recovery:** save single-use recovery codes from Settings; a password reset revokes existing sessions.
-- **An inspection trail:** hybrid retrieval expands neighboring passages; structured claim assessments include exact quotes. Missing evidence triggers targeted retrieval. Minimal factual edits require final verification and a substantive-change check.
-- **Honest failure states:** missing evidence, provider quotas, interrupted answers, upload errors and stale historical sources are surfaced explicitly.
-- **A deployable stack:** Next.js, NestJS, PostgreSQL/pgvector, Redis limits and work leases, Docker, migrations and automated checks.
-- **Desktop and mobile:** independently scrolling panels, a visible composer, keyboard-accessible dialogs and mobile navigation.
+Veriqon keeps that evidence alongside the conversation. It retrieves passages, decomposes an answer into factual claims, checks quoted support and attempts bounded corrections when evidence establishes a replacement. Unresolved claims and source disagreements remain visible. A background worker can reassess saved answers after document updates without overwriting their original versions.
 
-[Mobile workspace](docs/screenshots/workspace-mobile.png) · [Mobile assistant](docs/screenshots/assistant-mobile-dark.png) · [Account screen](docs/screenshots/auth-desktop-dark.png)
+This is a research application with tested local workflows. Model-based verification is an assessment, not a guarantee of truth. See [current capabilities](docs/capabilities.md) and [release readiness](docs/RELEASE_READINESS.md) for the tested boundaries and remaining work.
 
-Screenshots use synthetic fixtures. The live app is an early public release with account registration; accounts do not share their libraries. Free hosting may take about a minute to wake, and AI calls share the operator's provider quota.
+## What you can do
 
-## How an answer is built
-
-```mermaid
-flowchart LR
-    A[Question] --> B[Embed and retrieve]
-    B --> C[Draft with citations]
-    C --> K[Decompose atomic facts]
-    K --> D{Assess evidence}
-    D -->|Pass| E[Supported answer]
-    D -->|Missing evidence| J[Targeted retrieval]
-    J --> D
-    D -->|Contradicting evidence| F[Minimal factual edit]
-    D -->|Unresolved| I[Withhold unsupported claims]
-    F --> G{Reassess}
-    G -->|Supported substantive correction| H[Repaired answer]
-    G -->|Fail| I
-```
-
-The verifier is a model assessment, **not a guarantee of truth**. Questions are independent: previous turns are saved but are not supplied as model context. Retrieval can miss information that a document contains; abstention is not proof that the entire document lacks an answer.
-
-## Architecture
-
-```mermaid
-flowchart TD
-    Browser --> Web[Next.js / Vercel]
-    Web -->|Same-origin API proxy| API[NestJS / Render]
-    API --> PG[(PostgreSQL + pgvector / Neon)]
-    API --> Redis[(Redis / Upstash)]
-    API --> Provider[OpenRouter: embeddings, generation, verification]
-```
-
-PostgreSQL stores accounts, session hashes, documents and original bytes, vectors, conversations and answers. Redis coordinates disposable rate limits and active-work leases. PostgreSQL performs **exact** vector ranking; there is no ANN index yet. Bounded local caches use account and document-revision keys. SQLite is an optional development mode, not the cloud database.
-
-```text
-apps/web/          Next.js interface and API proxy
-src/auth/          Password hashing, JWT sessions and guards
-src/database/      PostgreSQL/SQLite storage and migrations
-src/vector-store/  Embeddings, passage windows and retrieval
-src/rag/           Uploads, generation, verification and repair
-src/common/        Provider handling, limits and configuration
-src/tests/         Backend and infrastructure tests
-tests/browser/     Desktop/mobile interaction tests
-scripts/           Migrations, bootstrap and evaluation tools
-```
-
-## Start with Docker
-
-Requirements: Docker with Linux containers, Node.js 22.18+ for the setup helper, and an OpenRouter account with available embedding/chat models.
-
-```sh
-git clone https://github.com/iamrakiib/veriqon.git
-cd veriqon
-node scripts/init-docker.mjs
-```
-
-Fill `OPENROUTER_API_KEY`, `EMBEDDING_MODEL` and `LLM_MODEL` in the generated private `.env.docker`. Optionally set `VERIFIER_MODEL`; otherwise verification uses the generation model. The helper generates separate database, JWT and setup secrets without overwriting existing settings.
-
-```sh
-docker compose --env-file .env.docker up --build -d
-```
-
-Open **http://localhost:3002**. Create the first owner using `SETUP_CODE` from `.env.docker`. Each installation has its own database and credentials. New Docker installations default to closed registration after owner setup; set `ALLOW_REGISTRATION=true` to offer public sign-up. Never commit the generated file.
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for cloud deployment, TLS, migration, backups, hosting limits and releases.
+| Workflow | Behavior |
+| --- | --- |
+| Build a private library | Upload PDF, DOCX, TXT or Markdown; inspect indexing progress and download originals. |
+| Ask with evidence | Hybrid retrieval, named-document scope, passage citations and limited conversation reference context. |
+| Inspect factual correction | Atomic claims, exact supporting/contradicting quotes, minimal edits and post-repair verification. |
+| Review disagreements | Compare opposing passages, record source decisions and inspect decision history. No inferred authority from upload order. |
+| Track knowledge changes | Explicit temporal metadata, archived source versions, queued revalidation and appended answer versions. |
+| Recover from interruption | Persistent indexing checkpoints, bounded provider retries, queue reconciliation and source-excerpt fallback. |
+| Control your account | Account-isolated data, rotating sessions and single-use recovery codes. |
 
 <details>
-<summary>Run without Docker for local development</summary>
+<summary>Conflict review and mobile chat</summary>
 
-Run `npm ci`, copy `.env.example` to `.env`, and configure the provider and a random `JWT_SECRET` of at least 32 characters. Generate a secret locally:
+<img src="docs/screenshots/conflict-review.png" alt="Conflict Center comparing two policy passages with source versions and unresolved status" width="1200">
 
-```sh
-node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
-```
-
-Leave `DATABASE_URL` and `REDIS_URL` blank for SQLite development. Start these commands in separate terminals:
-
-```sh
-npm run start:dev
-npm run web:dev
-```
-
-Open **http://127.0.0.1:3001**. The first-owner code is generated in `data/setup-code.txt`. No default password exists. Local data under ignored `data/` does not synchronize with the cloud. If the API port changes, set server-side `API_ORIGIN` in `apps/web/.env.local` and restart the frontend.
+<img src="docs/screenshots/chat-mobile.png" alt="Mobile chat with a visible composer and cited answer" width="390">
 
 </details>
 
-## Verification
+Screenshots show the current interface using synthetic documents and account data. They illustrate the UI, not a measured accuracy or latency claim. Capture instructions are in [Testing](docs/TESTING.md).
 
-```sh
+## How correction works
+
+~~~mermaid
+flowchart LR
+    Q[Question] --> R[Retrieve authorized passages]
+    R --> G[Generate draft]
+    G --> C[Extract atomic claims]
+    C --> V{Check evidence}
+    V -->|Supported| A[Cited answer]
+    V -->|Insufficient| T[Targeted retrieval]
+    T --> V
+    V -->|Contradicted| E[Minimal factual edit]
+    E --> F{Reverify}
+    F -->|Supported substantive change| P[Versioned correction]
+    F -->|Unresolved| U[Partial answer or abstention]
+    V -->|Conflicting| H[Conflict Center]
+~~~
+
+The implementation is **RAC-inspired**, with additional temporal, authorization and reliability safeguards. It is not claimed as a faithful reproduction of the published algorithm. A paraphrase is not a successful factual repair; a repaired claim must survive a fresh evidence assessment. Read the [method and attribution](docs/rac-method.md) and [self-correction design](docs/SELF_CORRECTION.md).
+
+Citation numbers such as [1] and [2] identify retrieved passages. Several passages can come from one document.
+
+## Run locally
+
+Use Docker with Linux containers and Node.js 22.18+ for the setup helper. Live document processing requires an available embedding model and chat model through OpenRouter.
+
+~~~sh
+git clone https://github.com/iamrakiib/veriqon.git
+cd veriqon
+node scripts/init-docker.mjs
+~~~
+
+Set OPENROUTER_API_KEY, EMBEDDING_MODEL and LLM_MODEL in the generated private .env.docker. The helper generates independent database, JWT and setup secrets. It never overwrites existing configuration.
+
+~~~sh
+docker compose --env-file .env.docker build
+docker compose --env-file .env.docker up -d --no-build --wait --wait-timeout 180
+~~~
+
+Open **http://localhost:3002**. Create the first owner with SETUP_CODE from .env.docker and save the recovery codes. Later public registration is disabled by default; explicitly enable ALLOW_REGISTRATION if needed.
+
+The stack runs Next.js, NestJS API, a separate background worker, PostgreSQL/pgvector and Redis. Original files, source archives, conversations and corrections are stored in the database. Preserve its volume; deleting volumes deletes data.
+
+[Full installation and backup/restore](docs/INSTALLATION.md) | [Provider configuration](docs/provider-setup.md) | [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+### Try correction without an API key
+
+~~~sh
 npm ci
+npm run research:demo
+~~~
+
+Seven synthetic scenarios exercise the actual orchestration with scripted provider responses: an incorrect number, a correct answer, targeted retrieval, missing evidence, historical scope, a superficial rewrite and a repair introducing a new error. This is a reproducible protocol test, not an independently labeled model benchmark. [Live evaluation and review instructions](research/README.md).
+
+### Develop without Docker
+
+~~~sh
+npm ci
+npm run setup:local
+# Configure the provider in .env, then use two terminals:
+npm run start:dev
+npm run web:dev
+~~~
+
+Open **http://127.0.0.1:3001**. Blank DATABASE_URL and REDIS_URL select SQLite development. SQLite is not the cloud deployment profile. [Environment reference](.env.example).
+
+## Architecture
+
+~~~mermaid
+flowchart TD
+    Browser --> Web[Next.js]
+    Web -->|Same-origin proxy| API[NestJS API]
+    API --> PG[(PostgreSQL + pgvector)]
+    API --> Redis[(Redis)]
+    API --> Models[OpenRouter]
+    Worker[Background worker] --> PG
+    Worker --> Redis
+    Worker --> Models
+~~~
+
+PostgreSQL owns application data, embeddings and durable job state. Redis coordinates shared limits, leases and BullMQ delivery. Workers recover from database checkpoints. The semantic answer cache is process-local and checks ownership, source revision and question scope before reuse.
+
+Deployment targets are **Vercel + Render API/worker + Neon + compatible managed Redis**. Background processing needs suitable always-on resources; free-tier hosting is not an availability guarantee. The [cloud guide](docs/DEPLOYMENT.md) distinguishes configuration from executed acceptance tests.
+
+~~~text
+apps/web/          Interface and same-origin API proxy
+src/auth/          Authentication, sessions and account isolation
+src/database/      Persistent data, migrations and version history
+src/vector-store/  Embeddings and hybrid passage retrieval
+src/rag/           Ingestion, verification, repair and revalidation
+src/common/        Provider handling, limits and worker configuration
+src/tests/         Backend and infrastructure regression tests
+tests/             Browser and full-stack integration tests
+research/          Synthetic cases and evaluation documentation
+~~~
+
+## Test and evaluate
+
+~~~sh
 npm run lint
 npm test
+npm run test:release
+npm run research:demo
 npm run web:build
 npm run web:check
-npm run test:browser
+npx playwright install chromium
+npm run test:browser -- --workers=1
 npm audit --audit-level=high
-```
+~~~
 
-Backend tests start real HTTP servers with deterministic provider stubs. Browser tests use synthetic network fixtures to verify desktop/mobile forms, uploads, citations, repairs, sessions, themes and viewport fit. Local tests use Edge; CI installs Chromium. These suites do not consume provider credits.
+For disposable database and queue integration tests:
 
-For real PostgreSQL and Redis checks, use the **separate disposable test stack**:
-
-```sh
+~~~sh
 docker compose -f compose.test.yaml up -d --wait
 npm run test:infra
+npm run test:lifecycle
 docker compose -f compose.test.yaml down
-```
+~~~
 
-CI also builds both Docker images. See the [current engineering review](docs/release-review-2026-10-29.md). `npm run evaluate` makes real provider requests using a dedicated test account; it is a smoke tool, not an independently labeled benchmark.
+CI checks source publication safety, dependencies, backend/frontend behavior and the container installation, correction, restart and restore workflow. Scripted inference keeps deterministic tests reproducible; live-provider observations are recorded separately. [Test methodology and results](docs/TESTING.md) | [Milestone acceptance](docs/IMPLEMENTATION_PLAN.md).
 
-## Security and limits
+## Scope and limitations
 
-Passwords use salted scrypt. Access JWTs expire after 15 minutes; hashed rotating refresh tokens support sessions up to seven days. Cookies are HttpOnly, SameSite=Lax and Secure in cloud production. Logout revokes the database session. Writes validate origins and a required request header; data access is scoped to the signed-in account.
+- Model verification and retrieval can fail. Unsupported claims must not be presented as established facts; known live-model failures are tracked in [release readiness](docs/RELEASE_READINESS.md).
+- Vector ranking is exact, not ANN. Semantic caching is not shared across API replicas. Capacity claims are limited to measured workloads.
+- Conflict records come from assessed answers, not an exhaustive library scan. Explicit metadata and human decisions are required when scope or precedence is unknown.
+- Queued uploads allow 10 MB, 500,000 extracted characters and 1,000 passages. Scanned PDFs need external OCR. Provider quota still applies to indexing and answers.
+- Accounts use personal libraries. Shared workspace administration, MFA, email verification and email reset delivery are not implemented. Password recovery uses saved one-time codes.
+- Independent held-out factuality evaluation, extended mixed-workload soak and complete cloud acceptance remain release work. Local passes do not establish a production SLA.
 
-Uploads allow 10 MB and 100,000 extracted characters per file, ten files per browser batch, and 100 documents / 100 MB of source files plus text per account. Scanned PDFs need OCR. Parsing has a process boundary, memory limit and deadline. AI work is rate-limited and bounded in concurrency.
+## Contribute
 
-Email addresses are **not verified**. Recovery codes are available: sign in, open Settings, confirm your password and save eight one-time codes. Use **Forgot password?** with your email and one saved code to reset your password and revoke existing sessions. New accounts receive codes at registration. Replacing codes invalidates the old set; there is no email reset delivery. MFA, invitations, account deletion/export and security event monitoring are not implemented. AI providers receive document text or retrieved passages. Review provider handling before uploading confidential data. See [SECURITY.md](SECURITY.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and the [implementation plan](docs/IMPLEMENTATION_PLAN.md). Submit focused pull requests with reproducible tests. Keep credentials, account records and private documents out of commits and issues.
 
-## Research roadmap
-
-This is a foundation for the TemporalGuard research direction. **Not implemented:** immutable document versions, effective-date retrieval, authority-based conflict resolution, continuous answer revalidation, durable ingestion workers, learned reranking and independent retrieval/faithfulness benchmarks. The Conflict Center displays unresolved evidence from saved answer assessments; it does not perform a library-wide scan or resolve authority disputes.
-
-Reliability views show observed outcomes, not factual accuracy or an SLA. Historical audits in `docs/` describe earlier stages; the current review and deployment guide take precedence.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible bug reports and focused changes are welcome. Keep documents, database exports, credentials and account details out of public issues and commits.
-
-See the [reliability audit](docs/reliability-audit.md) for actual failure causes, verification boundaries and test results. Citation numbers such as `[1]`, `[2]` and `[3]` identify retrieved passages, which can all belong to the same document.
-
-The [RAC-inspired method and comparison](docs/rac-method.md) documents the paper/code audit, differences from RAC, reproducible evaluation and measured limitations.
+Original code and synthetic research fixtures are [MIT licensed](LICENSE). Bundled fonts retain their licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).

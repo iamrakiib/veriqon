@@ -3,6 +3,7 @@ import './globals.css';
 import './theme.css';
 import './viewport.css';
 import './polish.css';
+import './research.css';
 import { ThemeProvider } from '../components/theme-provider';
 
 export const metadata: Metadata = {

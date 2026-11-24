@@ -1,0 +1,1918 @@
+{
+  "generatedAt": "2026-11-11T06:14:16.971Z",
+  "mode": "live-provider-controlled-retrieval",
+  "datasetHash": "fb8d60ab47eaf7163f9c7f5e7b2718b1a7c054f2a7e0a9b19643c119c3f24c11",
+  "groundTruth": "Authored synthetic documents and annotations, fixed before model execution. Not independently human-reviewed and not sampled from real research papers.",
+  "protocol": "Same fixed drafts and evidence for both variants. Initial generation and embedding are excluded. No LLM grades the answers. Offline outcomes test orchestration only; live numeric grading is vocabulary-limited and cannot grade arbitrary semantic claims.",
+  "independentlyHumanReviewed": false,
+  "generalClaimCorrectness": null,
+  "citationEntailmentAccuracy": null,
+  "apiCost": null,
+  "cases": [
+    "incorrect-number",
+    "already-correct",
+    "targeted-retrieval",
+    "missing-evidence",
+    "historical-policy",
+    "superficial-rewrite",
+    "new-error-in-repair"
+  ],
+  "summaries": [
+    {
+      "variant": "uncorrected-fixed-draft",
+      "cases": 7,
+      "executionFailures": 0,
+      "numericFactCorrectness": 0.5454545454545454,
+      "numericUnsupportedRate": 0.45454545454545453,
+      "expectedNumericCoverage": 0.6,
+      "repairSuccessRate": null,
+      "unnecessaryRepairRate": null
+    },
+    {
+      "variant": "rac-inspired",
+      "cases": 7,
+      "executionFailures": 0,
+      "numericFactCorrectness": 1,
+      "numericUnsupportedRate": 0,
+      "expectedNumericCoverage": 1,
+      "repairSuccessRate": 1,
+      "unnecessaryRepairRate": 0
+    }
+  ],
+  "rows": [
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "incorrect-number",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 1,
+        "unsupported": 1,
+        "expected": 2,
+        "covered": 1
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "incorrect-number",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "result": {
+        "draft": "The adapter used two datasets. [1] The adapter used four architectures.",
+        "status": "repaired",
+        "verificationStatus": "REPAIRED_VERIFIED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter used two datasets. [1]",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            },
+            {
+              "sentence": "The adapter used four architectures.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter used two datasets.",
+              "span": {
+                "start": 0,
+                "end": 30,
+                "text": "The adapter used two datasets."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used two datasets."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            },
+            {
+              "id": "s2c1",
+              "sentenceId": 2,
+              "text": "The adapter used four architectures.",
+              "span": {
+                "start": 35,
+                "end": 71,
+                "text": "The adapter used four architectures."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used four architectures."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "results",
+            "source": "manuscript-results.txt",
+            "version": "sha256:6353f68a888b5a18f371e49b65d6a655f212b994fa93b9de6b75bb8b948ecfc8",
+            "chunkIndex": 0,
+            "excerpt": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported."
+          }
+        ],
+        "attempts": 2,
+        "durationMs": 16485,
+        "correction": {
+          "original": "The adapter used five datasets. The adapter used four architectures.",
+          "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+          "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes."
+        },
+        "repairHistory": [
+          {
+            "original": "The adapter used five datasets. The adapter used four architectures.",
+            "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+            "accepted": true,
+            "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes.",
+            "before": {
+              "passed": false,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used five datasets.",
+                  "supported": false,
+                  "evidenceIndexes": []
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used five datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 31,
+                    "text": "The adapter used five datasets."
+                  },
+                  "verdict": "CONTRADICTED",
+                  "supporting": [],
+                  "contradicting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "REPAIR"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 32,
+                    "end": 68,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Unresolved factual claims",
+              "evidence": "s1c1 · CONTRADICTED: The adapter used five datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "after": {
+              "passed": true,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used two datasets. [1]",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used two datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 30,
+                    "text": "The adapter used two datasets."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 35,
+                    "end": 71,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Claims supported by quoted evidence and model assessment",
+              "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "edits": [
+              {
+                "claimId": "s1c1",
+                "original": "The adapter used five datasets.",
+                "replacement": "The adapter used two datasets.",
+                "evidence": [
+                  {
+                    "index": 1,
+                    "quote": "The adapter used two datasets."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "retrievalRounds": 1,
+        "claimsChecked": 2,
+        "claimsSupported": 2,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 4196,
+            "success": true,
+            "promptTokens": 276,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2234,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 144
+          },
+          {
+            "stage": "Claim repair",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1681,
+            "success": true,
+            "promptTokens": 508,
+            "completionTokens": 44
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2884,
+            "success": true,
+            "promptTokens": 279,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 5446,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 141
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 2,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 1,
+      "latencyMs": 16507,
+      "repairNeeded": true,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 3334
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "already-correct",
+      "answer": "The adapter used two datasets. The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "already-correct",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "result": {
+        "draft": "The adapter used two datasets. The adapter used four architectures.",
+        "status": "supported",
+        "verificationStatus": "VERIFIED_UNCHANGED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter used two datasets.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            },
+            {
+              "sentence": "The adapter used four architectures.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter used two datasets.",
+              "span": {
+                "start": 0,
+                "end": 30,
+                "text": "The adapter used two datasets."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used two datasets."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            },
+            {
+              "id": "s2c1",
+              "sentenceId": 2,
+              "text": "The adapter used four architectures.",
+              "span": {
+                "start": 31,
+                "end": 67,
+                "text": "The adapter used four architectures."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used four architectures."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "results",
+            "source": "manuscript-results.txt",
+            "version": "sha256:6353f68a888b5a18f371e49b65d6a655f212b994fa93b9de6b75bb8b948ecfc8",
+            "chunkIndex": 0,
+            "excerpt": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported."
+          }
+        ],
+        "attempts": 1,
+        "durationMs": 4465,
+        "correction": null,
+        "repairHistory": [],
+        "retrievalRounds": 1,
+        "claimsChecked": 2,
+        "claimsSupported": 2,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1420,
+            "success": true,
+            "promptTokens": 276,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 3043,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 141
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 1,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 1,
+      "latencyMs": 4472,
+      "repairNeeded": false,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 1388
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "targeted-retrieval",
+      "answer": "The adapter used two datasets.",
+      "numerical": {
+        "returned": 1,
+        "correct": 1,
+        "unsupported": 0,
+        "expected": 1,
+        "covered": 1
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "targeted-retrieval",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 1,
+        "correct": 1,
+        "unsupported": 0,
+        "expected": 1,
+        "covered": 1
+      },
+      "result": {
+        "draft": "The adapter used two datasets.",
+        "status": "supported",
+        "verificationStatus": "VERIFIED_UNCHANGED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter used two datasets.",
+              "supported": true,
+              "evidenceIndexes": [
+                2
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter used two datasets.",
+              "span": {
+                "start": 0,
+                "end": 30,
+                "text": "The adapter used two datasets."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 2,
+                  "quote": "The adapter used two datasets."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "intro",
+            "source": "manuscript.txt",
+            "version": "sha256:4439fe1930877550aab1b3a982073afef00f3c52ca9b71bceff2289df0a8ae35",
+            "chunkIndex": 0,
+            "excerpt": "The manuscript describes a forecasting adapter. Experimental details appear in the results section."
+          },
+          {
+            "index": 2,
+            "documentId": "results",
+            "source": "manuscript-results.txt",
+            "version": "sha256:6353f68a888b5a18f371e49b65d6a655f212b994fa93b9de6b75bb8b948ecfc8",
+            "chunkIndex": 0,
+            "excerpt": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported."
+          }
+        ],
+        "attempts": 1,
+        "durationMs": 6586,
+        "correction": null,
+        "repairHistory": [],
+        "retrievalRounds": 2,
+        "claimsChecked": 1,
+        "claimsSupported": 1,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1943,
+            "success": true,
+            "promptTokens": 262,
+            "completionTokens": 40
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2867,
+            "success": true,
+            "promptTokens": 860,
+            "completionTokens": 77
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1773,
+            "success": true,
+            "promptTokens": 962,
+            "completionTokens": 77
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 0,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 2,
+      "latencyMs": 6590,
+      "repairNeeded": false,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 2278
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "missing-evidence",
+      "answer": "The adapter achieved 95% accuracy.",
+      "numerical": {
+        "returned": 1,
+        "correct": 0,
+        "unsupported": 1,
+        "expected": 0,
+        "covered": 0
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "missing-evidence",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 0,
+        "correct": 0,
+        "unsupported": 0,
+        "expected": 0,
+        "covered": 0
+      },
+      "result": {
+        "draft": "The retrieved passages do not establish the requested information. I cannot supply an unsupported value. Try identifying the relevant paper, results table, or section.",
+        "status": "abstained",
+        "verificationStatus": "INSUFFICIENT_EVIDENCE",
+        "factCheck": {
+          "passed": false,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter achieved 95% accuracy.",
+              "supported": false,
+              "evidenceIndexes": []
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter achieved 95% accuracy.",
+              "span": {
+                "start": 0,
+                "end": 34,
+                "text": "The adapter achieved 95% accuracy."
+              },
+              "verdict": "INSUFFICIENT_EVIDENCE",
+              "supporting": [],
+              "contradicting": [],
+              "missingInformation": [
+                "No accuracy figure is reported in the provided source."
+              ],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "TARGETED_RETRIEVAL"
+            }
+          ],
+          "verdict": "Unresolved factual claims",
+          "evidence": "s1c1 · INSUFFICIENT_EVIDENCE: The adapter achieved 95% accuracy. — No accuracy figure is reported in the provided source.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "intro",
+            "source": "manuscript.txt",
+            "version": "sha256:4439fe1930877550aab1b3a982073afef00f3c52ca9b71bceff2289df0a8ae35",
+            "chunkIndex": 0,
+            "excerpt": "The manuscript describes a forecasting adapter. Experimental details appear in the results section."
+          }
+        ],
+        "attempts": 1,
+        "durationMs": 2999,
+        "correction": null,
+        "reason": "insufficient_context",
+        "repairHistory": [],
+        "retrievalRounds": 2,
+        "claimsChecked": 1,
+        "claimsSupported": 0,
+        "claimsUnresolved": 1,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1303,
+            "success": true,
+            "promptTokens": 265,
+            "completionTokens": 46
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1692,
+            "success": true,
+            "promptTokens": 865,
+            "completionTokens": 79
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 0,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 2,
+      "latencyMs": 2999,
+      "repairNeeded": false,
+      "repairSucceeded": false,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 1255
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "historical-policy",
+      "answer": "In 2024, remote work was permitted one day per week. Manager approval was required.",
+      "numerical": {
+        "returned": 1,
+        "correct": 0,
+        "unsupported": 1,
+        "expected": 1,
+        "covered": 0
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "historical-policy",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 1,
+        "correct": 1,
+        "unsupported": 0,
+        "expected": 1,
+        "covered": 1
+      },
+      "result": {
+        "draft": "In 2024, remote work was permitted three days per week. [1] Manager approval was required.",
+        "status": "repaired",
+        "verificationStatus": "REPAIRED_VERIFIED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "In 2024, remote work was permitted three days per week. [1]",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            },
+            {
+              "sentence": "Manager approval was required.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "In 2024, remote work was permitted three days per week.",
+              "span": {
+                "start": 0,
+                "end": 55,
+                "text": "In 2024, remote work was permitted three days per week."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "In 2024, remote work was permitted three days per week."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "APPLICABLE",
+              "scope": {
+                "time": "2024",
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            },
+            {
+              "id": "s2c1",
+              "sentenceId": 2,
+              "text": "Manager approval was required.",
+              "span": {
+                "start": 60,
+                "end": 90,
+                "text": "Manager approval was required."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "Manager approval was required."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "APPLICABLE",
+              "scope": {
+                "time": "2024",
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: In 2024, remote work was permitted three days per week.\ns2c1 · SUPPORTED: Manager approval was required.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "historical",
+            "source": "policy-2024.txt",
+            "version": "sha256:1cddd29ad356c2738535a4ef4ba03aaae888d493f00e7a98e344c08b5cd8d263",
+            "chunkIndex": 0,
+            "excerpt": "In 2024, remote work was permitted three days per week. Manager approval was required."
+          },
+          {
+            "index": 2,
+            "documentId": "current",
+            "source": "policy-2025.txt",
+            "version": "sha256:bf01b27a3e0d90d6258e8dd96ef9ee02654028dc5f942ad52576ac8623cb3b39",
+            "chunkIndex": 0,
+            "excerpt": "In 2025, remote work is permitted one day per week. This policy does not apply to 2024."
+          }
+        ],
+        "attempts": 2,
+        "durationMs": 11174,
+        "correction": {
+          "original": "In 2024, remote work was permitted one day per week. Manager approval was required.",
+          "revised": "In 2024, remote work was permitted three days per week. [1] Manager approval was required.",
+          "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes."
+        },
+        "repairHistory": [
+          {
+            "original": "In 2024, remote work was permitted one day per week. Manager approval was required.",
+            "revised": "In 2024, remote work was permitted three days per week. [1] Manager approval was required.",
+            "accepted": true,
+            "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes.",
+            "before": {
+              "passed": false,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "In 2024, remote work was permitted one day per week.",
+                  "supported": false,
+                  "evidenceIndexes": []
+                },
+                {
+                  "sentence": "Manager approval was required.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "In 2024, remote work was permitted one day per week.",
+                  "span": {
+                    "start": 0,
+                    "end": 52,
+                    "text": "In 2024, remote work was permitted one day per week."
+                  },
+                  "verdict": "CONTRADICTED",
+                  "supporting": [],
+                  "contradicting": [
+                    {
+                      "index": 1,
+                      "quote": "In 2024, remote work was permitted three days per week."
+                    }
+                  ],
+                  "missingInformation": [],
+                  "temporalValidity": "APPLICABLE",
+                  "scope": {
+                    "time": "2024",
+                    "place": null
+                  },
+                  "recommendedAction": "REPAIR"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "Manager approval was required.",
+                  "span": {
+                    "start": 53,
+                    "end": 83,
+                    "text": "Manager approval was required."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "Manager approval was required."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "APPLICABLE",
+                  "scope": {
+                    "time": "2024",
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Unresolved factual claims",
+              "evidence": "s1c1 · CONTRADICTED: In 2024, remote work was permitted one day per week.\ns2c1 · SUPPORTED: Manager approval was required.",
+              "sourceConflicts": []
+            },
+            "after": {
+              "passed": true,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "In 2024, remote work was permitted three days per week. [1]",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                },
+                {
+                  "sentence": "Manager approval was required.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "In 2024, remote work was permitted three days per week.",
+                  "span": {
+                    "start": 0,
+                    "end": 55,
+                    "text": "In 2024, remote work was permitted three days per week."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "In 2024, remote work was permitted three days per week."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "APPLICABLE",
+                  "scope": {
+                    "time": "2024",
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "Manager approval was required.",
+                  "span": {
+                    "start": 60,
+                    "end": 90,
+                    "text": "Manager approval was required."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "Manager approval was required."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "APPLICABLE",
+                  "scope": {
+                    "time": "2024",
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Claims supported by quoted evidence and model assessment",
+              "evidence": "s1c1 · SUPPORTED: In 2024, remote work was permitted three days per week.\ns2c1 · SUPPORTED: Manager approval was required.",
+              "sourceConflicts": []
+            },
+            "edits": [
+              {
+                "claimId": "s1c1",
+                "original": "In 2024, remote work was permitted one day per week.",
+                "replacement": "In 2024, remote work was permitted three days per week.",
+                "evidence": [
+                  {
+                    "index": 1,
+                    "quote": "In 2024, remote work was permitted three days per week."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "retrievalRounds": 1,
+        "claimsChecked": 2,
+        "claimsSupported": 2,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1291,
+            "success": true,
+            "promptTokens": 285,
+            "completionTokens": 92
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2836,
+            "success": true,
+            "promptTokens": 1035,
+            "completionTokens": 161
+          },
+          {
+            "stage": "Claim repair",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1538,
+            "success": true,
+            "promptTokens": 600,
+            "completionTokens": 64
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2963,
+            "success": true,
+            "promptTokens": 288,
+            "completionTokens": 92
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2539,
+            "success": true,
+            "promptTokens": 1035,
+            "completionTokens": 158
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 0,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 1,
+      "latencyMs": 11175,
+      "repairNeeded": true,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 3810
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "superficial-rewrite",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 1,
+        "unsupported": 1,
+        "expected": 2,
+        "covered": 1
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "superficial-rewrite",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "result": {
+        "draft": "The adapter used two datasets. [1] The adapter used four architectures.",
+        "status": "repaired",
+        "verificationStatus": "REPAIRED_VERIFIED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter used two datasets. [1]",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            },
+            {
+              "sentence": "The adapter used four architectures.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter used two datasets.",
+              "span": {
+                "start": 0,
+                "end": 30,
+                "text": "The adapter used two datasets."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used two datasets."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            },
+            {
+              "id": "s2c1",
+              "sentenceId": 2,
+              "text": "The adapter used four architectures.",
+              "span": {
+                "start": 35,
+                "end": 71,
+                "text": "The adapter used four architectures."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used four architectures."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "results",
+            "source": "manuscript-results.txt",
+            "version": "sha256:6353f68a888b5a18f371e49b65d6a655f212b994fa93b9de6b75bb8b948ecfc8",
+            "chunkIndex": 0,
+            "excerpt": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported."
+          }
+        ],
+        "attempts": 2,
+        "durationMs": 14984,
+        "correction": {
+          "original": "The adapter used five datasets. The adapter used four architectures.",
+          "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+          "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes."
+        },
+        "repairHistory": [
+          {
+            "original": "The adapter used five datasets. The adapter used four architectures.",
+            "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+            "accepted": true,
+            "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes.",
+            "before": {
+              "passed": false,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used five datasets.",
+                  "supported": false,
+                  "evidenceIndexes": []
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used five datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 31,
+                    "text": "The adapter used five datasets."
+                  },
+                  "verdict": "CONTRADICTED",
+                  "supporting": [],
+                  "contradicting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "REPAIR"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 32,
+                    "end": 68,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Unresolved factual claims",
+              "evidence": "s1c1 · CONTRADICTED: The adapter used five datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "after": {
+              "passed": true,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used two datasets. [1]",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used two datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 30,
+                    "text": "The adapter used two datasets."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 35,
+                    "end": 71,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Claims supported by quoted evidence and model assessment",
+              "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "edits": [
+              {
+                "claimId": "s1c1",
+                "original": "The adapter used five datasets.",
+                "replacement": "The adapter used two datasets.",
+                "evidence": [
+                  {
+                    "index": 1,
+                    "quote": "The adapter used two datasets."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "retrievalRounds": 1,
+        "claimsChecked": 2,
+        "claimsSupported": 2,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2513,
+            "success": true,
+            "promptTokens": 276,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1982,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 144
+          },
+          {
+            "stage": "Claim repair",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 5179,
+            "success": true,
+            "promptTokens": 508,
+            "completionTokens": 44
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1977,
+            "success": true,
+            "promptTokens": 279,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 3329,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 141
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 0,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 1,
+      "latencyMs": 14984,
+      "repairNeeded": true,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 3334
+    },
+    {
+      "variant": "uncorrected-fixed-draft",
+      "case": "new-error-in-repair",
+      "answer": "The adapter used five datasets. The adapter used four architectures.",
+      "numerical": {
+        "returned": 2,
+        "correct": 1,
+        "unsupported": 1,
+        "expected": 2,
+        "covered": 1
+      },
+      "latencyMs": null,
+      "tokens": null,
+      "note": "Fixed input, not a timed generation baseline."
+    },
+    {
+      "variant": "rac-inspired",
+      "case": "new-error-in-repair",
+      "protocolPassed": null,
+      "numerical": {
+        "returned": 2,
+        "correct": 2,
+        "unsupported": 0,
+        "expected": 2,
+        "covered": 2
+      },
+      "result": {
+        "draft": "The adapter used two datasets. [1] The adapter used four architectures.",
+        "status": "repaired",
+        "verificationStatus": "REPAIRED_VERIFIED",
+        "factCheck": {
+          "passed": true,
+          "schemaValid": true,
+          "claims": [
+            {
+              "sentence": "The adapter used two datasets. [1]",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            },
+            {
+              "sentence": "The adapter used four architectures.",
+              "supported": true,
+              "evidenceIndexes": [
+                1
+              ]
+            }
+          ],
+          "atomicClaims": [
+            {
+              "id": "s1c1",
+              "sentenceId": 1,
+              "text": "The adapter used two datasets.",
+              "span": {
+                "start": 0,
+                "end": 30,
+                "text": "The adapter used two datasets."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used two datasets."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            },
+            {
+              "id": "s2c1",
+              "sentenceId": 2,
+              "text": "The adapter used four architectures.",
+              "span": {
+                "start": 35,
+                "end": 71,
+                "text": "The adapter used four architectures."
+              },
+              "verdict": "SUPPORTED",
+              "supporting": [
+                {
+                  "index": 1,
+                  "quote": "The adapter used four architectures."
+                }
+              ],
+              "contradicting": [],
+              "missingInformation": [],
+              "temporalValidity": "UNKNOWN",
+              "scope": {
+                "time": null,
+                "place": null
+              },
+              "recommendedAction": "PRESERVE"
+            }
+          ],
+          "verdict": "Claims supported by quoted evidence and model assessment",
+          "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+          "sourceConflicts": []
+        },
+        "retrievalMode": "hybrid",
+        "citations": [
+          {
+            "index": 1,
+            "documentId": "results",
+            "source": "manuscript-results.txt",
+            "version": "sha256:6353f68a888b5a18f371e49b65d6a655f212b994fa93b9de6b75bb8b948ecfc8",
+            "chunkIndex": 0,
+            "excerpt": "The adapter used two datasets. The adapter used four architectures. Quantitative accuracy was not reported."
+          }
+        ],
+        "attempts": 2,
+        "durationMs": 10134,
+        "correction": {
+          "original": "The adapter used five datasets. The adapter used four architectures.",
+          "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+          "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes."
+        },
+        "repairHistory": [
+          {
+            "original": "The adapter used five datasets. The adapter used four architectures.",
+            "revised": "The adapter used two datasets. [1] The adapter used four architectures.",
+            "accepted": true,
+            "reason": "Changed a factual value, entity or negation, preserved supported content, and checked the revision against exact source quotes.",
+            "before": {
+              "passed": false,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used five datasets.",
+                  "supported": false,
+                  "evidenceIndexes": []
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used five datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 31,
+                    "text": "The adapter used five datasets."
+                  },
+                  "verdict": "CONTRADICTED",
+                  "supporting": [],
+                  "contradicting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "REPAIR"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 32,
+                    "end": 68,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Unresolved factual claims",
+              "evidence": "s1c1 · CONTRADICTED: The adapter used five datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "after": {
+              "passed": true,
+              "schemaValid": true,
+              "claims": [
+                {
+                  "sentence": "The adapter used two datasets. [1]",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                },
+                {
+                  "sentence": "The adapter used four architectures.",
+                  "supported": true,
+                  "evidenceIndexes": [
+                    1
+                  ]
+                }
+              ],
+              "atomicClaims": [
+                {
+                  "id": "s1c1",
+                  "sentenceId": 1,
+                  "text": "The adapter used two datasets.",
+                  "span": {
+                    "start": 0,
+                    "end": 30,
+                    "text": "The adapter used two datasets."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used two datasets."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                },
+                {
+                  "id": "s2c1",
+                  "sentenceId": 2,
+                  "text": "The adapter used four architectures.",
+                  "span": {
+                    "start": 35,
+                    "end": 71,
+                    "text": "The adapter used four architectures."
+                  },
+                  "verdict": "SUPPORTED",
+                  "supporting": [
+                    {
+                      "index": 1,
+                      "quote": "The adapter used four architectures."
+                    }
+                  ],
+                  "contradicting": [],
+                  "missingInformation": [],
+                  "temporalValidity": "UNKNOWN",
+                  "scope": {
+                    "time": null,
+                    "place": null
+                  },
+                  "recommendedAction": "PRESERVE"
+                }
+              ],
+              "verdict": "Claims supported by quoted evidence and model assessment",
+              "evidence": "s1c1 · SUPPORTED: The adapter used two datasets.\ns2c1 · SUPPORTED: The adapter used four architectures.",
+              "sourceConflicts": []
+            },
+            "edits": [
+              {
+                "claimId": "s1c1",
+                "original": "The adapter used five datasets.",
+                "replacement": "The adapter used two datasets.",
+                "evidence": [
+                  {
+                    "index": 1,
+                    "quote": "The adapter used two datasets."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "retrievalRounds": 1,
+        "claimsChecked": 2,
+        "claimsSupported": 2,
+        "claimsUnresolved": 0,
+        "modelUsage": [
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 3093,
+            "success": true,
+            "promptTokens": 276,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2382,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 144
+          },
+          {
+            "stage": "Claim repair",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1344,
+            "success": true,
+            "promptTokens": 508,
+            "completionTokens": 44
+          },
+          {
+            "stage": "Atomic fact decomposition",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 1057,
+            "success": true,
+            "promptTokens": 279,
+            "completionTokens": 74
+          },
+          {
+            "stage": "Evidence verification",
+            "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "durationMs": 2251,
+            "success": true,
+            "promptTokens": 897,
+            "completionTokens": 141
+          }
+        ],
+        "promptVersion": "rac-inspired-v11-document-scope",
+        "apiCost": null,
+        "sourceRevision": 1,
+        "sourcesChanged": false,
+        "cache": {
+          "kind": "miss",
+          "reason": "no_candidate",
+          "lookupMs": 0,
+          "policyVersion": "semantic-v2-numeric-units"
+        }
+      },
+      "searches": 1,
+      "latencyMs": 10135,
+      "repairNeeded": true,
+      "repairSucceeded": true,
+      "unnecessaryRepair": false,
+      "providerFailure": false,
+      "tokenUsageComplete": true,
+      "reportedTokens": 3334
+    }
+  ]
+}

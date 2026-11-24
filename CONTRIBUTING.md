@@ -4,6 +4,8 @@ Use Node.js 22.18+ and follow the README to start locally. Work on a branch, use
 
 Run lint, backend tests, frontend build/typecheck and relevant browser tests. Use `compose.test.yaml` and `npm run test:infra` for database/Redis changes. Never point tests at production.
 
+[TESTING.md](docs/TESTING.md) explains suite boundaries, synthetic fixtures and explicit test endpoints. The bounded `npm run test:load` workload and its thresholds are declared in [RELEASE_WORKLOAD.md](docs/RELEASE_WORKLOAD.md) before execution. Do not weaken failed assertions or relabel a skipped/live-blocked check as a pass. Record the candidate, actual results and reproduction steps.
+
 Describe the trigger, changed behavior and validation in pull requests. Include synthetic screenshots in both themes and on mobile for visual changes. Regression tests should demonstrate behavior, not mirror implementation details.
 
 Bug reports should include reproduction steps, browser/OS, expected behavior and sanitized errors. Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Never attach `.env` files, database exports or personal documents.
