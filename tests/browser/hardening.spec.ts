@@ -99,6 +99,7 @@ test('chat header returns to filtered history, preserves drafts and gives the co
   await page.getByRole('main').getByRole('button', { name: /Engineering policy review/ }).click();
   await expect(page.getByLabel('Ask your knowledge base')).toHaveValue('Keep this draft when returning to history');
   await expect(page.getByRole('button', { name: 'Back to chat history' })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   const bounds = await page.locator('.answer-text').boundingBox();
   if (info.project.name === 'desktop') { expect(bounds!.width).toBeGreaterThan(740); expect(bounds!.width).toBeLessThanOrEqual(800); }
   else expect(bounds!.width).toBeGreaterThan(320);

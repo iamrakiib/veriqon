@@ -2,6 +2,15 @@
 
 Prepared: 11 November 2026. Scope: current local working tree, not the hosted application.
 
+## Release gate follow-up: 24 November 2026
+
+- [PR #10](https://github.com/iamrakiib/veriqon/pull/10) contains the audited release. Its initial Linux CI run passed Docker installation/restart/restore acceptance but failed one mobile layout assertion: the conversation measured 363 px against a >365.2 px requirement at a 664 px viewport. The other 112 browser tests passed; three were intentionally skipped. The PR remains unmerged until both required checks pass.
+- The CI trace shows the mobile assistant status wrapping onto a second line. Reduced mobile header vertical padding from 8 px to 4 px per side, retaining button sizes and conversation width. The existing layout regression now waits for web fonts before measuring; its height threshold is unchanged.
+- Complete local browser rerun: **113 passed, zero failed, three intentional skips** (`data/mobile-height-browser-after.log`). Production build, subsequent type check and lint passed (`data/mobile-height-build.log`, `data/mobile-height-typecheck.log`, `data/mobile-height-lint.log`). CI must validate this exact follow-up commit on Linux.
+- Existing cloud environment validation and read-only Neon preflight passed: applied migration checksums 1–2 match, pgvector 0.8.0 is installed. Deployment must apply pending migrations 3–4 and verify persistence. Existing Render service uses integrated SQL processing on its free plan; this is not the separate always-on worker acceptance profile. No paid services will be created.
+
+Remaining release operations: pass protected PR checks, merge, deploy the approved commit to existing hosting, and record actual live checks. Independent factual evaluation, LIVE-002, dedicated worker/cloud lifecycle acceptance and long-running workload validation remain open.
+
 ## Release follow-up: 23 November 2026
 
 - The user authorized GitHub publication and connected deployments after checks pass. `main` now requires a pull request, an up-to-date branch and the `verify` / `docker-installation` checks; force pushes and deletion are disabled, including administrator bypass. No paid infrastructure has been authorized.

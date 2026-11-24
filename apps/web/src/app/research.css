@@ -1381,7 +1381,7 @@ nav {
     font-size: 10px;
   }
   .assistant-heading {
-    padding: 8px var(--page-gutter);
+    padding: 4px var(--page-gutter);
   }
   .chat-history-button { min-width: 44px; min-height: 44px; padding: 10px; }
   .chat-history-button span { display: none; }
