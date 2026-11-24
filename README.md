@@ -183,6 +183,8 @@ CI checks source publication safety, dependencies, backend/frontend behavior and
 
 ## Contribute
 
+Browse the [documentation index](docs/README.md) for architecture, operations, evaluation and milestone guides.
+
 Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and the [implementation plan](docs/IMPLEMENTATION_PLAN.md). Submit focused pull requests with reproducible tests. Keep credentials, account records and private documents out of commits and issues.
 
 Original code and synthetic research fixtures are [MIT licensed](LICENSE). Bundled fonts retain their licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).

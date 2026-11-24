@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises';
 const source={id:'policy',source:'policy.md',text:'One day.',chunkCount:1,version:'v2'};
 const result={draft:'One day. [1]',status:'supported',verificationStatus:'VERIFIED_UNCHANGED',factCheck:{passed:true,verdict:'Supported',evidence:'One day.',claims:[]},citations:[{index:1,documentId:'policy',source:'policy.md',version:'v2',chunkIndex:0,excerpt:'One day.'}],durationMs:100,attempts:1,correction:null};
 async function setup(page:Page){
+  await page.route('**/api/rag/corrections',r=>r.fulfill({json:{records:[],reviewedAnswers:0,truncated:false}}));
   await page.route('**/api/auth/status',r=>r.fulfill({json:{needsSetup:false,registrationEnabled:true}}));
   await page.route('**/api/auth/me',r=>r.fulfill({json:{user:{id:'fixture',email:'test@example.test',name:'Test',role:'member'}}}));
   await page.route('**/api/rag/docs',r=>r.fulfill({json:[source]}));

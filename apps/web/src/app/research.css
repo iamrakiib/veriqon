@@ -234,6 +234,9 @@ nav {
   margin-left: auto;
   margin-right: auto;
 }
+.route-content > .search-field {
+  flex: 0 0 auto;
+}
 .section-heading {
   margin-bottom: 24px;
   align-items: center;
@@ -816,7 +819,7 @@ nav {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
-  margin: 24px 0 32px;
+  margin: 24px auto 32px;
 }
 .metric {
   border: 0;
@@ -1581,8 +1584,10 @@ nav {
 .conflict-actions-popover button:hover { background: var(--hover); }
 .conflict-actions-popover button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 600px) {
-  .conflict-records .conflict-refresh { width: 36px; min-width: 36px; padding: 0; justify-content: center; }
+  .view-toolbar .conflict-refresh { width: 36px; min-width: 36px; padding: 0; justify-content: center; }
   .conflict-refresh > span { display: none; }
+  .correction-toolbar > .muted { flex-basis: 100%; }
+  .correction-toolbar > .filter-select { flex: 1; min-width: 0; }
 }
 .conflict-clear-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .conflict-clear-actions .destructive { color: var(--danger); border-color: var(--danger); }

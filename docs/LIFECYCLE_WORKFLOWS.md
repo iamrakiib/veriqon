@@ -30,6 +30,7 @@ Upload polling is cancelled when the library closes. Workspace refreshes do not 
 - `GET /rag/messages/:id/version-history?limit=20&cursor=...`, newest first. Cursor is bound to the answer and uses its immutable sequence, avoiding same-timestamp gaps.
 - `GET /rag/messages/:id/revalidation-history?limit=20&cursor=...`.
 - `POST /rag/messages/:id/revalidate`, `GET /rag/revalidations` (latest 100 jobs).
+- `GET /rag/corrections` lists visible repair attempts among the latest 200 saved answer assessments. `POST /rag/corrections/archive` accepts 1–200 `{id, assessmentId}` references returned by that endpoint. It archives only those exact assessments for the signed-in account; stale batches fail atomically. Saved answers, immutable versions and background jobs remain intact. A new assessment has a different hash and remains visible. The toolbar's **Correction actions → Clear visible history** command applies the current filter and requires confirmation.
 
 History pages return `{items, nextCursor}`; page size is 1-50. Treat cursors as opaque. Foreign-account objects return 404. Metadata/review writes use revision checks and share the account's existing 20-work-operations/minute limit and concurrency admission with queries. Invalid revisions must not be retried blindly. Requests require the normal session and mutation origin/header protection.
 

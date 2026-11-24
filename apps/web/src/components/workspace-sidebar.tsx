@@ -31,7 +31,6 @@ type Props = {
   setMenuOpen: (value: boolean) => void;
   setSettings: (value: boolean) => void;
   documentCount: number;
-  repairCount: number;
   pending: boolean;
   historyLoading: boolean;
   historyError: string;
@@ -56,7 +55,6 @@ export function WorkspaceSidebar({
   setMenuOpen,
   setSettings,
   documentCount,
-  repairCount,
   pending,
   historyLoading,
   historyError,
@@ -134,9 +132,6 @@ export function WorkspaceSidebar({
               <span>{item.title}</span>
               {item.id === "knowledge" && (
                 <span className="nav-count">{documentCount}</span>
-              )}
-              {item.id === "corrections" && repairCount > 0 && (
-                <span className="nav-count">{repairCount}</span>
               )}
             </button>
           ))}

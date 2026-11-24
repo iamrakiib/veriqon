@@ -10,7 +10,7 @@ Include the affected revision, reproduction with synthetic data, expected/actual
 
 ## Current boundaries
 
-The [9 November local security/reliability audit](docs/security-reliability-audit.md) records tested fixes and remaining risks. Refresh attempts have a separate shared limit; registration and its first session commit together. Uncertainty wording cannot exempt an attached assertion from verification, and model-only precedence cannot silently resolve a source conflict. These safeguards do not constitute a security certification.
+The [historical security/reliability reviews](docs/HISTORICAL_REVIEWS.md) retain earlier test evidence; [release readiness](docs/RELEASE_READINESS.md) records current limits. Refresh attempts have a separate shared limit; registration and its first session commit together. Uncertainty wording cannot exempt an attached assertion from verification, and model-only precedence cannot silently resolve a source conflict. These safeguards do not constitute a security certification.
 
 - Browser requests bind the displayed account to the authenticated session. An account switch in another tab cannot silently replay a private read/write as the new account. This consistency header never replaces server-side authorization.
 - Upload admission runs before multipart buffering, with per-process/per-account concurrency bounds and a receiving deadline. Production parsing has a separate heap/deadline, but is not an OS sandbox. Deployment-level connection limits and malware scanning remain separate controls. History responses are bounded and paginated; total retention is not yet bounded.

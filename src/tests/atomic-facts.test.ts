@@ -7,6 +7,7 @@ import { RagService } from '../rag/rag.service';
 import { VectorStoreService } from '../vector-store/vector-store.service';
 import { answerSentences } from '../rag/verification';
 import { HttpException } from '@nestjs/common';
+import { evidenceReferences, resolveAssessmentReferences } from '../rag/evidence-references';
 const draft = 'The adapter used five datasets and four architectures.';
 const docs = [{ id: 'paper', source: 'paper.docx', version: 'approved-v2', chunkIndex: 0, text: 'The adapter used two datasets and four architectures.' }];
 const plan = { sentences: [{ id: 1, kind: 'FACTUAL', claims: [{ text: 'The adapter used five datasets.', span: 'The adapter used five datasets' }, { text: 'The adapter used four architectures.', span: 'four architectures' }] }] };
@@ -354,7 +355,7 @@ async function controlledCheck(responses: unknown[], draft = simpleDraft) {
     const rag = new RagService({ revision: async () => 1, search: async () => simpleDocs } as unknown as VectorStoreService);
     rag.generateAnswer = async () => draft;
     Object.defineProperty(rag, 'client', { value: { chat: { completions: { create: async (body: { messages: { content: string }[] }) => {
-      requests.push({ stageInput: JSON.parse(body.messages[1].content) });
+      requests.push({ stageInput: JSON.parse(body.messages.at(-1)!.content) });
       assert.ok(responses.length, 'No unbounded contract retries');
       const response = responses.shift(); if (response instanceof Error) throw response;
       return { model: 'controlled-fixture', choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(response) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } };
@@ -396,6 +397,43 @@ test('a quote mismatch identifies the claim and passage for one strict retry wit
   const failed = await controlledCheck([simplePlan, invalid, invalid]);
   assert.equal(failed.result.verificationStatus, 'VERIFICATION_FAILED'); assert.equal(failed.result.factCheck.passed, false);
   assert.equal(failed.requests.length, 3);
+});
+
+test('quote contract retry can select an exact source reference without copying or inventing evidence', async () => {
+  const invalid = { ...simpleAssessment, claims: [{ ...simpleAssessment.claims[0], supporting: [{ index: 1, quote: 'A paraphrase that is not source text.' }] }] };
+  const reference = { ...simpleAssessment, claims: [{ ...simpleAssessment.claims[0], supporting: [{ index: 1, quoteId: '1:1' }] }] };
+  const { result, requests } = await controlledCheck([simplePlan, invalid, reference]);
+  assert.equal(result.verificationStatus, 'VERIFIED_UNCHANGED');
+  assert.equal(result.repairHistory.length, 0, 'Repairing the assessment contract is not a factual repair');
+  assert.equal(result.factCheck.atomicClaims![0].supporting[0].quote, simpleDocs[0].text);
+  assert.equal(requests.length, 3, 'No additional provider calls beyond the existing retry budget');
+  const evidence = requests[2].stageInput.evidence as { segments: { quoteId: string; text: string }[] }[];
+  assert.deepEqual(evidence[0].segments, [{ quoteId: '1:1', text: simpleDocs[0].text }]);
+  for (const quote of [{ index: 1, quoteId: '1:999' }, { index: 2, quoteId: '1:1' }, { index: 1, quoteId: '1:1', quote: 'Injected quote' }]) {
+    const failed = await controlledCheck([simplePlan, invalid, { ...reference, claims: [{ ...reference.claims[0], supporting: [quote] }] }]);
+    assert.equal(failed.result.verificationStatus, 'VERIFICATION_FAILED');
+    assert.equal(failed.result.factCheck.passed, false);
+  }
+});
+
+test('source reference selection does not bypass quantity checks and retains bounded exact versioned segments', () => {
+  const references = evidenceReferences(docs);
+  const factPlan = parseFactPlan(JSON.stringify(plan), draft)!;
+  const raw = JSON.stringify({ conflicts: [], claims: plan.sentences[0].claims.map((_, i) => ({
+    id: `s1c${i + 1}`, verdict: 'SUPPORTED', supporting: [{ index: 1, quoteId: '1:1' }], contradicting: [],
+    missingInformation: [], temporalValidity: 'UNKNOWN', scope: { time: null, place: null },
+  })) });
+  const check = parseFactAssessments(resolveAssessmentReferences(raw, references), draft, docs, factPlan, true);
+  assert.equal(check.passed, false);
+  assert.equal(check.atomicClaims![0].verdict, 'INSUFFICIENT_EVIDENCE', 'An exact quote with two datasets cannot establish five');
+  assert.equal(check.atomicClaims![1].verdict, 'SUPPORTED');
+  assert.equal(references[0].version, docs[0].version);
+  const text = 'Heading\n' + 'long table value '.repeat(350) + '\nFinal result: 4.5 milliseconds.';
+  const long = evidenceReferences([{ ...docs[0], text }])[0];
+  assert.ok(long.segments.length > 2);
+  assert.equal(new Set(long.segments.map(s => s.quoteId)).size, long.segments.length);
+  assert.ok(long.segments.every(s => s.text.length <= 2000 && text.includes(s.text)));
+  assert.equal(long.segments.map(s => s.text).join(' ').replace(/\s+/g, ' '), text.replace(/\s+/g, ' '));
 });
 
 test('a supported historical claim with an incomplete quote gets one bounded evidence-contract retry', async () => {
