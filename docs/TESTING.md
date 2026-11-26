@@ -74,6 +74,8 @@ Conflict Center regressions: `npx playwright test tests/browser/conflict-actions
 
 ## Research review and release decision
 
+Chat usability regressions: `npx playwright test tests/browser/usability.spec.ts --workers=1`. These compare light/dark geometry across six routes at 360, 390, 768 and 1440 px, compare sidebar/history question searches, and exercise confirmed deletion, cancellation, server failure and reload persistence on desktop/mobile. Database tests cover owner isolation, cascade cleanup, retained documents/review decisions, stale-tab rejection and deletion during active revalidation. The real-stack lifecycle test also deletes its synthetic conversation after recovery and verifies retained source decisions.
+
 Live reports include model usage when supplied, exact answers/evidence and dataset hashes. Generate independent review templates with `scripts/review-research.mjs`; reviewers must inspect all factual propositions and citation support. Reviewer independence is not something the code can certify. Missing token/cost labels remain unknown.
 
 Cloud checks in [DEPLOYMENT.md](DEPLOYMENT.md), representative independent evaluation, long-duration capacity/soak and operational alert/rollback drills remain additional gates. Keep local release checks and public-cloud readiness separate in [RELEASE_READINESS.md](RELEASE_READINESS.md). Do not promote a candidate merely because its frontend builds.

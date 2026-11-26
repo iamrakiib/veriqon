@@ -1,5 +1,14 @@
 # RAG bug ledger
 
+## Usability follow-up (26 November 2026)
+
+- **UI-THEME-001 — fixed:** the dark-theme selector repeated layout tokens with higher specificity than responsive `:root` overrides. Phones used 32 px page gutters in dark mode and 16 px in light mode. Shared layout tokens now have one theme-independent selector; six-route geometry regressions pass at four widths.
+- **UI-HISTORY-001 — fixed:** sidebar search inspected only titles while Chat history also searched loaded question text. Both now use the same predicate and loaded history. The sidebar is labelled Recent chats; this does not add full-account search.
+- **CHAT-DELETE-001 — implemented and regression-tested:** conversation deletion had no API or interface. Owner-scoped transactional deletion, confirmation menus, error retention, stale-tab tombstones and in-flight completion guards preserve documents/source decisions without resurrecting deleted answers. Exact test results are in the latest implementation-plan checkpoint.
+- **LIVE-PROVIDER-001 — blocked:** three synthetic real-provider fact-check attempts on 26 November were rejected with HTTP 401 before decomposition. No factual verdict was produced. Replace the configured OpenRouter key before live evaluation. This is separate from LIVE-002, which remains unverified after its numeric/unit guard change.
+
+The following dated sections retain historical results. Current publication and dependency status are in [release readiness](RELEASE_READINESS.md); historical open advisories or undeployed checkpoints do not override newer evidence.
+
 ## Milestone 7 continuation (23 November 2026)
 
 - **LIVE-001: reproduced failure fixed.** The disclosure vocabulary excluded inference latency, and generic retry feedback repeated the rejection. A second defect asked the model to assess zero facts and it invented a claim ID. Explicit uncertainty eligibility, actionable retry feedback, a narrow latency disclosure rule and deterministic empty assessments for a single source version fix this path. Distinct-version conflict checks remain active. Disclosures now receive one bounded evidence expansion. Two initial regressions failed; four added final regressions pass in the 184-pass backend suite. The final real HTTP case passes with `INSUFFICIENT_EVIDENCE`, two retrieval rounds and no repair.

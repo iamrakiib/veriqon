@@ -1,21 +1,23 @@
 # Release readiness
 
-Updated 25 November 2026. Veriqon has a deployed research application and tested local workflows. It is not certified bug-free, independently proven factually accurate, or covered by an availability SLA.
+Updated 26 November 2026. Veriqon has a deployed research application and tested local workflows. It is not certified bug-free, independently proven factually accurate, or covered by an availability SLA.
 
 ## Published baseline
 
-[PR #10](https://github.com/iamrakiib/veriqon/pull/10) merged commit `febdf8bfced91e8e03c474015a00dc5b9a828458`. Required GitHub `verify` and `docker-installation` checks passed. Both hosting services were verified on that commit:
+[PR #11](https://github.com/iamrakiib/veriqon/pull/11) merged commit `9ea7859a96d7da74f288569e8207e0d77837ccfb`. Required GitHub `verify` and `docker-installation` checks passed, including container recovery/backup/restore. Both hosting services were verified on that commit:
 
-- [Frontend](https://veriqon-two.vercel.app): Vercel deployment `dpl_8zdbwix9hRMqBjknyETFx4bS2AA6`, READY.
-- [API](https://veriqon-api.onrender.com): Render deployment `dep-dc2kjr59fdbs73fvlhl0`, live.
+- [Frontend](https://veriqon-two.vercel.app): Vercel deployment `dpl_GJWMh6zFAiKAgSnv24A8ffSA2tiE`, READY.
+- [API](https://veriqon-api.onrender.com): Render deployment `dep-dc2vaqetlv9c738rto2g`, live.
 - Neon: pgvector 0.8.0, migrations 1–4 applied. A predeployment backup was restored into an isolated local database.
-- Eleven live smoke assertions passed with a separate synthetic account: registration/recovery codes, login/cookie protection, unauthenticated rejection, PDF upload/indexing, original-file hash, an evidence-grounded answer with a versioned citation, and saved conversation persistence. That one real-provider answer took 3,830 ms; it is not an average or accuracy benchmark.
+- Eighteen live follow-up assertions passed with the existing synthetic account: login, private cache controls, original PDF hash and conversation persistence, desktop/mobile history/analytics/Corrections in both themes, no browser errors and a versioned v17 answer. That one real-provider answer took 7,071 ms; it is not an average or accuracy benchmark. Initial registration/PDF-indexing acceptance was recorded with PR #10.
 
 The free Render service runs integrated SQL-backed background processing. It is **not** the separate always-on API/worker/BullMQ profile in the deployment Blueprint. Vercel was published through the CLI; automatic Git repository linking remains unconfigured. Main is protected against deletion/force-push and requires pull requests plus the two passing checks.
 
 ## Current follow-up
 
-The local follow-up fixes two reproduced layout defects, adds account-scoped Corrections archival, and tests exact-source references on the existing verifier contract retry. Its validation and publication state are recorded at the top of [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md); do not assume these changes are live merely because the baseline above is deployed.
+The current follow-up fixes theme-dependent mobile spacing and inconsistent sidebar/history search, adds confirmed conversation deletion, and guards deletion against stale tabs and running jobs. Its validation and publication state are recorded at the top of [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). Hosting results for the eventual follow-up commit belong in its protected PR release record.
+
+On 26 November three real-provider fact-check attempts were rejected with HTTP 401 before decomposition. A valid OpenRouter key is required for further live AI evaluation; this is not evidence that documents lack an answer or that factual verification passed. The existing deployment evidence above is historical, not a guarantee of current provider availability.
 
 A deployed answer at 08:34 UTC on 24 November failed because the model returned a supporting quote that did not match the cited passage, including after its bounded retry. All four provider calls completed successfully. This was an invalid assessment contract, not a provider outage or a finding that the document lacked the answer. Two later observed answers passed the model-based verification contract; these observations do not establish general accuracy.
 

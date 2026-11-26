@@ -83,4 +83,16 @@ test('real lifecycle: register, queued upload, conflict review, automatic correc
   expect((await page.request.get('/api/auth/me')).status()).toBe(401);
   await page.reload();await page.getByLabel('Email address',{exact:true}).fill('owner@browser.test');await page.getByLabel('Password',{exact:true}).fill(password+'new');await page.getByRole('button',{name:'Sign in',exact:true}).click();
   await expect(page.locator('.app-shell')).toBeVisible();expect((await page.request.get(`/api/rag/messages/${answer.messageId}/version-history`).then(r=>r.json())).items).toHaveLength(versions.items.length);
+  // Delete through the real UI/API after recovery; preserve source authority decisions.
+  await page.getByRole('button',{name:'Chat history',exact:true}).click();
+  await page.getByRole('main').getByLabel(/Chat actions for/).first().click();
+  await page.getByRole('button',{name:'Delete chat',exact:true}).click();
+  await page.getByRole('dialog',{name:'Delete chat?'}).getByRole('button',{name:'Delete chat',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'Delete chat?'})).not.toBeVisible();
+  expect((await page.request.get(`/api/rag/messages/${answer.messageId}/version-history`)).status()).toBe(404);
+  expect((await page.request.get('/api/rag/conversations').then(r=>r.json()))).toHaveLength(0);
+  expect((await page.request.get('/api/rag/docs').then(r=>r.json()))).toHaveLength(2);
+  const retained=await page.request.get('/api/rag/conflicts').then(r=>r.json());
+  expect(retained.records.some((c:{resolution?:{action:string}})=>c.resolution?.action==='PREFER_SOURCE')).toBe(true);
+  expect(retained.records.every((c:{messageId?:string})=>!c.messageId)).toBe(true);
 });

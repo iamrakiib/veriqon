@@ -240,6 +240,8 @@ export class DatabaseService extends KnowledgeStore implements OnModuleInit {
   async beginMessage(ownerId: string, conversationId: string, question: string, id: string = randomUUID()) {
     const now = Date.now();
     await this.transaction(async () => {
+      if (this.dialect === 'postgresql') await this.get('SELECT id FROM users WHERE id=? FOR UPDATE', ownerId);
+      if (await this.get("SELECT id FROM knowledge_events WHERE owner_id=? AND entity_id=? AND action='CONVERSATION_DELETED' LIMIT 1", ownerId, conversationId)) throw new ConflictException('This chat was deleted. Start a new chat.');
       await this.run(`INSERT INTO conversations VALUES(?,?,?,?) ON CONFLICT(owner_id,id) DO UPDATE SET updated_at=excluded.updated_at`, ownerId, conversationId, question.slice(0, 80), now);
       const inserted = await this.run('INSERT INTO messages(owner_id,conversation_id,id,question,created_at) VALUES(?,?,?,?,?) ON CONFLICT(owner_id,id) DO NOTHING', ownerId, conversationId, id, question, now);
       if (!inserted.changes) throw new ConflictException('This request ID already exists. Refresh saved history before retrying.');
@@ -271,7 +273,9 @@ export class DatabaseService extends KnowledgeStore implements OnModuleInit {
   }
   async finishMessage(ownerId: string, messageId: string, result?: unknown, error?: string) {
     await this.transaction(async () => {
-      await this.run('UPDATE messages SET result=?,error=? WHERE owner_id=? AND id=?', result === undefined ? null : JSON.stringify(result), error ?? null, ownerId, messageId);
+      if (this.dialect === 'postgresql') await this.get('SELECT id FROM users WHERE id=? FOR UPDATE', ownerId);
+      const updated = await this.run('UPDATE messages SET result=?,error=? WHERE owner_id=? AND id=?', result === undefined ? null : JSON.stringify(result), error ?? null, ownerId, messageId);
+      if (!updated.changes) return; // A late provider response must not recreate a deleted chat.
       if (result !== undefined) {
         await this.run('INSERT INTO answer_versions VALUES(?,?,0,?,?,?,?) ON CONFLICT(owner_id,message_id,sequence) DO NOTHING', ownerId, messageId, JSON.stringify(result), Number((result as any).sourceRevision || 0), 'Original answer', Date.now());
         await this.persistAnswerConflicts(ownerId, messageId, result);
@@ -360,6 +364,25 @@ export class DatabaseService extends KnowledgeStore implements OnModuleInit {
   async conversationMessages(ownerId: string, conversationId: string, before?: string) {
     if (!await this.get('SELECT id FROM conversations WHERE owner_id=? AND id=?', ownerId, conversationId)) throw new NotFoundException('Conversation not found.');
     return this.messagePage(ownerId, conversationId, before, 30, await this.revision(ownerId));
+  }
+  async deleteConversation(ownerId: string, conversationId: string) {
+    return this.transaction(async () => {
+      // Same lock order as revalidation commits: deleting a chat fences queued/running jobs.
+      if (this.dialect === 'postgresql') await this.get('SELECT id FROM users WHERE id=? FOR UPDATE', ownerId);
+      if (!await this.get('SELECT id FROM conversations WHERE owner_id=? AND id=?', ownerId, conversationId)) throw new NotFoundException('Conversation not found.');
+      await this.run('DELETE FROM knowledge_events WHERE owner_id=? AND entity_id IN (SELECT id FROM messages WHERE owner_id=? AND conversation_id=?)', ownerId, ownerId, conversationId);
+      // Source decisions are independent of chat retention. Keep their evidence/history,
+      // but remove deleted question text and the now-invalid affected-answer link in one SQL write.
+      const payload = this.dialect === 'postgresql'
+        ? `(payload::jsonb || '{"messageId":"","conversationId":"","question":""}'::jsonb)::text`
+        : "json_set(payload,'$.messageId','','$.conversationId','','$.question','')";
+      const conversation = this.dialect === 'postgresql' ? "payload::jsonb->>'conversationId'" : "json_extract(payload,'$.conversationId')";
+      await this.run(`UPDATE evidence_conflicts SET payload=${payload} WHERE owner_id=? AND ${conversation}=?`, ownerId, conversationId);
+      await this.run('DELETE FROM conversations WHERE owner_id=? AND id=?', ownerId, conversationId);
+      await this.auditKnowledge(ownerId, conversationId, 'CONVERSATION_DELETED', 'Chat deleted by its owner.', {});
+      // Foreign keys remove messages, answer versions and revalidation jobs atomically.
+      return { success: true };
+    });
   }
   async conversationContext(ownerId: string, conversationId: string): Promise<ConversationContext | undefined> {
     const rows = await this.all('SELECT question,result FROM messages WHERE owner_id=? AND conversation_id=? AND result IS NOT NULL ORDER BY created_at DESC,id DESC LIMIT 20', ownerId, conversationId);

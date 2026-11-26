@@ -139,7 +139,7 @@ export function WorkspaceSidebar({
       </div>
       <div className="nav-group conversations">
         <div className="nav-label-row">
-          <span className="nav-label">CHAT HISTORY</span>
+          <span className="nav-label">RECENT CHATS</span>
           <button
             className="icon-button"
             aria-label="Refresh chat history"

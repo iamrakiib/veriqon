@@ -65,6 +65,39 @@ test('correction history archives exact owner assessments atomically without del
   } finally { await f.close(); }
 });
 
+test('conversation deletion is owner-scoped and fences answer and revalidation writes', async () => {
+  const f = await fixture();
+  try {
+    const version = await f.doc('policy', 'One day.');
+    const id = await f.db.beginMessage('a', 'delete-chat', 'Days?');
+    await f.db.finishMessage('a', id, { draft: 'One day.', sourceRevision: 1 });
+    const other = await f.db.beginMessage('b', 'delete-chat', 'Private question');
+    await f.db.finishMessage('b', other, { draft: 'Private answer.' });
+    await f.db.run('INSERT INTO revalidation_jobs(id,owner_id,message_id,target_revision,next_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?)', 'delete-job','a',id,1,0,0,0);
+    await f.db.auditKnowledge('a', id, 'ANSWER_REVALIDATED', 'Recorded assessment', { draft: 'One day.' });
+    await f.db.persistConflict('a', { id:'retained-decision', messageId:id, conversationId:'delete-chat', question:'Days?', detectedAt:new Date().toISOString(), claim:'Days disagree', status:'UNRESOLVED', scope:{time:null,place:null}, temporalValidity:'UNKNOWN', reason:'Source disagreement', supporting:[{index:1,documentId:'policy',source:'policy.txt',version,chunkIndex:0,excerpt:'One day.',quote:'One day.'}], contradicting:[] });
+    await f.db.run("UPDATE evidence_conflicts SET status='RESOLVED',resolution=? WHERE owner_id=? AND id=?", JSON.stringify({action:'PREFER_SOURCE',preferredDocumentId:'policy'}),'a','retained-decision');
+    const revision = await f.db.revision('a');
+    await assert.rejects(f.db.deleteConversation('b', 'missing-chat'), /not found/);
+    await f.db.deleteConversation('a', 'delete-chat');
+    assert.equal((await f.db.conversations('a')).length, 0);
+    assert.equal((await f.db.conversations('b')).length, 1);
+    for (const table of ['messages','answer_versions','revalidation_jobs']) assert.equal(Number((await f.db.get(`SELECT COUNT(*) AS n FROM ${table} WHERE owner_id=?`, 'a'))!.n), 0);
+    assert.equal((await f.db.knowledgeEvents('a', id)).length, 0);
+    assert.equal(await f.db.revision('a'), revision);
+    assert.ok(await f.db.get('SELECT id FROM documents WHERE owner_id=? AND id=?', 'a','policy'));
+    const conflict = (await f.db.conflictRecords('a')).records[0];
+    assert.equal(conflict.messageId, ''); assert.equal(conflict.question, '');
+    assert.equal(conflict.resolution.action, 'PREFER_SOURCE');
+    await assert.rejects(f.db.savedAnswer('a', id), /not found/);
+    await assert.rejects(f.db.beginMessage('a', 'delete-chat', 'Stale browser tab retry'), /chat was deleted/);
+    const pending = await f.db.beginMessage('a', 'pending-chat', 'Still running');
+    await f.db.deleteConversation('a', 'pending-chat');
+    await f.db.finishMessage('a', pending, { draft: 'Late provider response.' });
+    assert.equal(Number((await f.db.get('SELECT COUNT(*) AS n FROM answer_versions WHERE owner_id=?', 'a'))!.n), 0);
+  } finally { await f.close(); }
+});
+
 test('metadata rejects invalid dates, cross-owner sources, lost updates and supersession cycles', async () => {
   const f = await fixture();
   try {

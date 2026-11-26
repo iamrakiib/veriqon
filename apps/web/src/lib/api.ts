@@ -139,13 +139,13 @@ export async function request<T>(
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message = data?.message;
-      throw new Error(
+      throw Object.assign(new Error(
         Array.isArray(message)
           ? message.join(". ")
           : typeof message === "string"
             ? message
             : "The API is unavailable. Check that the NestJS server is running.",
-      );
+      ), { status: response.status });
     }
     if (data === null)
       throw new Error(
@@ -160,7 +160,7 @@ export async function request<T>(
       throw new Error(
         path === "query"
           ? "The answer timed out. Please retry, or select a faster model in the server configuration."
-          : "The request timed out. Refresh the library before retrying an upload.",
+          : "The request timed out. Refresh this view before retrying.",
       );
     if (error instanceof TypeError)
       throw new Error(
@@ -199,6 +199,7 @@ export const api = {
       body: JSON.stringify(document),
     }),
   conversations: (before?: string) => request<Conversation[]>(`conversations${before ? `?before=${encodeURIComponent(before)}` : ""}`),
+  deleteConversation: (id: string) => request<{ success: boolean }>(`conversations/${encodeURIComponent(id)}`, { method: "DELETE" }),
   olderMessages: (id: string, before?: string) => request<{ messages: Message[]; olderMessagesCursor: string | null }>(`conversations/${encodeURIComponent(id)}/messages${before ? `?before=${encodeURIComponent(before)}` : ""}`),
   query: (query: string, conversationId?: string, messageId?: string) =>
     request<QueryResult>("query", {

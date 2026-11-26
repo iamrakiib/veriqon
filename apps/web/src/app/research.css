@@ -891,6 +891,14 @@ nav {
 .history-list {
   margin-top: 24px;
 }
+.history-entry { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
+.history-entry .history-row { flex: 1; min-width: 0; border-bottom: 0; }
+.conversation-actions { position: relative; flex: 0 0 auto; }
+.conversation-actions > summary { list-style: none; width: 40px; height: 40px; cursor: pointer; }
+.conversation-actions > summary::-webkit-details-marker { display: none; }
+.conversation-actions-popover { position: absolute; right: 0; top: calc(100% + 4px); z-index: 20; min-width: 164px; padding: 4px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
+.conversation-actions-popover button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 8px 12px; text-align: left; color: var(--danger); border-radius: var(--radius-sm); }
+.conversation-actions-popover button:hover { background: var(--hover); }
 .history-row {
   display: flex;
   align-items: center;

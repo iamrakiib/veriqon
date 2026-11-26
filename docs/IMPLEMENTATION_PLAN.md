@@ -1,6 +1,22 @@
 # Veriqon implementation and release plan
 
-Prepared: 11 November 2026. Updated: 25 November 2026. Current release evidence is below; subsequent dated entries retain their original scope.
+Prepared: 11 November 2026. Updated: 26 November 2026. Current release evidence is below; subsequent dated entries retain their original scope.
+
+## Chat usability and regression QA: 26 November 2026
+
+Baseline: protected [PR #11](https://github.com/iamrakiib/veriqon/pull/11), commit `9ea7859a96d7da74f288569e8207e0d77837ccfb`, passed required GitHub checks and was verified on Vercel/Render. Its live follow-up passed 18 assertions, including preserved PDF/conversation data, responsive Corrections/history/analytics and one real-provider v17 answer. This supersedes earlier pending-publication language below.
+
+- [x] Reproduced phone theme layout mismatch: dark-theme selector specificity overrode responsive shared spacing. Separated layout tokens from palette selectors. Exact geometry now matches across six routes at 360, 390, 768 and 1440 px.
+- [x] Reproduced inconsistent chat search: sidebar searched titles only. Sidebar and Chat history now search the same loaded titles/questions. Recent chats is the sidebar label; older records remain accessible through history pagination.
+- [x] Implemented the missing delete workflow: header/history overflow menus, explicit confirmation, preserved UI on request failure and reload persistence. Transactional owner-scoped deletion removes messages, versions and jobs; source documents/review decisions survive. Deleted question text and answer links are removed from retained conflicts. A tombstone and consistent user-lock order stop stale browser requests or late worker/provider completion from resurrecting deleted chats.
+- [x] Corrected Analytics' stale statement that no background scheduler exists; it directs users to the actual job status in Corrections.
+- [x] Backend/build: **191 passed, zero failed, seven infrastructure-only skips** (`data/qa-backend-final.log`). Focused auth/lifecycle suite: 23 passed. Seven controlled research scenarios passed; lint, production frontend build and subsequent type check passed.
+- [x] Focused UI before fixes: five failures / one intentional viewport skip. After fixes: five passed / one skip. Whole browser suite: **121 passed, three failed, four intentional skips**; two failures expected the superseded sidebar label, and the third timed out before slow development JS finished loading. Updated the label assertion; all six affected desktop/mobile authentication/history cases passed on rerun (`data/qa-browser-rerun.log`). The authentication assertion and timeout were unchanged. Required CI will rerun the complete suite on Linux.
+- [x] PostgreSQL/Redis: **82 passed, zero failed, one dedicated Redis-restart skip**, 83 total, 349.9 seconds (`data/qa-infra-final.log`). Includes owner isolation, deletion cleanup, in-flight revalidation deletion, standalone-worker checkpoint recovery and post-commit replay.
+- [x] Real frontend/API/PostgreSQL/Redis lifecycle: **one passed**, 56.6 seconds (`data/qa-lifecycle-final.log`), including automatic correction, recovery and UI deletion while documents/source decisions remain. Inference is scripted. Four release-tool tests passed; source/history audit found zero findings across 233 files and 599 Git objects.
+- [ ] Protected PR checks/publication and live UI verification remain in progress for this follow-up. Record their exact commit and hosting results on the PR release record.
+
+Three fresh real-provider synthetic fact checks were blocked by HTTP 401 before decomposition (`data/qa-live-facts.json`). No verdict, repair success, accuracy or latency improvement is inferred. A valid OpenRouter key is required to resume live evaluation. LIVE-002, independently reviewed factual evaluation, always-on hosted worker acceptance and longer mixed-workload tests remain open. No paid resources are authorized.
 
 ## Current follow-up: layout, correction history and quote recovery
 
