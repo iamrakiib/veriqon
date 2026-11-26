@@ -2,6 +2,23 @@
 
 Prepared: 11 November 2026. Updated: 26 November 2026. Current release evidence is below; subsequent dated entries retain their original scope.
 
+## Human QA and exploratory testing milestone (26 November 2026)
+
+Status: **IN PROGRESS**, following deployed PR #12 and documentation-only PR #13. Preserve completed development; discover failures in the UI before changing implementation. Evidence: [HUMAN_QA_BUG_REPORT.md](HUMAN_QA_BUG_REPORT.md).
+
+- [ ] Session 1: authentication, navigation, refresh, multiple tabs and interrupted operations.
+- [ ] Session 2: PDF, DOCX, TXT and Markdown ingestion, persistence and duplicates.
+- [ ] Session 3: chat, retrieval, citations, history and request interruption.
+- [ ] Session 4: factual verification and repair; live acceptance requires valid provider authentication.
+- [ ] Session 5: continuous correction/versioning; live-model acceptance has the same prerequisite.
+- [ ] Session 6: Conflict Center, decisions, correction history and dashboard metrics.
+- [ ] Session 7: desktop/tablet/mobile, keyboard access, themes and unusual sequences.
+- [ ] Session 8: deployed recovery/reliability and final release verification.
+
+Acceptance per session: record interactions, reproducible defects and evidence; fix confirmed root causes minimally; rerun the original workflow and relevant regressions. Distinguish deployed checks, controlled browser failures, local fixes and blocked workflows. Use synthetic QA data only; no destructive production stress tests or paid resources. Passing automated tests alone does not complete this milestone.
+
+27 November checkpoint: explored deployed authentication/navigation, supported and malformed uploads, saved citations/downloads, provider-failed chat, review/queue empty states and Analytics on desktop/phone. Discovered and locally fixed page Back/Forward/refresh behavior (HQA-001) and misleading completed-answer metric labeling (HQA-003). Each has a failing-before regression. Affected browser suite: **56 passed / two intentional skips / zero failures**; production build, TypeScript and lint passed. Real UI registration, cross-tab logout, cookie-loss handling, original-file SHA-256 and persisted failure states were checked. Exact scope and not-run cases are in the report. Provider authentication still blocks successful indexing/inference/correction (HQA-002); initial gateway HTTP 429 recovered but its cause remains unresolved (HQA-004). This milestone is not accepted; local fixes still need release/deployed retest.
+
 ## Chat usability and regression QA: 26 November 2026
 
 Baseline: protected [PR #11](https://github.com/iamrakiib/veriqon/pull/11), commit `9ea7859a96d7da74f288569e8207e0d77837ccfb`, passed required GitHub checks and was verified on Vercel/Render. Its live follow-up passed 18 assertions, including preserved PDF/conversation data, responsive Corrections/history/analytics and one real-provider v17 answer. This supersedes earlier pending-publication language below.

@@ -496,4 +496,9 @@ test('analytics distinguishes missing evidence from technical failures and confl
   await expect(count('Answers with unresolved conflicts')).toHaveText('1');
   await expect(count('Generation / verification failures')).toHaveText('1');
   await expect(count('Request failures')).toHaveText('1');
+  const recorded = page.locator('.metric').filter({ hasText: 'Recorded responses' });
+  await expect(recorded.locator('strong')).toHaveText('4');
+  await expect(recorded).toContainText('Includes abstentions and failures');
+  await expect(page.getByLabel('Recorded responses by date')).toBeVisible();
+  await expect(page.locator('.metric').filter({ hasText: 'Average response' })).toContainText('Noncached responses, including failures');
 });
