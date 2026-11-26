@@ -26,6 +26,7 @@ import {
 import { AnswerVersionHistory } from "./knowledge-controls";
 import { BrandMark } from "./ui";
 import { RepairDetails, VerificationBadge } from "./answer-details";
+import { ConversationActions } from "./conversation-actions";
 
 export type Message = {
   id: string;
@@ -35,6 +36,8 @@ export type Message = {
   createdAt: string;
 };
 export type Conversation = { id: string; title: string; messages: Message[]; cursor?: string; hasMoreConversations?: boolean; olderMessagesCursor?: string | null; newerMessagesOmitted?: boolean };
+export const matchesConversation = (c: Conversation, search: string) =>
+  `${c.title} ${c.messages.map(m => m.question).join(" ")}`.toLowerCase().includes(search.trim().toLowerCase());
 
 export function ChatPanel({
   query,
@@ -48,6 +51,7 @@ export function ChatPanel({
   onSend,
   onNew,
   onHistory,
+  onDelete,
   onCitation,
   hasOlderMessages,
   loadingOlderMessages,
@@ -67,6 +71,7 @@ export function ChatPanel({
   onSend: (question: string) => Promise<void>;
   onNew: () => void;
   onHistory: () => void;
+  onDelete?: () => void;
   onCitation: (citation: Citation) => void;
   hasOlderMessages?: boolean;
   loadingOlderMessages?: boolean;
@@ -195,6 +200,7 @@ export function ChatPanel({
         >
           <Plus size={18} />
         </button>
+        {onDelete && <ConversationActions disabled={pending} onDelete={onDelete} />}
       </div>
       <div
         className="chat-tabs"

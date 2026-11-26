@@ -222,6 +222,11 @@ export class RagController {
   @Get('conversations')
   conversations(@CurrentUser() user: Account, @Query() query: HistoryQueryDto) { return this.database.conversations(user.id, query.before); }
 
+  @Delete('conversations/:id')
+  deleteConversation(@CurrentUser() user: Account, @Param('id') id: string) {
+    return this.execute(user.id, () => this.database.deleteConversation(user.id, id));
+  }
+
   @Get('messages/:id')
   savedAnswer(@CurrentUser() user: Account, @Param('id') id: string, @Res({ passthrough: true }) response: Response) {
     response.setHeader('Cache-Control', 'private, no-store');

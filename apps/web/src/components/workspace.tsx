@@ -32,7 +32,7 @@ import { WorkspaceDialogs, type SourcePreview } from "./workspace-dialogs";
 import { ThemeToggle } from "./theme-provider";
 import { ConflictCenter } from "./conflict-center";
 import { DocumentLibrary } from "./document-library";
-import { ChatPanel, type Conversation, type Message } from "./chat-panel";
+import { ChatPanel, matchesConversation, type Conversation, type Message } from "./chat-panel";
 import { Modal } from "./ui";
 import { RepairDetails, VerificationBadge } from "./answer-details";
 import {
@@ -116,6 +116,8 @@ export function Workspace({
   const [historySearch, setHistorySearch] = useState("");
   const [conversationSearch, setConversationSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<Conversation | null>(null);
+  const [chatDeleteError, setChatDeleteError] = useState("");
   const [activeId, setActiveId] = useState("");
   const [focusedMessage, setFocusedMessage] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -136,7 +138,7 @@ export function Workspace({
   const visibleConversations = conversations.filter(
     (c) =>
       c.messages.length > 0 &&
-      c.title.toLowerCase().includes(historySearch.toLowerCase()),
+      matchesConversation(c, historySearch),
   );
   const connected = Boolean(health);
 
@@ -316,6 +318,27 @@ export function Workspace({
     if (conversations.length >= CONVERSATION_WINDOW) setHistoryWindowed(true);
     setActiveId(conversation.id);
     navigate("chat");
+  }
+  function confirmChatDeletion(chat: Conversation) {
+    setChatDeleteError(""); setChatToDelete(chat);
+  }
+  async function removeChat() {
+    if (!chatToDelete || busy || requestLock.current || paginationLock.current) return;
+    const id = chatToDelete.id;
+    requestLock.current = true; setBusy("delete-chat"); setChatDeleteError("");
+    try {
+      if (chatToDelete.messages.length) {
+        try { await api.deleteConversation(id); }
+        catch (e) { if ((e as { status?: number }).status !== 404) throw e; } // Already removed in another tab, or never saved after a rejected request.
+      }
+      const remaining = historyState.current.conversations.filter(c => c.id !== id);
+      if (!remaining.length) remaining.push(freshConversation());
+      setConversations(remaining);
+      setDrafts(items => { const next = { ...items }; delete next[id]; return next; });
+      if (historyState.current.activeId === id) { setActiveId(remaining[0].id); navigate("history"); }
+      setChatToDelete(null); setNotice("Chat deleted. Your documents and source review decisions are unchanged.");
+    } catch (e) { setChatDeleteError(e instanceof Error ? e.message : "Could not delete this chat. Please retry."); }
+    finally { requestLock.current = false; setBusy(""); }
   }
   async function send(question: string) {
     if (requestLock.current || paginationLock.current || historyLoading || historyError || active?.newerMessagesOmitted) return;
@@ -611,6 +634,7 @@ export function Workspace({
                 onSend={send}
                 onNew={newConversation}
                 onHistory={() => navigate("history")}
+                onDelete={active && (active.messages.length > 0 || drafts[activeId]) ? () => confirmChatDeletion(active) : undefined}
                 onCitation={inspectCitation}
                 hasOlderMessages={Boolean(active?.olderMessagesCursor)}
                 loadingOlderMessages={loadingOlder === activeId}
@@ -624,6 +648,8 @@ export function Workspace({
               <ConversationHistory
                 search={conversationSearch}
                 onSearch={setConversationSearch}
+                onDelete={confirmChatDeletion}
+                deleteDisabled={pending || Boolean(busy) || historyLoading || loadingMoreHistory || Boolean(loadingOlder)}
                 conversations={conversations}
                 loading={historyLoading}
                 error={historyError}
@@ -695,6 +721,10 @@ export function Workspace({
           </button>
         </div>
       )}
+      <Modal open={Boolean(chatToDelete)} onClose={() => { if (busy !== "delete-chat") setChatToDelete(null); }} title="Delete chat?" description={`Delete “${chatToDelete?.title || "this chat"}” and its questions, answers and answer versions? This cannot be undone. Uploaded documents and source review decisions are kept.`}>
+        {chatDeleteError && <p role="alert" className="inline-note">{chatDeleteError}</p>}
+        <div className="conflict-clear-actions"><button className="button secondary" disabled={busy === "delete-chat"} onClick={() => setChatToDelete(null)}>Cancel</button><button className="button secondary destructive" disabled={Boolean(busy)} onClick={() => void removeChat()}>{busy === "delete-chat" ? "Deleting…" : "Delete chat"}</button></div>
+      </Modal>
       <WorkspaceDialogs sources={documents}
         preview={preview}
         setPreview={setPreview}

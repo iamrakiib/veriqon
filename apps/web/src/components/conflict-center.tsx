@@ -207,7 +207,7 @@ export function ConflictCenter({
                           </span>
                           <code title={c.id}>{c.id.slice(0, 12)}</code>
                         </div>
-                        <p>Question: {c.question}</p>
+                        {c.question && <p>Question: {c.question}</p>}
                         <div className="conflict-sides">
                           {[
                             { name: "Supporting passage", refs: c.supporting },
@@ -286,6 +286,7 @@ export function ConflictCenter({
                           </div>
                         </dl>
                         <p className="conflict-reason">{c.reason}</p>
+                        {!c.messageId && <p className="scope-note">The original chat was deleted. Source evidence and review decisions are retained.</p>}
                         {c.messageId && onOpen && (
                           <button
                             className="text-button"

@@ -192,7 +192,7 @@ test('saved chat history reopens after reload with answers, citations and repair
   await page.getByText('Retrieved passages', { exact: true }).click();
   await expect(page.getByRole('button', { name: '[1] policy.md' })).toBeVisible();
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();
-  await expect(page.getByText('CHAT HISTORY', { exact: true })).toBeVisible();
+  await expect(page.getByText('RECENT CHATS', { exact: true })).toBeVisible();
   await page.locator('.conversation-link', { hasText: 'Remember this research question' }).click();
   await expect(page.locator('.user-message')).toHaveText('Remember this research question');
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Open navigation' }).click();

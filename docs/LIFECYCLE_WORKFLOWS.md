@@ -23,6 +23,7 @@ Upload polling is cancelled when the library closes. Workspace refreshes do not 
 
 ## API contracts
 
+- `DELETE /rag/conversations/:id` permanently deletes the owner's conversation, messages, answer versions and revalidation jobs in one transaction. Answer-level audit details are removed; a minimal deletion event prevents stale tabs from recreating the conversation. Source documents, source conflicts and review decisions remain, with deleted question text and affected-answer links removed. The **Chat actions → Delete chat** menu is available in Chat history and the active chat header, with confirmation and retryable failure feedback. This is different from clearing Corrections or Conflict Center display history.
 - `GET /rag/docs/:id/metadata`, `PUT /rag/docs/:id/metadata` with `metadata`, `expectedRevision`, `reason`.
 - `GET /rag/docs/:id/version-history?limit=20&cursor=...`, then `GET /rag/docs/:id/versions/:versionId` for the archived text.
 - `POST /rag/conflicts/:id/decision` with `action`, `expectedRevision`, `explanation` and, for `PREFER_SOURCE`, `preferredDocumentId`.

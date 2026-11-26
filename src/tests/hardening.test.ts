@@ -227,6 +227,18 @@ test('HTTP hardening: account switching, bounded complete history, upload admiss
       assert.equal(response.status, 400, JSON.stringify(invalid));
     }
     assert.equal(await database.get('SELECT id FROM documents WHERE owner_id=? AND id=?', a.id, 'invalid-input'), undefined);
+    await database.run('DELETE FROM auth_limits WHERE key=?', `work:${a.id}`);
+    const removedChat = randomUUID(), removedMessage = await database.beginMessage(a.id, removedChat, 'Delete only my chat');
+    await database.finishMessage(a.id, removedMessage, { draft: 'Synthetic answer.' });
+    const remove = (customHeaders: Record<string,string>) => fetch(origin + `/rag/conversations/${removedChat}`, { method:'DELETE', headers:customHeaders });
+    assert.equal((await remove({})).status, 403);
+    assert.equal((await remove({'X-Veriqon-Request':'1'})).status, 401);
+    assert.equal((await remove({...headers,Cookie:b.cookie})).status, 409);
+    assert.equal((await remove({Cookie:b.cookie,'X-Veriqon-Request':'1','X-Veriqon-Account':b.id})).status, 404);
+    assert.equal((await remove(headers)).status, 200);
+    assert.equal((await get(`/rag/messages/${removedMessage}`)).status, 404);
+    assert.equal((await get(`/rag/conversations/${removedChat}/messages`)).status, 404);
+    assert.equal((await post({query:'A stale tab must not recreate this chat',conversationId:removedChat})).status, 409);
   } finally {
     await app.close();
     if (admin) { await admin.query(`DROP SCHEMA ${schema} CASCADE`); await admin.end(); }

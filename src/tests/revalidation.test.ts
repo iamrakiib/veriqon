@@ -57,6 +57,23 @@ function model(rag: RagService) {
   return state;
 }
 
+test('deleting a conversation during background verification prevents a late answer version or retry', async () => {
+  const f = await fixture();
+  try {
+    const id = await f.message(saved()); const worker = new RevalidationService(f.db, f.rag);
+    await worker.request('a', id);
+    let release!: () => void, started!: () => void;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const entered = new Promise<void>(resolve => { started = resolve; });
+    f.rag.queryPipeline = async () => { started(); await held; return saved(newFact) as any; };
+    const running = worker.tick(); await entered;
+    await f.db.deleteConversation('a', 'chat'); release(); await running;
+    assert.equal((await worker.list('a')).jobs.length, 0);
+    assert.equal(Number((await f.db.get('SELECT COUNT(*) AS n FROM answer_versions WHERE owner_id=?', 'a'))!.n), 0);
+    assert.equal((await f.db.knowledgeEvents('a', id)).length, 0);
+  } finally { await f.close(); }
+});
+
 test('revalidation retries failed jobs truthfully and preserves cooldown and audit history', async () => {
   const f = await fixture();
   try {

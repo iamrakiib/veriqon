@@ -5,6 +5,8 @@ import type { Citation, DocumentRecord } from "../lib/api";
 import { RevalidationPanel } from "./knowledge-controls";
 import { request } from "../lib/api";
 import type { Conversation, Message } from "./chat-panel";
+import { matchesConversation } from "./chat-panel";
+import { ConversationActions } from "./conversation-actions";
 import { EmptyState, Modal } from "./ui";
 import { RepairDetails, VerificationBadge } from "./answer-details";
 
@@ -35,6 +37,8 @@ export function ConversationHistory({
   error,
   onRetry,
   onOpen,
+  onDelete,
+  deleteDisabled,
   hasMore,
   loadingMore,
   moreError,
@@ -48,6 +52,8 @@ export function ConversationHistory({
   error: string;
   onRetry: () => void;
   onOpen: (id: string) => void;
+  onDelete?: (chat: Conversation) => void;
+  deleteDisabled?: boolean;
   hasMore?: boolean;
   loadingMore?: boolean;
   moreError?: string;
@@ -57,9 +63,7 @@ export function ConversationHistory({
   const rows = conversations.filter(
     (c) =>
       c.messages.length &&
-      `${c.title} ${c.messages.map((m) => m.question).join(" ")}`
-        .toLowerCase()
-        .includes(search.toLowerCase()),
+      matchesConversation(c, search),
   );
   return (
     <>
@@ -91,10 +95,10 @@ export function ConversationHistory({
       ) : rows.length ? (
         <div className="history-list">
           {rows.map((c) => (
+            <div className="history-entry" key={c.id}>
             <button
               className="history-row"
               onClick={() => onOpen(c.id)}
-              key={c.id}
             >
               <MessageSquare size={18} />
               <span>
@@ -108,6 +112,8 @@ export function ConversationHistory({
               </span>
               <ArrowUpRight size={16} />
             </button>
+            {onDelete && <ConversationActions label={`Chat actions for ${c.title}`} disabled={deleteDisabled} onDelete={() => onDelete(c)} />}
+            </div>
           ))}
         </div>
       ) : (
@@ -495,7 +501,7 @@ export function Analytics({
           </div>
           <div>
             <dt>Pending revalidation jobs</dt>
-            <dd>Unavailable · no background scheduler</dd>
+            <dd>View Corrections for background job status</dd>
           </div>
           <div>
             <dt>Factual accuracy</dt>
