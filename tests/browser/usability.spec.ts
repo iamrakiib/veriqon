@@ -43,6 +43,27 @@ test('sidebar search finds question text just like Chat history', async ({ page 
   await expect(page.locator('.conversation-link')).toContainText(chat.title);
 });
 
+test('workspace pages support browser back, forward and reload without losing drafts', async ({ page }) => {
+  await page.goto('/'); await nav(page, 'Chat workspace');
+  await page.getByLabel('Ask your knowledge base').fill('Keep this draft while I check history');
+  await nav(page, 'Chat history'); await nav(page, 'Analytics');
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Chat history', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByLabel('Ask your knowledge base')).toHaveValue('Keep this draft while I check history');
+  await page.goForward();
+  await expect(page.getByRole('heading', { name: 'Chat history', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Chat history', exact: true })).toBeVisible();
+  // Re-selecting the current page must not add duplicate Back steps.
+  await nav(page, 'Chat history'); await nav(page, 'Analytics'); await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Chat history', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByLabel('Ask your knowledge base')).toBeVisible();
+  await page.goto('/#unknown');
+  await expect(page.getByRole('button', { name: 'Add documents', exact: true })).toBeEnabled();
+});
+
 test('chat deletion is discoverable, confirmed, failure-safe and persistent', async ({ page }, info) => {
   let exists = true, fail = true, deletes = 0;
   await page.route('**/api/rag/conversations', r => r.fulfill({ json: exists ? [chat] : [] }));

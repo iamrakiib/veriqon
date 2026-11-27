@@ -47,9 +47,12 @@ test('an old tab cannot silently replay private requests as a newly signed-in ac
   switched = true;
   await page.getByRole('button', { name: 'Refresh workspace' }).click();
   await expect.poll(() => reloadedAsB).toBe(true);
-  await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Show assistant' }).click();
+  // The page fragment survives an account change; account-owned state must not.
+  await expect(page).toHaveURL(/#chat$/);
+  await expect(page.locator('.profile')).toContainText('Account B');
   await expect(page.getByLabel('Ask your knowledge base')).toHaveValue('');
+  await page.getByRole('button', { name: 'Show workspace' }).click();
+  await expect(page.getByRole('button', { name: 'Add documents' })).toBeEnabled();
 });
 
 test('older conversations and messages can be loaded, retried and read without losing a draft', async ({ page }, info) => {

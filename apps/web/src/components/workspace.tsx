@@ -128,6 +128,25 @@ export function Workspace({
   const [pending, setPending] = useState(false);
   const [busy, setBusy] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const restoreView = () => {
+      const route = window.location.hash.slice(1);
+      const next = navigation.find(item => item.id === route)?.id;
+      // The accessibility skip link moves focus without switching pages.
+      if (route !== "main") {
+        setView(next || "knowledge");
+        setFocusedMessage("");
+        setMenuOpen(false);
+      }
+    };
+    restoreView();
+    window.addEventListener("popstate", restoreView);
+    window.addEventListener("hashchange", restoreView);
+    return () => {
+      window.removeEventListener("popstate", restoreView);
+      window.removeEventListener("hashchange", restoreView);
+    };
+  }, []);
   const [settings, setSettings] = useState(false);
   const [help, setHelp] = useState(false);
   const [preview, setPreview] = useState<SourcePreview | null>(null);
@@ -291,6 +310,7 @@ export function Workspace({
   }, [menuOpen]);
 
   function navigate(next: View) {
+    if (view !== next) window.history.pushState(null, "", `#${next}`);
     setFocusedMessage("");
     setView(next);
     setMenuOpen(false);

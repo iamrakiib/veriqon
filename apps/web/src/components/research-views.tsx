@@ -322,9 +322,9 @@ export function Analytics({
       note: "Current private library",
     },
     {
-      label: "Completed answers",
+      label: "Recorded responses",
       value: answers.length,
-      note: "Includes abstentions",
+      note: "Includes abstentions and failures",
     },
     {
       label: "Verified answers",
@@ -341,7 +341,7 @@ export function Analytics({
       value: timed.length
         ? `${(timed.reduce((n, r) => n + r.durationMs, 0) / timed.length / 1000).toFixed(1)} s`
         : "—",
-      note: "Noncached completed requests",
+      note: "Noncached responses, including failures",
     },
     {
       label: "Reported tokens",
@@ -392,12 +392,12 @@ export function Analytics({
               <h2>Answer activity</h2>
               <p className="muted">
                 Up to 14 recorded dates, ordered by day. Counts include
-                abstentions.
+                abstentions and failed assessments.
               </p>
               {days.size ? (
                 <div
                   className="activity-chart"
-                  aria-label="Completed answers by date"
+                  aria-label="Recorded responses by date"
                 >
                   {[...days.entries()]
                     .sort(([a], [b]) => a - b)
